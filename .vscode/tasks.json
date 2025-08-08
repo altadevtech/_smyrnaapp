@@ -1,0 +1,13 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Instalar dependências e iniciar desenvolvimento",
+			"type": "shell",
+			"command": "npm install && echo 'Dependências instaladas! Execute npm run server:dev em um terminal e npm run dev em outro para iniciar o projeto.'",
+			"group": "build",
+			"isBackground": false,
+			"problemMatcher": []
+		}
+	]
+}

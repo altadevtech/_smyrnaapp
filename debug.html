@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug - Limpar Cache</title>
+</head>
+<body>
+    <h1>Debug - Limpar Cache do Navegador</h1>
+    <button onclick="clearCache()">Limpar localStorage e recarregar</button>
+    
+    <h2>Status atual:</h2>
+    <div id="status"></div>
+    
+    <script>
+        function clearCache() {
+            localStorage.clear()
+            sessionStorage.clear()
+            location.href = 'http://localhost:3000/'
+        }
+        
+        // Mostrar status atual
+        const status = document.getElementById('status')
+        const token = localStorage.getItem('token')
+        status.innerHTML = `
+            <p>Token: ${token ? 'Existe' : 'Não existe'}</p>
+            <p>LocalStorage items: ${localStorage.length}</p>
+        `
+    </script>
+</body>
+</html>
