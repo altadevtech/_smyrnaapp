@@ -127,6 +127,7 @@ class Database {
           console.error('Erro ao criar tabela widgets:', err)
         } else {
           console.log('Tabela widgets criada/verificada com sucesso')
+          this.createDefaultWidgets()
         }
       })
       
@@ -202,6 +203,105 @@ class Database {
     } catch (error) {
       console.error('Erro ao criar senhas hash:', error)
     }
+  }
+
+  createDefaultWidgets() {
+    console.log('Verificando widgets padrão...')
+    
+    // Verificar se já existem widgets
+    this.db.get('SELECT COUNT(*) as count FROM widgets', (err, result) => {
+      if (err) {
+        console.error('Erro ao verificar widgets existentes:', err)
+        return
+      }
+
+      if (result.count === 0) {
+        console.log('Criando widgets padrão...')
+        
+        // Widget 1 - Banner Principal
+        const bannerConfig = {
+          title: 'Bem-vindo ao Smyrna CMS',
+          description: 'Sistema de gerenciamento de conteúdo moderno e eficiente',
+          image: '',
+          link: '#',
+          buttonText: 'Saiba Mais'
+        }
+
+        // Widget 2 - Notícias
+        const newsConfig = {
+          title: 'Últimas Notícias',
+          count: 6,
+          showDate: true,
+          showExcerpt: true
+        }
+
+        // Widget 3 - Login
+        const loginConfig = {
+          title: 'Área Restrita',
+          showRegister: false,
+          redirectAfterLogin: '/dashboard'
+        }
+
+        // Widget 4 - Contato
+        const contactConfig = {
+          title: 'Entre em Contato',
+          email: 'contato@smyrna.com',
+          phone: '(11) 99999-9999',
+          address: 'São Paulo, SP, Brasil',
+          showForm: true
+        }
+
+        this.db.run(
+          'INSERT INTO widgets (type, name, config) VALUES (?, ?, ?)',
+          ['banner', 'Banner Principal', JSON.stringify(bannerConfig)],
+          function(err) {
+            if (err) {
+              console.error('Erro ao criar widget banner:', err)
+            } else {
+              console.log('✅ Widget Banner criado com ID:', this.lastID)
+            }
+          }
+        )
+
+        this.db.run(
+          'INSERT INTO widgets (type, name, config) VALUES (?, ?, ?)',
+          ['news', 'Widget de Notícias', JSON.stringify(newsConfig)],
+          function(err) {
+            if (err) {
+              console.error('Erro ao criar widget news:', err)
+            } else {
+              console.log('✅ Widget Notícias criado com ID:', this.lastID)
+            }
+          }
+        )
+
+        this.db.run(
+          'INSERT INTO widgets (type, name, config) VALUES (?, ?, ?)',
+          ['login', 'Widget de Login', JSON.stringify(loginConfig)],
+          function(err) {
+            if (err) {
+              console.error('Erro ao criar widget login:', err)
+            } else {
+              console.log('✅ Widget Login criado com ID:', this.lastID)
+            }
+          }
+        )
+
+        this.db.run(
+          'INSERT INTO widgets (type, name, config) VALUES (?, ?, ?)',
+          ['contact', 'Widget de Contato', JSON.stringify(contactConfig)],
+          function(err) {
+            if (err) {
+              console.error('Erro ao criar widget contact:', err)
+            } else {
+              console.log('✅ Widget Contato criado com ID:', this.lastID)
+            }
+          }
+        )
+      } else {
+        console.log('Widgets já existem no banco de dados')
+      }
+    })
   }
 
   createDefaultTemplates() {

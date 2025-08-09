@@ -45,52 +45,38 @@ const PublicPages = () => {
         <Link to="/" className="back-button">
           <ArrowRight size={18} style={{ transform: 'rotate(180deg)' }} /> Voltar ao início
         </Link>
-        <h1><FileText size={24} /> Páginas</h1>
+        <h1><FileText size={24} /> Todas as Páginas</h1>
       </header>
 
       <main className="public-content">
         {pages.length > 0 ? (
-          <div className="pages-grid">
+          <div className="posts-grid">
             {pages.map(page => (
               <article key={page.id} className="page-card">
-                <header className="page-header">
-                  <h2>
+                <div className="page-content">
+                  <h2 className="page-title">
                     <Link to={`/page/${page.slug || generateSlug(page.title, page.id)}`}>
                       {page.title}
                     </Link>
                   </h2>
+                  <p className="page-excerpt">
+                    {page.content.length > 200 
+                      ? page.content.substring(0, 200) + '...' 
+                      : page.content}
+                  </p>
                   <div className="page-meta">
-                    <span className="meta-item">
-                      <User size={14} />
-                      {page.author_name}
-                    </span>
-                    <span className="meta-item">
-                      <Calendar size={14} />
-                      Atualizado em {new Date(page.updated_at).toLocaleDateString('pt-BR')}
-                    </span>
+                    <span><User size={14} /> {page.author_name}</span>
+                    <span><Calendar size={14} /> {new Date(page.updated_at).toLocaleDateString('pt-BR')}</span>
                   </div>
-                </header>
-
-                <div className="page-excerpt">
-                  <p>{page.content.substring(0, 250)}...</p>
                 </div>
-
-                <footer className="page-footer">
-                  <Link 
-                    to={`/page/${page.slug || generateSlug(page.title, page.id)}`} 
-                    className="read-more"
-                  >
-                    Ler página <ArrowRight size={14} />
-                  </Link>
-                </footer>
               </article>
             ))}
           </div>
         ) : (
           <div className="no-content">
-            <FileText size={48} />
-            <h2>Nenhuma página publicada ainda</h2>
-            <p>Volte em breve para conferir nossos conteúdos!</p>
+            <FileText size={64} />
+            <h2>Nenhuma página encontrada</h2>
+            <p>Ainda não há páginas publicadas.</p>
           </div>
         )}
       </main>

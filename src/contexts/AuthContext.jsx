@@ -71,10 +71,15 @@ export const AuthProvider = ({ children }) => {
     setUser(null)
   }
 
+  const updateUser = (updatedUser) => {
+    setUser(updatedUser)
+  }
+
   const value = {
     user,
     login,
     logout,
+    updateUser,
     loading
   }
 

@@ -10,7 +10,7 @@ class ShortcodeParser {
   // Carregar widgets disponíveis
   async loadWidgets() {
     try {
-      const response = await api.get('/widgets')
+      const response = await api.get('/widgets/public')
       response.data.forEach(widget => {
         this.widgets.set(widget.id.toString(), widget)
       })

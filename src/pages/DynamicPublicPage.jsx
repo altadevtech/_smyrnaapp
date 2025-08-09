@@ -52,27 +52,35 @@ const DynamicPublicPage = () => {
   return (
     <div className="public-container">
       <header className="public-header">
-        <Link to="/" className="back-button">
-          <ArrowLeft size={18} /> Voltar ao início
-        </Link>
+        <nav className="breadcrumb-nav">
+          <Link to="/" className="back-button">
+            <ArrowLeft size={18} /> Voltar ao início
+          </Link>
+          <span className="breadcrumb-separator">•</span>
+          <span className="current-page">{page.title}</span>
+        </nav>
       </header>
 
-      <article className="public-content">
-        <header className="content-header">
-          <h1>{page.title}</h1>
-          <div className="content-meta">
+      <article className="page-article">
+        <header className="article-header">
+          <h1 className="article-title">{page.title}</h1>
+          <div className="article-meta">
             <span className="meta-item">
               <User size={16} />
               Por {page.author_name}
             </span>
             <span className="meta-item">
               <Calendar size={16} />
-              Atualizado em {new Date(page.updated_at).toLocaleDateString('pt-BR')}
+              Atualizado em {new Date(page.updated_at).toLocaleDateString('pt-BR', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              })}
             </span>
           </div>
         </header>
 
-        <div className="content-body">
+        <div className="article-content">
           <ContentRenderer 
             content={page.content} 
             className="content-text"

@@ -53,44 +53,30 @@ const PublicBlog = () => {
           <div className="posts-grid">
             {posts.map(post => (
               <article key={post.id} className="post-card">
-                <header className="post-header">
-                  <h2>
+                <div className="post-content">
+                  <h2 className="post-title">
                     <Link to={`/blog/${generateSlug(post.title, post.id)}`}>
                       {post.title}
                     </Link>
                   </h2>
+                  <p className="post-excerpt">
+                    {post.content.length > 200 
+                      ? post.content.substring(0, 200) + '...' 
+                      : post.content}
+                  </p>
                   <div className="post-meta">
-                    <span className="meta-item">
-                      <User size={14} />
-                      {post.author_name}
-                    </span>
-                    <span className="meta-item">
-                      <Calendar size={14} />
-                      {new Date(post.created_at).toLocaleDateString('pt-BR')}
-                    </span>
+                    <span><User size={14} /> {post.author_name}</span>
+                    <span><Calendar size={14} /> {new Date(post.created_at).toLocaleDateString('pt-BR')}</span>
                   </div>
-                </header>
-
-                <div className="post-excerpt">
-                  <p>{post.content.substring(0, 200)}...</p>
                 </div>
-
-                <footer className="post-footer">
-                  <Link 
-                    to={`/blog/${generateSlug(post.title, post.id)}`} 
-                    className="read-more"
-                  >
-                    Ler mais <ArrowRight size={14} />
-                  </Link>
-                </footer>
               </article>
             ))}
           </div>
         ) : (
           <div className="no-content">
-            <FileText size={48} />
-            <h2>Nenhum post publicado ainda</h2>
-            <p>Volte em breve para conferir nossos conteúdos!</p>
+            <FileText size={64} />
+            <h2>Nenhum post encontrado</h2>
+            <p>Ainda não há posts publicados no blog.</p>
           </div>
         )}
       </main>

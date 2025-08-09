@@ -33,8 +33,8 @@ const DynamicHome = () => {
 
   if (loading) {
     return (
-      <div style={{ textAlign: 'center', padding: '2rem' }}>
-        <p>Carregando página inicial...</p>
+      <div className="public-container">
+        <div className="loading">Carregando página inicial...</div>
       </div>
     )
   }
@@ -44,9 +44,15 @@ const DynamicHome = () => {
     console.log('🎨 Renderizando página home dinâmica')
     
     return (
-      <div className="dynamic-home">
-        <h1>{homePage.title}</h1>
-        <ContentRenderer content={homePage.content} />
+      <div className="public-container">
+        <div className="dynamic-home">
+          <header className="public-header">
+            <h1>{homePage.title}</h1>
+          </header>
+          <div className="dynamic-content">
+            <ContentRenderer content={homePage.content} />
+          </div>
+        </div>
       </div>
     )
   }
@@ -95,77 +101,93 @@ const StaticHome = () => {
   }
 
   return (
-    <div className="public-home">
-      <section className="hero-section">
-        <h1>Bem-vindo ao Smyrna CMS</h1>
-        <p>Sistema de gerenciamento de conteúdo simples e eficiente.</p>
-        <div className="hero-actions">
-          <Link to="/blog" className="btn btn-primary">
-            <FileText size={18} /> Ver Blog
-          </Link>
-          <Link to="/admin/login" className="btn btn-secondary">
-            Área Administrativa
-          </Link>
-        </div>
-      </section>
+    <div className="public-container">
+      <div className="public-home">
+        <section className="hero-section">
+          <h1>Bem-vindo ao Smyrna CMS</h1>
+          <p>Sistema de gerenciamento de conteúdo simples e eficiente para criar sites modernos e responsivos.</p>
+          <div className="hero-actions">
+            <Link to="/blog" className="btn btn-primary">
+              <FileText size={18} /> Ver Blog
+            </Link>
+            <Link to="/admin/login" className="btn btn-secondary">
+              Área Administrativa
+            </Link>
+          </div>
+        </section>
 
-      <section className="content-sections">
-        <div className="section-card">
-          <h2><FileText size={24} /> Páginas</h2>
-          {pages.length > 0 ? (
-            <div className="content-list">
-              {pages.slice(0, 3).map(page => (
-                <div key={page.id} className="content-item">
-                  <h3>
-                    <Link to={`/page/${page.slug || generateSlug(page.title, page.id)}`}>
-                      {page.title}
-                    </Link>
-                  </h3>
-                  <p>{page.content.substring(0, 120)}...</p>
-                  <div className="item-meta">
-                    <span><User size={14} /> {page.author_name}</span>
-                    <span><Calendar size={14} /> {new Date(page.updated_at).toLocaleDateString('pt-BR')}</span>
+        <section className="content-sections">
+          <div className="section-card">
+            <h2><FileText size={24} /> Páginas Recentes</h2>
+            {pages.length > 0 ? (
+              <div className="content-list">
+                {pages.slice(0, 3).map(page => (
+                  <div key={page.id} className="content-item">
+                    <h3>
+                      <Link to={`/page/${page.slug || generateSlug(page.title, page.id)}`}>
+                        {page.title}
+                      </Link>
+                    </h3>
+                    <p className="page-excerpt">
+                      {page.content.length > 150 
+                        ? page.content.substring(0, 150) + '...' 
+                        : page.content}
+                    </p>
+                    <div className="item-meta">
+                      <span><User size={14} /> {page.author_name}</span>
+                      <span><Calendar size={14} /> {new Date(page.updated_at).toLocaleDateString('pt-BR')}</span>
+                    </div>
                   </div>
-                </div>
-              ))}
-              {pages.length > 3 && (
-                <Link to="/pages" className="view-all">
-                  Ver todas as páginas <ArrowRight size={14} />
+                ))}
+                {pages.length > 3 && (
+                  <Link to="/pages" className="view-all">
+                    Ver todas as páginas <ArrowRight size={14} />
+                  </Link>
+                )}
+              </div>
+            ) : (
+              <div className="no-content">
+                <FileText size={48} />
+                <p>Nenhuma página publicada ainda.</p>
+              </div>
+            )}
+          </div>
+
+          <div className="section-card">
+            <h2><FileText size={24} /> Posts Recentes</h2>
+            {posts.length > 0 ? (
+              <div className="content-list">
+                {posts.slice(0, 3).map(post => (
+                  <div key={post.id} className="content-item">
+                    <h3>
+                      <Link to={`/blog/${generateSlug(post.title, post.id)}`}>
+                        {post.title}
+                      </Link>
+                    </h3>
+                    <p className="post-excerpt">
+                      {post.content.length > 150 
+                        ? post.content.substring(0, 150) + '...' 
+                        : post.content}
+                    </p>
+                    <div className="item-meta">
+                      <span><User size={14} /> {post.author_name}</span>
+                      <span><Calendar size={14} /> {new Date(post.created_at).toLocaleDateString('pt-BR')}</span>
+                    </div>
+                  </div>
+                ))}
+                <Link to="/blog" className="view-all">
+                  Ver todos os posts <ArrowRight size={14} />
                 </Link>
-              )}
-            </div>
-          ) : (
-            <p>Nenhuma página publicada ainda.</p>
-          )}
-        </div>
-
-        <div className="section-card">
-          <h2><FileText size={24} /> Posts Recentes</h2>
-          {posts.length > 0 ? (
-            <div className="content-list">
-              {posts.slice(0, 3).map(post => (
-                <div key={post.id} className="content-item">
-                  <h3>
-                    <Link to={`/blog/${generateSlug(post.title, post.id)}`}>
-                      {post.title}
-                    </Link>
-                  </h3>
-                  <p>{post.content.substring(0, 120)}...</p>
-                  <div className="item-meta">
-                    <span><User size={14} /> {post.author_name}</span>
-                    <span><Calendar size={14} /> {new Date(post.created_at).toLocaleDateString('pt-BR')}</span>
-                  </div>
-                </div>
-              ))}
-              <Link to="/blog" className="view-all">
-                Ver todos os posts <ArrowRight size={14} />
-              </Link>
-            </div>
-          ) : (
-            <p>Nenhum post publicado ainda.</p>
-          )}
-        </div>
-      </section>
+              </div>
+            ) : (
+              <div className="no-content">
+                <FileText size={48} />
+                <p>Nenhum post publicado ainda.</p>
+              </div>
+            )}
+          </div>
+        </section>
+      </div>
     </div>
   )
 }
