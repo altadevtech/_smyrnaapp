@@ -34,6 +34,22 @@ async function initializeServer() {
       res.json({ status: 'OK', timestamp: new Date().toISOString() })
     })
 
+    // Debug endpoint - verificar usuários no banco (TEMPORÁRIO)
+    app.get('/api/debug/users', (req, res) => {
+      const db = Database.getDb()
+      db.all('SELECT id, name, email, role, status FROM users', (err, users) => {
+        if (err) {
+          res.status(500).json({ error: err.message })
+        } else {
+          res.json({ 
+            count: users.length, 
+            users: users,
+            message: users.length === 0 ? 'Nenhum usuário encontrado - executar createDefaultUsers' : 'Usuários encontrados'
+          })
+        }
+      })
+    })
+
     // Routes
     app.use('/api/auth', authRoutes)
     app.use('/api/users', userRoutes)
