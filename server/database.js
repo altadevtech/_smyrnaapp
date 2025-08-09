@@ -14,7 +14,7 @@ class Database {
   }
 
   init() {
-    const dbPath = path.join(__dirname, 'smyrna.db')
+    const dbPath = process.env.DB_PATH || path.join(__dirname, 'smyrna.db')
     console.log('Caminho do banco de dados:', dbPath)
     
     this.db = new sqlite3.Database(dbPath, (err) => {

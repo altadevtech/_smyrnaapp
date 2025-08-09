@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: smyrna-cms
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: npm run render-build
+    startCommand: npm run server
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DB_PATH
+        value: "./server/smyrna.db"
+    autoDeploy: true
+    disk:
+      name: smyrna-disk
+      mountPath: /opt/render/project/src/server
+      sizeGB: 1
