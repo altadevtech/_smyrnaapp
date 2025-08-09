@@ -16,4 +16,8 @@ services:
         generateValue: true
       - key: DB_PATH
         value: "./server/smyrna.db"
+      - key: npm_config_build_from_source
+        value: "true"
+      - key: npm_config_sqlite
+        value: "/usr"
     autoDeploy: true

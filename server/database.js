@@ -1,4 +1,3 @@
-import sqlite3 from 'sqlite3'
 import bcrypt from 'bcryptjs'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -6,30 +5,70 @@ import { fileURLToPath } from 'url'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-sqlite3.verbose()
+// Função para importar SQLite3 com verificação de bindings
+async function importSQLite3() {
+  try {
+    console.log('🔍 Verificando bindings do SQLite3...')
+    const sqlite3Module = await import('sqlite3')
+    console.log('✅ SQLite3 importado com sucesso')
+    return sqlite3Module.default.verbose()
+  } catch (error) {
+    console.error('❌ Erro ao importar SQLite3:', error.message)
+    
+    if (error.message.includes('bindings')) {
+      console.log('🔧 Erro de bindings detectado - tentando rebuild automático...')
+      
+      try {
+        const { execSync } = await import('child_process')
+        execSync('npm rebuild sqlite3', { stdio: 'inherit' })
+        console.log('✅ Rebuild do SQLite3 concluído, tentando importar novamente...')
+        
+        const sqlite3Module = await import('sqlite3')
+        return sqlite3Module.default.verbose()
+      } catch (rebuildError) {
+        console.error('❌ Falha no rebuild automático:', rebuildError.message)
+        throw rebuildError
+      }
+    }
+    
+    throw error
+  }
+}
 
 class Database {
   constructor() {
     this.db = null
+    this.sqlite3 = null
   }
 
-  init() {
-    return new Promise((resolve, reject) => {
+  async init() {
+    try {
+      // Importar SQLite3 com verificação de bindings
+      this.sqlite3 = await importSQLite3()
+      
       const dbPath = process.env.DB_PATH || path.join(__dirname, 'smyrna.db')
       console.log('🗄️ Caminho do banco de dados:', dbPath)
       
-      this.db = new sqlite3.Database(dbPath, (err) => {
-        if (err) {
-          console.error('❌ Erro ao conectar com o banco de dados:', err.message)
-          reject(err)
-        } else {
-          console.log('✅ Conectado ao banco de dados SQLite:', dbPath)
-          this.createTables()
-            .then(() => resolve())
-            .catch(reject)
-        }
+      return new Promise((resolve, reject) => {
+        this.db = new this.sqlite3.Database(dbPath, (err) => {
+          if (err) {
+            console.error('❌ Erro ao conectar com o banco de dados:', err.message)
+            reject(err)
+          } else {
+            console.log('✅ Conectado ao banco de dados SQLite:', dbPath)
+            this.createTables()
+              .then(() => {
+                console.log('✅ Database inicializado com sucesso')
+                resolve()
+              })
+              .catch(reject)
+          }
+        })
       })
-    })
+    } catch (error) {
+      console.error('❌ Erro durante inicialização do database:', error.message)
+      throw error
+    }
   }
 
   createTables() {
