@@ -23,10 +23,13 @@ class ShortcodeParser {
   parseShortcodes(content) {
     if (!content) return content
 
-    // Regex mais simples para encontrar shortcodes: [widget:tipo]
-    const shortcodeRegex = /\[widget:(\w+)\]/g
+    // Regex para encontrar shortcodes com parâmetros: [widget:tipo param1="valor1" param2="valor2"]
+    const shortcodeRegex = /\[widget:(\w+)([^\]]*)\]/g
 
-    return content.replace(shortcodeRegex, (match, type) => {
+    return content.replace(shortcodeRegex, (match, type, params) => {
+      // Parse dos parâmetros
+      const config = this.parseShortcodeParams(params)
+      
       // Criar um placeholder único para o widget
       const widgetId = `${type}_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`
       const placeholderId = `widget-placeholder-${widgetId}`
@@ -34,12 +37,31 @@ class ShortcodeParser {
       // Armazenar dados do widget para renderização posterior
       const widgetData = {
         type,
-        placeholderId
+        placeholderId,
+        config
       }
 
       // Retornar placeholder HTML que será substituído depois
       return `<div id="${placeholderId}" data-widget="${JSON.stringify(widgetData).replace(/"/g, '&quot;')}" class="widget-placeholder"></div>`
     })
+  }
+
+  // Parse dos parâmetros do shortcode
+  parseShortcodeParams(paramsString) {
+    const config = {}
+    
+    if (!paramsString.trim()) return config
+
+    // Regex para encontrar parâmetros: param="valor" ou param='valor'
+    const paramRegex = /(\w+)=["']([^"']+)["']/g
+    let match
+
+    while ((match = paramRegex.exec(paramsString)) !== null) {
+      const [, key, value] = match
+      config[key] = value
+    }
+
+    return config
   }
 
   // Renderizar widgets nos placeholders
@@ -57,7 +79,7 @@ class ShortcodeParser {
         const widget = {
           type: widgetData.type,
           name: `Widget ${widgetData.type}`,
-          config: {}
+          config: widgetData.config || {}
         }
 
         if (widget) {
@@ -136,8 +158,11 @@ class ShortcodeParser {
       case 'image':
         div.innerHTML = `
           <div class="widget-image">
-            <img src="${widget.config?.src || '/placeholder.jpg'}" alt="${widget.config?.alt || 'Imagem'}" style="max-width: 100%;" />
-            ${widget.config?.caption ? `<p class="image-caption">${widget.config.caption}</p>` : ''}
+            ${widget.config?.title ? `<h3>${widget.config.title}</h3>` : ''}
+            <img src="${widget.config?.url || widget.config?.src || '/placeholder.jpg'}" 
+                 alt="${widget.config?.alt || widget.config?.title || 'Imagem'}" 
+                 style="max-width: 100%; height: auto; ${widget.config?.borderRadius ? `border-radius: ${widget.config.borderRadius};` : ''}" />
+            ${widget.config?.caption ? `<p class="image-caption" style="font-size: 14px; color: #666; margin-top: 8px; font-style: italic;">${widget.config.caption}</p>` : ''}
           </div>
         `
         break

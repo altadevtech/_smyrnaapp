@@ -1,8 +1,10 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
+import { useSettings } from '../contexts/SettingsContext'
 import { Heart, Code, Globe, Mail, Phone, MapPin } from 'lucide-react'
 
 const Footer = () => {
+  const { settings } = useSettings()
   const currentYear = new Date().getFullYear()
 
   return (
@@ -12,19 +14,36 @@ const Footer = () => {
           
           {/* Coluna 1: Sobre */}
           <div className="footer-column">
-            <h3>Smyrna CMS</h3>
+            {settings.logo ? (
+              <div className="footer-logo-container">
+                <img 
+                  src={settings.logo} 
+                  alt={settings.siteName}
+                  className="footer-logo"
+                />
+              </div>
+            ) : (
+              <h3>{settings.siteName}</h3>
+            )}
             <p>
-              Sistema de gerenciamento de conteúdo moderno, 
-              responsivo e fácil de usar. Construído com React 
-              e Node.js para máxima performance.
+              {settings.siteDescription || 'Sistema de gerenciamento de conteúdo moderno, responsivo e fácil de usar. Construído com React e Node.js para máxima performance.'}
             </p>
             <div className="footer-social">
-              <a href="#" aria-label="Website">
-                <Globe size={20} />
-              </a>
-              <a href="#" aria-label="Email">
-                <Mail size={20} />
-              </a>
+              {settings.website && (
+                <a href={settings.website} aria-label="Website" target="_blank" rel="noopener noreferrer">
+                  <Globe size={20} />
+                </a>
+              )}
+              {settings.contactEmail && (
+                <a href={`mailto:${settings.contactEmail}`} aria-label="Email">
+                  <Mail size={20} />
+                </a>
+              )}
+              {!settings.website && !settings.contactEmail && (
+                <p style={{ color: '#9ca3af', fontSize: '0.875rem', fontStyle: 'italic' }}>
+                  Configure links sociais no perfil.
+                </p>
+              )}
             </div>
           </div>
 
@@ -54,18 +73,29 @@ const Footer = () => {
           <div className="footer-column">
             <h4>Contato</h4>
             <div className="footer-contact">
-              <div className="contact-item">
-                <Mail size={16} />
-                <span>contato@smyrna.com</span>
-              </div>
-              <div className="contact-item">
-                <Phone size={16} />
-                <span>+55 (11) 99999-9999</span>
-              </div>
-              <div className="contact-item">
-                <MapPin size={16} />
-                <span>São Paulo, SP</span>
-              </div>
+              {settings.contactEmail && (
+                <div className="contact-item">
+                  <Mail size={16} />
+                  <span>{settings.contactEmail}</span>
+                </div>
+              )}
+              {settings.contactPhone && (
+                <div className="contact-item">
+                  <Phone size={16} />
+                  <span>{settings.contactPhone}</span>
+                </div>
+              )}
+              {settings.contactAddress && (
+                <div className="contact-item">
+                  <MapPin size={16} />
+                  <span>{settings.contactAddress}</span>
+                </div>
+              )}
+              {!settings.contactEmail && !settings.contactPhone && !settings.contactAddress && (
+                <p style={{ color: '#9ca3af', fontStyle: 'italic' }}>
+                  Configure as informações de contato no painel administrativo.
+                </p>
+              )}
             </div>
           </div>
 
@@ -75,7 +105,7 @@ const Footer = () => {
         <div className="footer-bottom">
           <div className="footer-bottom-content">
             <p>
-              © {currentYear} Smyrna CMS. Todos os direitos reservados.
+              © {currentYear} {settings.siteName}. Todos os direitos reservados.
             </p>
             <p className="footer-credit">
               Feito com <Heart size={16} className="heart" /> e <Code size={16} /> 

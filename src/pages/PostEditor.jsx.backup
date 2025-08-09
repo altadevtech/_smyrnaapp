@@ -96,8 +96,8 @@ const PostEditor = () => {
         <h1>{isEditing ? 'Editar Post' : 'Novo Post'}</h1>
       </div>
 
-      <div className="post-editor-grid">
-        <div className="post-editor-main">
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
+        <div className="main-content">
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="form-group">
               <label htmlFor="title">Título *</label>
@@ -160,7 +160,7 @@ const PostEditor = () => {
           </form>
         </div>
 
-        <div className="post-editor-sidebar">
+        <div className="sidebar" style={{ backgroundColor: '#f8f9fa', padding: '1.5rem', borderRadius: '8px', height: 'fit-content' }}>
           <div className="editor-help">
             <h3 style={{ marginTop: 0, color: '#333', fontSize: '1.25rem' }}>📝 Editor de Posts</h3>
             

@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
+import { useSettings } from '../contexts/SettingsContext'
 import { User, Settings, Palette, Upload, Save, Mail, Phone, MapPin, Globe, Eye, EyeOff } from 'lucide-react'
 import api from '../services/api'
 import toast from 'react-hot-toast'
 
 const Profile = () => {
   const { user, updateUser } = useAuth()
+  const { settings, updateSettings, refreshSettings } = useSettings()
   const [loading, setLoading] = useState(false)
   const [activeTab, setActiveTab] = useState('profile')
   const [showPassword, setShowPassword] = useState(false)
@@ -19,47 +21,19 @@ const Profile = () => {
     confirmPassword: ''
   })
 
-  // Estados para configurações do sistema
-  const [systemSettings, setSystemSettings] = useState({
-    siteName: 'Smyrna CMS',
-    siteDescription: 'Sistema de Gerenciamento de Conteúdo',
-    logo: '',
-    contactEmail: '',
-    contactPhone: '',
-    contactAddress: '',
-    website: '',
-    theme: 'light'
-  })
-
   // Estados para preview do logo
   const [logoPreview, setLogoPreview] = useState('')
 
   useEffect(() => {
-    loadSystemSettings()
-  }, [])
-
-  const loadSystemSettings = async () => {
-    try {
-      const response = await api.get('/settings')
-      setSystemSettings({ ...systemSettings, ...response.data })
-      if (response.data.logo) {
-        setLogoPreview(response.data.logo)
-      }
-    } catch (error) {
-      console.log('Configurações não encontradas, usando padrões')
+    // Inicializar preview do logo com configurações do contexto
+    if (settings.logo) {
+      setLogoPreview(settings.logo)
     }
-  }
+  }, [settings])
 
   const handleProfileChange = (e) => {
     setProfileData({
       ...profileData,
-      [e.target.name]: e.target.value
-    })
-  }
-
-  const handleSystemChange = (e) => {
-    setSystemSettings({
-      ...systemSettings,
       [e.target.name]: e.target.value
     })
   }
@@ -76,10 +50,6 @@ const Profile = () => {
       reader.onload = (e) => {
         const logoData = e.target.result
         setLogoPreview(logoData)
-        setSystemSettings({
-          ...systemSettings,
-          logo: logoData
-        })
       }
       reader.readAsDataURL(file)
     }
@@ -138,8 +108,20 @@ const Profile = () => {
     setLoading(true)
 
     try {
-      await api.put('/settings', systemSettings)
-      toast.success('Configurações salvas com sucesso!')
+      // Criar um objeto com as configurações atualizadas incluindo o logo
+      const updatedSettings = {
+        ...settings,
+        logo: logoPreview
+      }
+      
+      // Usar o contexto para atualizar as configurações
+      const success = await updateSettings(updatedSettings)
+      
+      if (success) {
+        toast.success('Configurações salvas com sucesso! O logotipo foi atualizado no header.')
+      } else {
+        toast.error('Erro ao salvar configurações')
+      }
     } catch (error) {
       toast.error(error.response?.data?.message || 'Erro ao salvar configurações')
     } finally {
@@ -147,8 +129,18 @@ const Profile = () => {
     }
   }
 
+  const handleSystemChange = (e) => {
+    // Atualizar configurações localmente no contexto
+    const newSettings = {
+      ...settings,
+      [e.target.name]: e.target.value
+    }
+    updateSettings(newSettings)
+  }
+
   const applyTheme = (theme) => {
-    setSystemSettings({ ...systemSettings, theme })
+    const newSettings = { ...settings, theme }
+    updateSettings(newSettings)
     document.documentElement.setAttribute('data-theme', theme)
     localStorage.setItem('theme', theme)
     toast.success(`Tema ${theme === 'light' ? 'Claro' : 'Escuro'} aplicado!`)
@@ -304,7 +296,7 @@ const Profile = () => {
                 <input
                   type="text"
                   name="siteName"
-                  value={systemSettings.siteName}
+                  value={settings.siteName}
                   onChange={handleSystemChange}
                   style={{ width: '100%' }}
                 />
@@ -314,7 +306,7 @@ const Profile = () => {
                 <label>Descrição do Site:</label>
                 <textarea
                   name="siteDescription"
-                  value={systemSettings.siteDescription}
+                  value={settings.siteDescription}
                   onChange={handleSystemChange}
                   rows="3"
                   style={{ width: '100%' }}
@@ -370,7 +362,7 @@ const Profile = () => {
                 <input
                   type="email"
                   name="contactEmail"
-                  value={systemSettings.contactEmail}
+                  value={settings.contactEmail}
                   onChange={handleSystemChange}
                   style={{ width: '100%' }}
                 />
@@ -384,7 +376,7 @@ const Profile = () => {
                 <input
                   type="tel"
                   name="contactPhone"
-                  value={systemSettings.contactPhone}
+                  value={settings.contactPhone}
                   onChange={handleSystemChange}
                   style={{ width: '100%' }}
                 />
@@ -398,7 +390,7 @@ const Profile = () => {
                 <input
                   type="text"
                   name="contactAddress"
-                  value={systemSettings.contactAddress}
+                  value={settings.contactAddress}
                   onChange={handleSystemChange}
                   style={{ width: '100%' }}
                 />
@@ -412,7 +404,7 @@ const Profile = () => {
                 <input
                   type="url"
                   name="website"
-                  value={systemSettings.website}
+                  value={settings.website}
                   onChange={handleSystemChange}
                   style={{ width: '100%' }}
                 />
@@ -438,7 +430,7 @@ const Profile = () => {
             {/* Tema Claro */}
             <div 
               style={{
-                border: systemSettings.theme === 'light' ? '3px solid #3b82f6' : '1px solid #e5e7eb',
+                border: settings.theme === 'light' ? '3px solid #3b82f6' : '1px solid #e5e7eb',
                 borderRadius: '0.75rem',
                 padding: '1.5rem',
                 cursor: 'pointer',
@@ -456,7 +448,7 @@ const Profile = () => {
               <p style={{ color: '#6b7280', fontSize: '0.875rem' }}>
                 Interface clara e moderna, ideal para ambientes bem iluminados.
               </p>
-              {systemSettings.theme === 'light' && (
+              {settings.theme === 'light' && (
                 <div style={{ marginTop: '1rem', color: '#3b82f6', fontWeight: 'bold' }}>
                   ✓ Tema Ativo
                 </div>
@@ -466,7 +458,7 @@ const Profile = () => {
             {/* Tema Escuro */}
             <div 
               style={{
-                border: systemSettings.theme === 'dark' ? '3px solid #3b82f6' : '1px solid #e5e7eb',
+                border: settings.theme === 'dark' ? '3px solid #3b82f6' : '1px solid #e5e7eb',
                 borderRadius: '0.75rem',
                 padding: '1.5rem',
                 cursor: 'pointer',
@@ -485,7 +477,7 @@ const Profile = () => {
               <p style={{ color: '#d1d5db', fontSize: '0.875rem' }}>
                 Interface escura e elegante, reduz o cansaço visual em ambientes com pouca luz.
               </p>
-              {systemSettings.theme === 'dark' && (
+              {settings.theme === 'dark' && (
                 <div style={{ marginTop: '1rem', color: '#3b82f6', fontWeight: 'bold' }}>
                   ✓ Tema Ativo
                 </div>

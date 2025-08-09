@@ -49,6 +49,39 @@
   resize: vertical;
 }
 
+/* Estilos para o editor de posts responsivo */
+.post-editor-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+}
+
+.post-editor-main {
+  min-width: 0; /* Permite que o conteúdo encolha */
+}
+
+.post-editor-sidebar {
+  background-color: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 8px;
+  height: fit-content;
+  position: sticky;
+  top: 2rem;
+}
+
+/* Mobile responsivo para editor de posts */
+@media (max-width: 768px) {
+  .post-editor-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .post-editor-sidebar {
+    position: static;
+    order: -1; /* Coloca a sidebar no topo em mobile */
+  }
+}
+
 /* Rich Text Editor Styles */
 .rich-text-editor {
   border: 1px solid #d1d5db;
@@ -489,7 +522,7 @@
 
 /* Templates Manager Styles */
 .templates-manager {
-  max-width: 1200px;
+  max-width: 100%;
   margin: 0 auto;
 }
 
@@ -752,10 +785,9 @@
 .public-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: left;
   margin-bottom: 2rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid #eee;
 }
 
 .public-header h1 {
@@ -779,11 +811,8 @@
 }
 
 .public-content {
-  background: white;
   color: black;
-  border-radius: 8px;
-  padding: 2rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  padding: 0rem;
 }
 
 .content-header {
@@ -818,8 +847,8 @@
 .post-card, .page-card {
   background: white;
   color: black;
-  border-radius: 8px;
-  padding: 1.5rem;
+  border-radius: 3px;
+  padding: 0rem;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   transition: transform 0.2s, box-shadow 0.2s;
 }
@@ -1159,7 +1188,7 @@
 
 /* Container responsivo principal */
 .public-container {
-  max-width: 1200px;
+  max-width: 100%;
   margin: 0 auto;
   padding: 0 1rem;
   min-height: calc(100vh - 60px);
@@ -1167,12 +1196,11 @@
 
 /* Header público responsivo */
 .public-header {
-  display: flex;
+  display: inline-flex;
   flex-direction: column;
   gap: 1rem;
-  margin-bottom: 2rem;
-  padding: 2rem 0;
-  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 0rem;
+  padding: 0rem 0;
 }
 
 .public-header h1 {
@@ -1522,9 +1550,9 @@
 }
 
 .navbar-container {
-  max-width: 1200px;
+  max-width: 100%;
   margin: 0 auto;
-  padding: 0 1rem;
+  padding: 0 5rem;
 }
 
 .navbar-content {
@@ -1544,6 +1572,19 @@
 
 .navbar-brand:hover {
   color: #93c5fd;
+}
+
+.navbar-logo {
+  max-height: 40px;
+  max-width: 200px;
+  height: auto;
+  width: auto;
+  object-fit: contain;
+  transition: transform 0.2s ease;
+}
+
+.navbar-logo:hover {
+  transform: scale(1.05);
 }
 
 /* Desktop Menu */
@@ -1758,6 +1799,11 @@
   .navbar-container {
     padding: 0 1rem;
   }
+  
+  .navbar-logo {
+    max-height: 32px;
+    max-width: 150px;
+  }
 }
 
 /* ===== BREAKPOINTS RESPONSIVOS ===== */
@@ -1909,18 +1955,12 @@
 /* Artigos individuais */
 .post-article,
 .page-article {
-  background: white;
-  border-radius: 1rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e5e7eb;
   overflow: hidden;
   margin-bottom: 2rem;
 }
 
 .article-header {
-  padding: 2rem 2rem 1rem;
-  border-bottom: 1px solid #f3f4f6;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  margin-bottom: 2rem;
 }
 
 .article-title {
@@ -1946,7 +1986,7 @@
 }
 
 .article-content {
-  padding: 2rem;
+  padding-top: 2rem;
   line-height: 1.8;
   font-size: 1.125rem;
   color: #374151;
@@ -2016,9 +2056,9 @@
 }
 
 .article-footer {
-  padding: 1.5rem 2rem;
-  border-top: 1px solid #f3f4f6;
-  background: #fafafa;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
 }
 
 .back-to-blog {
@@ -2070,6 +2110,33 @@
   
   .current-page {
     max-width: none;
+  }
+}
+
+/* ===== RESPONSIVIDADE PARA EDITORES ===== */
+
+/* Layout responsivo para editores de posts e páginas */
+@media (max-width: 768px) {
+  div[style*="grid-template-columns: 2fr 1fr"] {
+    display: block !important;
+  }
+  
+  .sidebar {
+    margin-top: 2rem !important;
+  }
+  
+  .main-content {
+    margin-bottom: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .sidebar {
+    padding: 1rem !important;
+  }
+  
+  .help-section {
+    margin-bottom: 1rem !important;
   }
 }
 
@@ -2250,7 +2317,7 @@ select:focus {
 }
 
 .footer-container {
-  max-width: 1200px;
+  max-width: 1280px;
   margin: 0 auto;
   padding: 0 1rem;
 }
@@ -2271,6 +2338,25 @@ select:focus {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+.footer-logo-container {
+  margin-bottom: 1rem;
+}
+
+.footer-logo {
+  max-height: 60px;
+  max-width: 200px;
+  height: auto;
+  width: auto;
+  object-fit: contain;
+  filter: brightness(1.1);
+  transition: all 0.3s ease;
+}
+
+.footer-logo:hover {
+  transform: scale(1.05);
+  filter: brightness(1.2);
 }
 
 .footer-column h4 {
@@ -2358,8 +2444,8 @@ select:focus {
 }
 
 .footer-bottom-content {
-  display: flex;
-  flex-direction: column;
+  display: inline-flex;
+  flex-direction: initial;
   align-items: center;
   text-align: center;
   gap: 0.5rem;
@@ -2421,6 +2507,11 @@ select:focus {
   .footer-credit {
     justify-content: center;
   }
+  
+  .footer-logo {
+    max-height: 50px;
+    max-width: 160px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -2440,5 +2531,10 @@ select:focus {
   .footer-social a {
     width: 36px;
     height: 36px;
+  }
+  
+  .footer-logo {
+    max-height: 40px;
+    max-width: 140px;
   }
 }

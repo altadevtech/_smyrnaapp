@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { useSettings } from '../contexts/SettingsContext'
 import { LogOut, User, FileText, Users, Home, Settings, Layout, Menu, X } from 'lucide-react'
 import api from '../services/api'
 
 const Navbar = () => {
   const { user, logout } = useAuth()
+  const { settings } = useSettings()
   const navigate = useNavigate()
   const [publicPages, setPublicPages] = useState([])
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -57,7 +59,15 @@ const Navbar = () => {
             className="navbar-brand"
             onClick={closeMobileMenu}
           >
-            Smyrna CMS
+            {settings.logo ? (
+              <img 
+                src={settings.logo} 
+                alt={settings.siteName}
+                className="navbar-logo"
+              />
+            ) : (
+              settings.siteName
+            )}
           </Link>
           
           {/* Mobile menu button */}

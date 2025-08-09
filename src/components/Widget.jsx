@@ -198,9 +198,9 @@ const Widget = ({ type, data, config = {} }) => {
         return (
           <div className="widget-image">
             {config.title && <h3>{config.title}</h3>}
-            {config.imageUrl ? (
+            {(config.imageUrl || config.url) ? (
               <img 
-                src={config.imageUrl} 
+                src={config.imageUrl || config.url} 
                 alt={config.alt || config.title || 'Imagem'} 
                 style={{ 
                   maxWidth: '100%', 

@@ -2,6 +2,7 @@ import React from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from './contexts/AuthContext'
+import { SettingsProvider } from './contexts/SettingsContext'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import DynamicHome from './pages/DynamicHome'
@@ -26,10 +27,11 @@ import './App.css'
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <div className="App">
-          <Navbar />
-          <main className="container">
+      <SettingsProvider>
+        <Router>
+          <div className="App">
+            <Navbar />
+            <main className="container">
             <Routes>
               {/* Rota de Debug */}
               <Route path="/debug" element={<DebugComponent />} />
@@ -131,6 +133,7 @@ function App() {
           <Toaster position="top-right" />
         </div>
       </Router>
+      </SettingsProvider>
     </AuthProvider>
   )
 }
