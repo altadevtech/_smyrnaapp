@@ -1,10 +1,29 @@
 import axios from 'axios'
 import { clearAuthData, shouldRedirectToLogin, isPublicAPIRoute } from '../utils/authUtils'
 
+// Detectar se está em desenvolvimento ou produção
+const getBaseURL = () => {
+  // 1. Verificar se há uma variável de ambiente customizada
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL
+  }
+  
+  // 2. Se estiver em produção (Render.com), usar a URL atual
+  if (import.meta.env.PROD) {
+    return `${window.location.origin}/api`
+  }
+  
+  // 3. Se estiver em desenvolvimento, usar localhost
+  return 'http://localhost:5000/api'
+}
+
 // Configuração base do axios
 const api = axios.create({
-  baseURL: 'http://localhost:5000/api'
+  baseURL: getBaseURL()
 })
+
+console.log('🔗 API Base URL:', api.defaults.baseURL)
+console.log('🌍 Environment:', import.meta.env.MODE)
 
 // Interceptor para adicionar token automaticamente
 api.interceptors.request.use(
