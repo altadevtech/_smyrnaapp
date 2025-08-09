@@ -89,17 +89,31 @@ O endpoint `/api/health` retorna:
 
 ## Troubleshooting
 
-### Build Falha
+### ❌ Build Falha
 - Verifique logs de build no dashboard
 - Certifique-se que `package.json` tem script `render-build`
 
-### App Não Inicia
+### ❌ App Não Inicia
 - Verifique logs de runtime
 - Confirme que porta está configurada como `process.env.PORT`
 
-### Banco de Dados
-- Verifique se o disco persistente está montado
-- Confirme permissões de escrita na pasta `server`
+### ❌ Erro SQLite3 "invalid ELF header"
+**✅ Solução**: Este erro é corrigido automaticamente pelo script `render-postbuild` que recompila o SQLite3 para a arquitetura do Render:
+```bash
+npm rebuild sqlite3 --build-from-source
+```
+
+### ❌ Banco de Dados
+- Verifique se o caminho DB_PATH está correto
+- Confirme se o SQLite3 foi recompilado corretamente
+
+## Build Command Detalhado
+```bash
+npm ci && npm run render-postbuild && npm run build
+```
+- `npm ci`: Instalação limpa das dependências
+- `npm run render-postbuild`: Recompila SQLite3 para arquitetura do Render
+- `npm run build`: Build do frontend com Vite
 
 ## Custos
 - **Free Plan**: Incluso, com limitações

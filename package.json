@@ -11,7 +11,8 @@
     "server": "node server/server.js",
     "server:dev": "nodemon server/server.js",
     "start": "npm run server",
-    "render-build": "npm install && npm run build"
+    "render-postbuild": "npm rebuild sqlite3",
+    "render-build": "npm ci && npm run render-postbuild && npm run build"
   },
   "dependencies": {
     "axios": "^1.6.7",
