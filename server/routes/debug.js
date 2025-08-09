@@ -121,4 +121,75 @@ router.post('/test-password', async (req, res) => {
   })
 })
 
+// Endpoint para interceptar tentativas de login e mostrar dados recebidos
+router.post('/intercept-login', async (req, res) => {
+  const { email, password } = req.body
+  
+  console.log('🔍 Interceptando tentativa de login:')
+  console.log('📧 Email recebido:', JSON.stringify(email))
+  console.log('🔐 Senha recebida:', JSON.stringify(password))
+  console.log('📏 Email length:', email ? email.length : 'undefined')
+  console.log('📏 Password length:', password ? password.length : 'undefined')
+  console.log('🧹 Email trimmed:', email ? email.trim() : 'undefined')
+  console.log('🧹 Password trimmed:', password ? password.trim() : 'undefined')
+  
+  if (!email || !password) {
+    return res.status(400).json({ 
+      message: 'Email e senha são obrigatórios',
+      received: { email, password }
+    })
+  }
+
+  const db = Database.getDb()
+  
+  // Buscar por email exato
+  db.get('SELECT * FROM users WHERE email = ? AND status = "active"', [email], async (err, user) => {
+    if (err) {
+      return res.status(500).json({ message: 'Erro interno do servidor', error: err.message })
+    }
+
+    if (!user) {
+      // Buscar por email case-insensitive
+      db.get('SELECT * FROM users WHERE LOWER(email) = LOWER(?) AND status = "active"', [email], async (err2, user2) => {
+        if (err2) {
+          return res.status(500).json({ message: 'Erro interno do servidor', error: err2.message })
+        }
+        
+        return res.json({
+          found: !!user2,
+          exactMatch: false,
+          caseInsensitiveMatch: !!user2,
+          searchedEmail: email,
+          searchedEmailTrimmed: email.trim(),
+          message: user2 ? 'Usuário encontrado com case-insensitive' : 'Usuário não encontrado',
+          userInDb: user2 ? { email: user2.email, name: user2.name } : null
+        })
+      })
+      return
+    }
+
+    try {
+      const isValidPassword = await bcrypt.compare(password, user.password)
+      
+      res.json({
+        found: true,
+        exactMatch: true,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        status: user.status,
+        passwordValid: isValidPassword,
+        receivedData: {
+          email: JSON.stringify(email),
+          password: JSON.stringify(password),
+          emailLength: email.length,
+          passwordLength: password.length
+        }
+      })
+    } catch (error) {
+      res.status(500).json({ message: 'Erro interno do servidor', error: error.message })
+    }
+  })
+})
+
 export default router
