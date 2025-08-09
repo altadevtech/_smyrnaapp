@@ -2,7 +2,9 @@ import React from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from './contexts/AuthContext'
+import { SettingsProvider } from './contexts/SettingsContext'
 import Navbar from './components/Navbar'
+import Footer from './components/Footer'
 import DynamicHome from './pages/DynamicHome'
 import PublicPages from './pages/PublicPages'
 import DynamicPublicPage from './pages/DynamicPublicPage'
@@ -13,6 +15,7 @@ import Dashboard from './pages/Dashboard'
 import Pages from './pages/Pages'
 import Posts from './pages/Posts'
 import Users from './pages/Users'
+import Profile from './pages/Profile'
 import DynamicPageEditor from './pages/DynamicPageEditor'
 import PostEditor from './pages/PostEditor'
 import Templates from './pages/TemplatesSimple'
@@ -24,10 +27,11 @@ import './App.css'
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <div className="App">
-          <Navbar />
-          <main className="container">
+      <SettingsProvider>
+        <Router>
+          <div className="App">
+            <Navbar />
+            <main className="container">
             <Routes>
               {/* Rota de Debug */}
               <Route path="/debug" element={<DebugComponent />} />
@@ -108,6 +112,14 @@ function App() {
                 } 
               />
               <Route 
+                path="/profile" 
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
                 path="/admin/templates" 
                 element={
                   <ProtectedRoute requiredRole="admin">
@@ -117,9 +129,11 @@ function App() {
               />
             </Routes>
           </main>
+          <Footer />
           <Toaster position="top-right" />
         </div>
       </Router>
+      </SettingsProvider>
     </AuthProvider>
   )
 }

@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { clearAuthData, shouldRedirectToLogin, isPublicAPIRoute } from '../utils/authUtils'
 
+// Configuração base do axios
 const api = axios.create({
   baseURL: 'http://localhost:5000/api'
 })

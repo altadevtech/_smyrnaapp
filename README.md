@@ -77,9 +77,24 @@ Um sistema de gerenciamento de conteúdo (CMS) simples e eficiente desenvolvido 
 2. **📰 Widget Notícias** - Lista automática de posts do blog
 3. **🔐 Widget Login** - Formulário de acesso à área restrita
 4. **📧 Widget Contato** - Formulário de contato completo
-5. **🖼️ Widget Imagem** - Upload de imagens individuais
+5. **🖼️ Widget Imagem** - Upload de imagens individuais com parâmetros configuráveis
 6. **🎥 Widget Vídeo** - Vídeos do YouTube ou locais
 7. **📝 Widget Conteúdo** - Editor HTML livre
+
+#### 🆕 Shortcodes com Parâmetros:
+Os widgets podem ser chamados com parâmetros personalizados:
+
+**Widget de Imagem:**
+```
+[widget:image url="https://exemplo.com/imagem.jpg" title="Minha Imagem" alt="Descrição" caption="Legenda da imagem" borderRadius="8px"]
+```
+
+**Parâmetros disponíveis para Widget Imagem:**
+- `url` ou `src`: URL da imagem
+- `title`: Título exibido acima da imagem
+- `alt`: Texto alternativo para acessibilidade
+- `caption`: Legenda exibida abaixo da imagem
+- `borderRadius`: Bordas arredondadas (ex: "8px", "50%")
 
 ## 🛠️ Tecnologias
 

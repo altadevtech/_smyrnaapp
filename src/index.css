@@ -29,9 +29,9 @@ body {
 }
 
 #root {
-  max-width: 1280px;
+  max-width: 100%;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 0rem;
   text-align: center;
   width: 100%;
 }
@@ -109,18 +109,40 @@ body {
 }
 
 .card {
-  background: white;
   color: black;
-  border-radius: 8px;
-  padding: 1.5rem;
+  border-radius: 0px;
+  padding-top: 1rem;
   margin-bottom: 1rem;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .grid {
   display: grid;
   gap: 1rem;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+input[type="password"], input[type="text"], input[type="email"], input[type="tel"], input[type="url"], textarea {
+    padding: 7px;
+}
+
+.grid .card h3 {
+    font-size: 90px;
+    line-height: 100%;
+}
+
+.grid .card div:first-child {
+    border: 2px solid #333;
+    width: 90%;
+    padding: 20px;
+    border-radius: 15px;
+}
+
+.card svg.lucide.lucide-file-text {
+    stroke: #333;
+}
+
+.card svg.lucide.lucide-users {
+    stroke: #333;
 }
 
 @media (prefers-color-scheme: light) {

@@ -49,31 +49,54 @@ const PublicPost = () => {
   return (
     <div className="public-container">
       <header className="public-header">
-        <Link to="/blog" className="back-button">
-          <ArrowLeft size={18} /> Voltar ao blog
-        </Link>
+        <nav className="breadcrumb-nav">
+          <Link to="/" className="back-button">
+            <Home size={18} /> Início
+          </Link>
+          <span className="breadcrumb-separator">•</span>
+          <Link to="/blog" className="back-button">
+            Blog
+          </Link>
+          <span className="breadcrumb-separator">•</span>
+          <span className="current-page">{post.title}</span>
+        </nav>
       </header>
 
-      <article className="public-content">
-        <header className="content-header">
-          <h1>{post.title}</h1>
-          <div className="content-meta">
+      <article className="post-article">
+        <header className="article-header">
+          <h1 className="article-title">{post.title}</h1>
+          <div className="article-meta">
             <span className="meta-item">
               <User size={16} />
               Por {post.author_name}
             </span>
             <span className="meta-item">
               <Calendar size={16} />
-              Publicado em {new Date(post.created_at).toLocaleDateString('pt-BR')}
+              {new Date(post.created_at).toLocaleDateString('pt-BR', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              })}
             </span>
           </div>
         </header>
 
-        <div className="content-body">
+        <div className="article-content">
           <div 
-            dangerouslySetInnerHTML={{ __html: post.content.replace(/\n/g, '<br>') }}
+            dangerouslySetInnerHTML={{ 
+              __html: post.content
+                .replace(/\n\n/g, '</p><p>')
+                .replace(/\n/g, '<br>')
+                .replace(/^(.*)$/, '<p>$1</p>')
+            }}
           />
         </div>
+
+        <footer className="article-footer">
+          <Link to="/blog" className="back-to-blog">
+            <ArrowLeft size={18} /> Voltar ao blog
+          </Link>
+        </footer>
       </article>
     </div>
   )

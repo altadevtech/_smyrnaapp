@@ -10,6 +10,7 @@ import postRoutes from './routes/posts.js'
 import dashboardRoutes from './routes/dashboard.js'
 import templateRoutes from './routes/templates.js'
 import widgetRoutes from './routes/widgets.js'
+import settingsRoutes from './routes/settings.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -38,6 +39,7 @@ app.use('/api/posts', postRoutes)
 app.use('/api/dashboard', dashboardRoutes)
 app.use('/api/templates', templateRoutes)
 app.use('/api/widgets', widgetRoutes)
+app.use('/api/settings', settingsRoutes)
 
 // Serve React app for all other routes
 app.get('*', (req, res) => {
