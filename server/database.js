@@ -14,146 +14,169 @@ class Database {
   }
 
   init() {
-    const dbPath = process.env.DB_PATH || path.join(__dirname, 'smyrna.db')
-    console.log('Caminho do banco de dados:', dbPath)
-    
-    this.db = new sqlite3.Database(dbPath, (err) => {
-      if (err) {
-        console.error('Erro ao conectar com o banco de dados:', err.message)
-      } else {
-        console.log('Conectado ao banco de dados SQLite:', dbPath)
-        this.createTables()
-      }
+    return new Promise((resolve, reject) => {
+      const dbPath = process.env.DB_PATH || path.join(__dirname, 'smyrna.db')
+      console.log('🗄️ Caminho do banco de dados:', dbPath)
+      
+      this.db = new sqlite3.Database(dbPath, (err) => {
+        if (err) {
+          console.error('❌ Erro ao conectar com o banco de dados:', err.message)
+          reject(err)
+        } else {
+          console.log('✅ Conectado ao banco de dados SQLite:', dbPath)
+          this.createTables()
+            .then(() => resolve())
+            .catch(reject)
+        }
+      })
     })
   }
 
   createTables() {
-    console.log('Criando tabelas do banco de dados...')
-    
-    // Tabela de usuários
-    const userTable = `
-      CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        email TEXT UNIQUE NOT NULL,
-        password TEXT NOT NULL,
-        role TEXT NOT NULL DEFAULT 'editor',
-        status TEXT NOT NULL DEFAULT 'active',
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-      )
-    `
-
-    // Tabela de páginas
-    const pageTable = `
-      CREATE TABLE IF NOT EXISTS pages (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        title TEXT NOT NULL,
-        content TEXT NOT NULL,
-        status TEXT NOT NULL DEFAULT 'draft',
-        author_id INTEGER NOT NULL,
-        template_id INTEGER DEFAULT 1,
-        widget_data JSON,
-        slug TEXT UNIQUE,
-        is_home BOOLEAN DEFAULT false,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (author_id) REFERENCES users (id),
-        FOREIGN KEY (template_id) REFERENCES templates (id)
-      )
-    `
-
-    // Tabela de posts
-    const postTable = `
-      CREATE TABLE IF NOT EXISTS posts (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        title TEXT NOT NULL,
-        content TEXT NOT NULL,
-        status TEXT NOT NULL DEFAULT 'draft',
-        author_id INTEGER NOT NULL,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (author_id) REFERENCES users (id)
-      )
-    `
-
-    // Tabela de templates
-    const templateTable = `
-      CREATE TABLE IF NOT EXISTS templates (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        description TEXT,
-        layout JSON NOT NULL,
-        is_default BOOLEAN DEFAULT false,
-        show_header BOOLEAN DEFAULT true,
-        show_footer BOOLEAN DEFAULT true,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-      )
-    `
-
-    // Tabela de widgets
-    const widgetTable = `
-      CREATE TABLE IF NOT EXISTS widgets (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        type TEXT NOT NULL,
-        name TEXT NOT NULL,
-        config JSON NOT NULL,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-      )
-    `
-
-    this.db.serialize(() => {
-      this.db.run(userTable, (err) => {
-        if (err) {
-          console.error('Erro ao criar tabela users:', err)
-        } else {
-          console.log('Tabela users criada/verificada com sucesso')
-        }
-      })
+    return new Promise((resolve, reject) => {
+      console.log('🔧 Criando tabelas do banco de dados...')
       
-      this.db.run(templateTable, (err) => {
-        if (err) {
-          console.error('Erro ao criar tabela templates:', err)
-        } else {
-          console.log('Tabela templates criada/verificada com sucesso')
-          this.createDefaultTemplates()
+      // Tabela de usuários
+      const userTable = `
+        CREATE TABLE IF NOT EXISTS users (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL,
+          email TEXT UNIQUE NOT NULL,
+          password TEXT NOT NULL,
+          role TEXT NOT NULL DEFAULT 'editor',
+          status TEXT NOT NULL DEFAULT 'active',
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+      `
+
+      // Tabela de páginas
+      const pageTable = `
+        CREATE TABLE IF NOT EXISTS pages (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          title TEXT NOT NULL,
+          content TEXT NOT NULL,
+          status TEXT NOT NULL DEFAULT 'draft',
+          author_id INTEGER NOT NULL,
+          template_id INTEGER DEFAULT 1,
+          widget_data JSON,
+          slug TEXT UNIQUE,
+          is_home BOOLEAN DEFAULT false,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (author_id) REFERENCES users (id),
+          FOREIGN KEY (template_id) REFERENCES templates (id)
+        )
+      `
+
+      // Tabela de posts
+      const postTable = `
+        CREATE TABLE IF NOT EXISTS posts (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          title TEXT NOT NULL,
+          content TEXT NOT NULL,
+          status TEXT NOT NULL DEFAULT 'draft',
+          author_id INTEGER NOT NULL,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (author_id) REFERENCES users (id)
+        )
+      `
+
+      // Tabela de templates
+      const templateTable = `
+        CREATE TABLE IF NOT EXISTS templates (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL,
+          description TEXT,
+          layout JSON NOT NULL,
+          is_default BOOLEAN DEFAULT false,
+          show_header BOOLEAN DEFAULT true,
+          show_footer BOOLEAN DEFAULT true,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+      `
+
+      // Tabela de widgets
+      const widgetTable = `
+        CREATE TABLE IF NOT EXISTS widgets (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          type TEXT NOT NULL,
+          name TEXT NOT NULL,
+          config JSON NOT NULL,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+      `
+
+      this.db.serialize(() => {
+        let completed = 0
+        const totalTables = 5
+        const checkComplete = () => {
+          completed++
+          if (completed === totalTables) {
+            this.createDefaultTemplates()
+            this.createDefaultUsers()
+            resolve()
+          }
         }
+
+        this.db.run(userTable, (err) => {
+          if (err) {
+            console.error('❌ Erro ao criar tabela users:', err)
+            reject(err)
+          } else {
+            console.log('✅ Tabela users criada/verificada')
+            checkComplete()
+          }
+        })
+        
+        this.db.run(templateTable, (err) => {
+          if (err) {
+            console.error('❌ Erro ao criar tabela templates:', err)
+            reject(err)
+          } else {
+            console.log('✅ Tabela templates criada/verificada')
+            checkComplete()
+          }
+        })
+        
+        this.db.run(widgetTable, (err) => {
+          if (err) {
+            console.error('❌ Erro ao criar tabela widgets:', err)
+            reject(err)
+          } else {
+            console.log('✅ Tabela widgets criada/verificada')
+            checkComplete()
+          }
+        })
+        
+        this.db.run(pageTable, (err) => {
+          if (err) {
+            console.error('❌ Erro ao criar tabela pages:', err)
+            reject(err)
+          } else {
+            console.log('✅ Tabela pages criada/verificada')
+            checkComplete()
+          }
+        })
+        
+        this.db.run(postTable, (err) => {
+          if (err) {
+            console.error('❌ Erro ao criar tabela posts:', err)
+            reject(err)
+          } else {
+            console.log('✅ Tabela posts criada/verificada')
+            checkComplete()
+          }
+        })
       })
-      
-      this.db.run(widgetTable, (err) => {
-        if (err) {
-          console.error('Erro ao criar tabela widgets:', err)
-        } else {
-          console.log('Tabela widgets criada/verificada com sucesso')
-          this.createDefaultWidgets()
-        }
-      })
-      
-      this.db.run(pageTable, (err) => {
-        if (err) {
-          console.error('Erro ao criar tabela pages:', err)
-        } else {
-          console.log('Tabela pages criada/verificada com sucesso')
-        }
-      })
-      
-      this.db.run(postTable, (err) => {
-        if (err) {
-          console.error('Erro ao criar tabela posts:', err)
-        } else {
-          console.log('Tabela posts criada/verificada com sucesso')
-        }
-      })
-      
-      // Inserir usuários padrão
-      this.createDefaultUsers()
     })
   }
 
   async createDefaultUsers() {
-    console.log('Verificando usuários padrão...')
+    console.log('👥 Verificando usuários padrão...')
     
     try {
       const adminPassword = await bcrypt.hash('admin123', 10)
@@ -162,14 +185,14 @@ class Database {
       // Verificar se já existem usuários
       this.db.get('SELECT COUNT(*) as count FROM users', (err, result) => {
         if (err) {
-          console.error('Erro ao verificar usuários existentes:', err)
+          console.error('❌ Erro ao verificar usuários existentes:', err)
           return
         }
 
-        console.log('Usuários existentes no banco:', result.count)
+        console.log('📊 Usuários existentes no banco:', result.count)
 
         if (result.count === 0) {
-          console.log('Criando usuários padrão...')
+          console.log('➕ Criando usuários padrão...')
           
           // Inserir usuário admin
           this.db.run(
@@ -177,9 +200,9 @@ class Database {
             ['Admin', 'admin@smyrna.com', adminPassword, 'admin'],
             function(err) {
               if (err) {
-                console.error('Erro ao criar usuário admin:', err)
+                console.error('❌ Erro ao criar usuário admin:', err)
               } else {
-                console.log('✅ Usuário admin criado com ID:', this.lastID)
+                console.log('✅ Usuário admin criado, ID:', this.lastID)
               }
             }
           )
@@ -190,132 +213,33 @@ class Database {
             ['Editor', 'editor@smyrna.com', editorPassword, 'editor'],
             function(err) {
               if (err) {
-                console.error('Erro ao criar usuário editor:', err)
+                console.error('❌ Erro ao criar usuário editor:', err)
               } else {
-                console.log('✅ Usuário editor criado com ID:', this.lastID)
+                console.log('✅ Usuário editor criado, ID:', this.lastID)
               }
             }
           )
         } else {
-          console.log('Usuários já existem no banco de dados')
+          console.log('👥 Usuários já existem no banco de dados')
         }
       })
     } catch (error) {
-      console.error('Erro ao criar senhas hash:', error)
+      console.error('❌ Erro ao criar senhas hash:', error)
     }
   }
 
-  createDefaultWidgets() {
-    console.log('Verificando widgets padrão...')
-    
-    // Verificar se já existem widgets
-    this.db.get('SELECT COUNT(*) as count FROM widgets', (err, result) => {
-      if (err) {
-        console.error('Erro ao verificar widgets existentes:', err)
-        return
-      }
-
-      if (result.count === 0) {
-        console.log('Criando widgets padrão...')
-        
-        // Widget 1 - Banner Principal
-        const bannerConfig = {
-          title: 'Bem-vindo ao Smyrna CMS',
-          description: 'Sistema de gerenciamento de conteúdo moderno e eficiente',
-          image: '',
-          link: '#',
-          buttonText: 'Saiba Mais'
-        }
-
-        // Widget 2 - Notícias
-        const newsConfig = {
-          title: 'Últimas Notícias',
-          count: 6,
-          showDate: true,
-          showExcerpt: true
-        }
-
-        // Widget 3 - Login
-        const loginConfig = {
-          title: 'Área Restrita',
-          showRegister: false,
-          redirectAfterLogin: '/dashboard'
-        }
-
-        // Widget 4 - Contato
-        const contactConfig = {
-          title: 'Entre em Contato',
-          email: 'contato@smyrna.com',
-          phone: '(11) 99999-9999',
-          address: 'São Paulo, SP, Brasil',
-          showForm: true
-        }
-
-        this.db.run(
-          'INSERT INTO widgets (type, name, config) VALUES (?, ?, ?)',
-          ['banner', 'Banner Principal', JSON.stringify(bannerConfig)],
-          function(err) {
-            if (err) {
-              console.error('Erro ao criar widget banner:', err)
-            } else {
-              console.log('✅ Widget Banner criado com ID:', this.lastID)
-            }
-          }
-        )
-
-        this.db.run(
-          'INSERT INTO widgets (type, name, config) VALUES (?, ?, ?)',
-          ['news', 'Widget de Notícias', JSON.stringify(newsConfig)],
-          function(err) {
-            if (err) {
-              console.error('Erro ao criar widget news:', err)
-            } else {
-              console.log('✅ Widget Notícias criado com ID:', this.lastID)
-            }
-          }
-        )
-
-        this.db.run(
-          'INSERT INTO widgets (type, name, config) VALUES (?, ?, ?)',
-          ['login', 'Widget de Login', JSON.stringify(loginConfig)],
-          function(err) {
-            if (err) {
-              console.error('Erro ao criar widget login:', err)
-            } else {
-              console.log('✅ Widget Login criado com ID:', this.lastID)
-            }
-          }
-        )
-
-        this.db.run(
-          'INSERT INTO widgets (type, name, config) VALUES (?, ?, ?)',
-          ['contact', 'Widget de Contato', JSON.stringify(contactConfig)],
-          function(err) {
-            if (err) {
-              console.error('Erro ao criar widget contact:', err)
-            } else {
-              console.log('✅ Widget Contato criado com ID:', this.lastID)
-            }
-          }
-        )
-      } else {
-        console.log('Widgets já existem no banco de dados')
-      }
-    })
-  }
-
   createDefaultTemplates() {
-    console.log('Verificando templates padrão...')
+    console.log('📋 Verificando templates padrão...')
     
     // Verificar se já existem templates
     this.db.get('SELECT COUNT(*) as count FROM templates', (err, result) => {
       if (err) {
-        console.error('Erro ao verificar templates existentes:', err)
+        console.error('❌ Erro ao verificar templates existentes:', err)
         return
       }
 
       if (result.count === 0) {
-        console.log('Criando templates padrão...')
+        console.log('➕ Criando templates padrão...')
         
         // Template 1 - Layout Básico
         const template1Layout = {
@@ -376,9 +300,9 @@ class Database {
           ['Layout Básico', 'Template simples com bloco de conteúdo', JSON.stringify(template1Layout), true],
           function(err) {
             if (err) {
-              console.error('Erro ao criar template 1:', err)
+              console.error('❌ Erro ao criar template 1:', err)
             } else {
-              console.log('✅ Template 1 criado com ID:', this.lastID)
+              console.log('✅ Template 1 criado, ID:', this.lastID)
             }
           }
         )
@@ -388,9 +312,9 @@ class Database {
           ['Layout com Banner', 'Template com banner principal e conteúdo', JSON.stringify(template2Layout)],
           function(err) {
             if (err) {
-              console.error('Erro ao criar template 2:', err)
+              console.error('❌ Erro ao criar template 2:', err)
             } else {
-              console.log('✅ Template 2 criado com ID:', this.lastID)
+              console.log('✅ Template 2 criado, ID:', this.lastID)
             }
           }
         )
@@ -400,14 +324,14 @@ class Database {
           ['Layout Completo', 'Template completo com banner, notícias, conteúdo e contato', JSON.stringify(template3Layout)],
           function(err) {
             if (err) {
-              console.error('Erro ao criar template 3:', err)
+              console.error('❌ Erro ao criar template 3:', err)
             } else {
-              console.log('✅ Template 3 criado com ID:', this.lastID)
+              console.log('✅ Template 3 criado, ID:', this.lastID)
             }
           }
         )
       } else {
-        console.log('Templates já existem no banco de dados')
+        console.log('📋 Templates já existem no banco de dados')
       }
     })
   }
@@ -420,9 +344,9 @@ class Database {
     if (this.db) {
       this.db.close((err) => {
         if (err) {
-          console.error('Erro ao fechar o banco de dados:', err.message)
+          console.error('❌ Erro ao fechar o banco de dados:', err.message)
         } else {
-          console.log('Conexão com o banco de dados fechada.')
+          console.log('✅ Conexão com o banco de dados fechada.')
         }
       })
     }
