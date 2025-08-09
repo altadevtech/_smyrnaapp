@@ -4,7 +4,7 @@ services:
     env: node
     region: oregon
     plan: free
-    buildCommand: npm run render-build
+    buildCommand: npm install && npm run build
     startCommand: npm run server
     healthCheckPath: /api/health
     envVars:
@@ -17,7 +17,3 @@ services:
       - key: DB_PATH
         value: "./server/smyrna.db"
     autoDeploy: true
-    disk:
-      name: smyrna-disk
-      mountPath: /opt/render/project/src/server
-      sizeGB: 1

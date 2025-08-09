@@ -52,9 +52,9 @@ As seguintes variáveis serão configuradas automaticamente:
 
 ### Build Command
 ```bash
-npm run render-build
+npm install && npm run build
 ```
-Executa: `npm install && npm run build`
+Executa: `npm install` e depois `vite build` com esbuild
 
 ### Start Command
 ```bash
