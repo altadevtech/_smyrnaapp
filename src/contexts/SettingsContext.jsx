@@ -26,7 +26,8 @@ export const SettingsProvider = ({ children }) => {
 
   const loadSettings = async () => {
     try {
-      const response = await api.get('/settings')
+      // Usar endpoint público para configurações
+      const response = await api.get('/settings/public')
       setSettings({ ...settings, ...response.data })
     } catch (error) {
       console.log('Configurações não encontradas, usando padrões')

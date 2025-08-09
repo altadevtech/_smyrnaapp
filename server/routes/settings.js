@@ -4,7 +4,70 @@ import { authenticateToken } from '../middleware/auth.js'
 
 const router = express.Router()
 
-// Aplicar middleware de autenticação para todas as rotas
+// GET /api/settings/public - Obter configurações públicas (sem autenticação)
+router.get('/public', async (req, res) => {
+  try {
+    const db = Database.getDb()
+    
+    // Verificar se a tabela de configurações existe
+    const tableExists = await new Promise((resolve, reject) => {
+      db.get(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='settings'",
+        (err, row) => {
+          if (err) reject(err)
+          else resolve(!!row)
+        }
+      )
+    })
+
+    if (!tableExists) {
+      // Retornar configurações padrão se tabela não existe
+      return res.json({
+        siteName: 'Smyrna CMS',
+        siteDescription: 'Sistema de Gerenciamento de Conteúdo',
+        logo: '',
+        contactEmail: '',
+        contactPhone: '',
+        contactAddress: '',
+        website: '',
+        theme: 'light'
+      })
+    }
+
+    // Buscar configurações no banco
+    const settings = await new Promise((resolve, reject) => {
+      db.all('SELECT key, value FROM settings', (err, rows) => {
+        if (err) reject(err)
+        else {
+          const settingsObj = {}
+          rows.forEach(row => {
+            settingsObj[row.key] = row.value
+          })
+          resolve(settingsObj)
+        }
+      })
+    })
+
+    // Adicionar valores padrão para chaves que não existem
+    const defaultSettings = {
+      siteName: 'Smyrna CMS',
+      siteDescription: 'Sistema de Gerenciamento de Conteúdo',
+      logo: '',
+      contactEmail: '',
+      contactPhone: '',
+      contactAddress: '',
+      website: '',
+      theme: 'light'
+    }
+
+    res.json({ ...defaultSettings, ...settings })
+  } catch (error) {
+    console.error('Erro ao obter configurações públicas:', error)
+    res.status(500).json({ message: 'Erro interno do servidor' })
+  }
+})
+
+// Aplicar middleware de autenticação para todas as outras rotas
 router.use(authenticateToken)
 
 // GET /api/settings - Obter configurações do sistema

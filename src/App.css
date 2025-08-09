@@ -182,16 +182,7 @@
 }
 
 /* Widget placeholder styles */
-.widget-placeholder {
-  background: #f0f9ff;
-  border: 2px dashed #60a5fa;
-  border-radius: 4px;
-  padding: 1rem;
-  margin: 0.5rem 0;
-  text-align: center;
-  color: #1e40af;
-  font-style: italic;
-}
+.widget-placeholder {}
 
 /* Editor form improvements */
 .page-editor {
