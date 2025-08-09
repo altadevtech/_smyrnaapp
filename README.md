@@ -2,8 +2,6 @@
 
 Um sistema de gerenciamento de conteúdo (CMS) simples e eficiente desenvolvido com React e Node.js, utilizando SQLite como banco de dados local.
 
-**🆕 NOVO: Sistema de Templates Dinâmicos e Widgets configuráveis!**
-
 ## 🚀 Características
 
 - **Frontend moderno**: React 18 com Vite para desenvolvimento rápido
