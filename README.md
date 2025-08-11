@@ -5,8 +5,8 @@ Este projeto nasceu como um CMS simples e robusto, desenvolvido com React no fro
 Construído com tecnologias consolidadas e boas práticas de desenvolvimento, o sistema mantém seu compromisso com performance, leveza e segurança, enquanto incorpora recursos essenciais para uma WIKI funcional e escalável.
 
 ### Principais funcionalidades planejadas:
-✅ Editor de conteúdo com suporte a Markdown e rich text
-✅ Sistema de versionamento de páginas
+✅ Editor de conteúdo com suporte a Markdown e rich text  
+✅ Sistema de versionamento de páginas  
 ✅ Histórico de edições com comparação de versões
 ✅ Pesquisa inteligente com destaque de termos
 ✅ Organização hierárquica por categorias e tags
