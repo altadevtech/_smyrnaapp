@@ -184,9 +184,41 @@ class Database {
         )
       `
 
+      // Tabela de versões de páginas
+      const pageVersionsTable = `
+        CREATE TABLE IF NOT EXISTS page_versions (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          page_id INTEGER NOT NULL,
+          version_number INTEGER NOT NULL,
+          title TEXT NOT NULL,
+          content TEXT NOT NULL,
+          author_id INTEGER NOT NULL,
+          change_summary TEXT,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (page_id) REFERENCES pages (id) ON DELETE CASCADE,
+          FOREIGN KEY (author_id) REFERENCES users (id),
+          UNIQUE(page_id, version_number)
+        )
+      `
+
+      // Tabela de comentários nas páginas
+      const pageCommentsTable = `
+        CREATE TABLE IF NOT EXISTS page_comments (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          page_id INTEGER NOT NULL,
+          author_id INTEGER NOT NULL,
+          content TEXT NOT NULL,
+          status TEXT NOT NULL DEFAULT 'approved',
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (page_id) REFERENCES pages (id) ON DELETE CASCADE,
+          FOREIGN KEY (author_id) REFERENCES users (id)
+        )
+      `
+
       this.db.serialize(() => {
         let completed = 0
-        const totalTables = 7  // Adicionada tabela de menus
+        const totalTables = 9  // Adicionadas tabelas de versões e comentários
         const checkComplete = () => {
           completed++
           if (completed === totalTables) {
@@ -264,6 +296,26 @@ class Database {
           } else {
             console.log('✅ Tabela menus criada/verificada')
             this.createDefaultMenus()
+            checkComplete()
+          }
+        })
+
+        this.db.run(pageVersionsTable, (err) => {
+          if (err) {
+            console.error('❌ Erro ao criar tabela page_versions:', err)
+            reject(err)
+          } else {
+            console.log('✅ Tabela page_versions criada/verificada')
+            checkComplete()
+          }
+        })
+
+        this.db.run(pageCommentsTable, (err) => {
+          if (err) {
+            console.error('❌ Erro ao criar tabela page_comments:', err)
+            reject(err)
+          } else {
+            console.log('✅ Tabela page_comments criada/verificada')
             checkComplete()
           }
         })
@@ -496,18 +548,18 @@ class Database {
   createDefaultMenus() {
     this.db.get('SELECT COUNT(*) as count FROM menus', (err, row) => {
       if (err) {
-        console.error('❌ Erro ao verificar menus:', err)
+        console.error('ÔØî Erro ao verificar menus:', err)
         return
       }
 
       if (row.count === 0) {
-        console.log('🍜 Criando menus padrão...')
+        console.log('­ƒì£ Criando menus padr├úo...')
 
         // Menu principal
         const defaultMenus = [
           { title: 'Home', url: '/', sort_order: 1, is_active: true },
           { title: 'Sobre', url: '/sobre', sort_order: 2, is_active: true },
-          { title: 'Serviços', url: '/servicos', sort_order: 3, is_active: true },
+          { title: 'Servi├ºos', url: '/servicos', sort_order: 3, is_active: true },
           { title: 'Blog', url: '/blog', sort_order: 4, is_active: true },
           { title: 'Contato', url: '/contato', sort_order: 5, is_active: true }
         ]

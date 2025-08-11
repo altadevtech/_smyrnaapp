@@ -14,6 +14,7 @@ import settingsRoutes from './routes/settings.js'
 import categoriesRoutes from './routes/categories.js'
 import menuRoutes from './routes/menus.js'
 import debugRoutes from './routes/debug.js'
+import pageVersionsRoutes from './routes/page-versions.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -65,6 +66,7 @@ async function initializeServer() {
     app.use('/api/categories', categoriesRoutes)
     app.use('/api/menus', menuRoutes)
     app.use('/api/debug', debugRoutes)
+    app.use('/api/page-versions', pageVersionsRoutes)
 
     // Serve React app for all other routes
     app.get('*', (req, res) => {

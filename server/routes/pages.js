@@ -269,21 +269,24 @@ router.put('/:id', (req, res) => {
       })
     }
 
-    db.run(
-      `UPDATE pages SET title = ?, content = ?, status = ?, template_id = ?, slug = ?, 
-                        widget_data = ?, is_home = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
-      [title, content, status, templateId, slug, widgetData ? JSON.stringify(widgetData) : null, isHome || false, id],
-      function(err) {
-        if (err) {
-          if (err.message.includes('UNIQUE constraint failed: pages.slug')) {
-            return res.status(400).json({ message: 'Slug já está em uso' })
+    // Criar versão antes de atualizar
+    createPageVersion(db, page, req.user.id, req.body.changeSummary || 'Edição da página', () => {
+      db.run(
+        `UPDATE pages SET title = ?, content = ?, status = ?, template_id = ?, slug = ?, 
+                          widget_data = ?, is_home = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
+        [title, content, status, templateId, slug, widgetData ? JSON.stringify(widgetData) : null, isHome || false, id],
+        function(err) {
+          if (err) {
+            if (err.message.includes('UNIQUE constraint failed: pages.slug')) {
+              return res.status(400).json({ message: 'Slug já está em uso' })
+            }
+            return res.status(500).json({ message: 'Erro ao atualizar página' })
           }
-          return res.status(500).json({ message: 'Erro ao atualizar página' })
-        }
 
-        res.json({ message: 'Página atualizada com sucesso' })
-      }
-    )
+          res.json({ message: 'Página atualizada com sucesso' })
+        }
+      )
+    })
   })
 })
 
@@ -356,5 +359,35 @@ router.delete('/:id', (req, res) => {
     })
   })
 })
+
+// Função auxiliar para criar versão da página
+function createPageVersion(db, page, authorId, changeSummary, callback) {
+  // Obter próximo número de versão
+  db.get(
+    'SELECT MAX(version_number) as max_version FROM page_versions WHERE page_id = ?',
+    [page.id],
+    (err, result) => {
+      if (err) {
+        console.error('Erro ao obter versão:', err)
+        return callback()
+      }
+      
+      const nextVersion = (result.max_version || 0) + 1
+      
+      // Criar nova versão
+      db.run(
+        `INSERT INTO page_versions (page_id, version_number, title, content, author_id, change_summary, created_at)
+         VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
+        [page.id, nextVersion, page.title, page.content, authorId, changeSummary],
+        (err) => {
+          if (err) {
+            console.error('Erro ao criar versão:', err)
+          }
+          callback()
+        }
+      )
+    }
+  )
+}
 
 export default router

@@ -24,6 +24,9 @@ import Templates from './pages/TemplatesSimple'
 import ProtectedRoute from './components/ProtectedRoute'
 import DebugComponent from './components/DebugComponent'
 import QuillTest from './components/QuillTest'
+import WikiLayout from './components/WikiLayout'
+import PageVersionHistory from './pages/PageVersionHistory'
+import VersionCompare from './pages/VersionCompare'
 import './App.css'
 
 function App() {
@@ -41,6 +44,17 @@ function App() {
               
               {/* Rotas Públicas */}
               <Route path="/" element={<DynamicHome />} />
+              
+              {/* Rotas Wiki Públicas */}
+              <Route path="/wiki" element={
+                <WikiLayout>
+                  <PublicPages />
+                </WikiLayout>
+              } />
+              <Route path="/wiki/:slug" element={<DynamicPublicPage />} />
+              <Route path="/:slug" element={<DynamicPublicPage />} />
+              
+              {/* Outras Rotas Públicas */}
               <Route path="/pages" element={<PublicPages />} />
               <Route path="/page/:slug" element={<DynamicPublicPage />} />
               <Route path="/blog" element={<PublicBlog />} />
@@ -79,6 +93,22 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <DynamicPageEditor />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/admin/pages/:id/versions" 
+                element={
+                  <ProtectedRoute>
+                    <PageVersionHistory />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/admin/pages/:id/versions/compare/:version1/:version2" 
+                element={
+                  <ProtectedRoute>
+                    <VersionCompare />
                   </ProtectedRoute>
                 } 
               />
