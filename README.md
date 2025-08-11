@@ -288,18 +288,6 @@ npm run lint         # Executa ESLint
 ### Dashboard
 - `GET /api/dashboard/stats` - Estatísticas
 
-## 🚧 Melhorias Futuras
-
-- [ ] Editor de texto rico (WYSIWYG)
-- [ ] Upload e gerenciamento de imagens
-- [ ] Sistema de tags e categorias
-- [ ] SEO otimização
-- [ ] Cache e performance
-- [ ] Temas personalizáveis
-- [ ] Backup automatizado
-- [ ] Logs de auditoria
-- [ ] API documentation (Swagger)
-- [ ] Testes automatizados
 
 ## � Componentes Principais
 
@@ -354,6 +342,23 @@ Renderiza páginas dinamicamente com base no template selecionado:
   ]
 }
 ```
+
+## 🚧 Melhorias Futuras
+- [ ] Substituição do Editor de texto rico (WYSIWYG) por uma ferramenta de edição via blocos
+- [ ] Sistema de Menu Recursivo (os menus poderão ser hierarquizados e será possível criar novas páginas filhas e submenus)
+- [ ] Implantação de templates com estrutura de blocos (ideia inspirada no Elementor, para facilitar a edição do layout por parte dos usuários sem conhecimento de HTML. A proposta será o usuário poder estruturar um layout apenas arrastando componentes e interindo o conteúdo)
+- [ ] Aprimoramento do chaveanto dos temas BLACK e WHITE, abrangendo todos os elementos HTML
+- [ ] Ajuste responsivo das tabelas na área administrativa
+- [ ] Upload e gerenciamento de imagens
+- [ ] Galeria de Imagens
+- [ ] Sistema de tags e categorias
+- [ ] SEO otimização
+- [ ] Cache e performance
+- [ ] Temas personalizáveis
+- [ ] Backup automatizado
+- [ ] Logs de auditoria
+- [ ] API documentation (Swagger)
+- [ ] Testes automatizados
 
 ## �📝 Licença
 Este projeto é de código aberto e está disponível sob a licença MIT.
