@@ -1,6 +1,6 @@
 # Smyrna CMS
 
-Um sistema de gerenciamento de conteúdo (CMS) simples e eficiente desenvolvido com React e Node.js, utilizando SQLite como banco de dados local.
+Sistema de gerenciamento de conteúdo (CMS) simples e eficiente desenvolvido com React e Node.js, utilizando SQLite como banco de dados local. O sistema já nasce com a ambição de ser a opção a ser adotada por aqueles que precisam de um sistema flexível, robusto, performático e leve. Desenvolvido com as tecnologias mais eficientes e consolidadas da atualidade e boas práticas de segurança e programação, nosso sistema ainda está em constante evolução. Sugestões serão muito bem vindas.
 
 ## 🚀 Características
 
@@ -356,13 +356,12 @@ Renderiza páginas dinamicamente com base no template selecionado:
 ```
 
 ## �📝 Licença
-
 Este projeto é de código aberto e está disponível sob a licença MIT.
 
 ## 🤝 Contribuições
+Contribuições são bem-vindas! 
 
-Contribuições são bem-vindas! Por favor:
-
+Por favor:
 1. Faça um fork do projeto
 2. Crie uma branch para sua feature
 3. Faça commit das suas mudanças
@@ -370,9 +369,8 @@ Contribuições são bem-vindas! Por favor:
 5. Abra um Pull Request
 
 ## 📞 Suporte
-
-Para suporte ou dúvidas, entre em contato através do sistema de issues do projeto.
+Para suporte ou dúvidas, entre em contato comigo pelo e-mail contato@smyrnacore.com.br ou através do sistema de issues do projeto.
 
 ---
 
-**Desenvolvido com ❤️ para simplificar o gerenciamento de conteúdo**
+**Desenvolvido com ❤️ por Flávio Rodrigues em 08/2025 e em evolução constante**
