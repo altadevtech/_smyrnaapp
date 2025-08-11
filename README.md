@@ -7,14 +7,14 @@ Construído com tecnologias consolidadas e boas práticas de desenvolvimento, o 
 ### Principais funcionalidades planejadas:
 ✅ Editor de conteúdo com suporte a Markdown e rich text  
 ✅ Sistema de versionamento de páginas  
-✅ Histórico de edições com comparação de versões
-✅ Pesquisa inteligente com destaque de termos
-✅ Organização hierárquica por categorias e tags
-✅ Controle de acesso e permissões por usuário
-✅ Sistema de comentários e discussões por página
-✅ Dashboard com estatísticas de uso e contribuições
-✅ Modo offline com sincronização local
-✅ Exportação de conteúdo em formatos como PDF e HTML
+✅ Histórico de edições com comparação de versões  
+✅ Pesquisa inteligente com destaque de termos  
+✅ Organização hierárquica por categorias e tags  
+✅ Controle de acesso e permissões por usuário  
+✅ Sistema de comentários e discussões por página  
+✅ Dashboard com estatísticas de uso e contribuições  
+✅ Modo offline com sincronização local  
+✅ Exportação de conteúdo em formatos como PDF e HTML  
 
 O projeto está em constante evolução e aberto a sugestões da comunidade. Se você busca uma solução WIKI leve, moderna e personalizável, este sistema pode ser o ponto de partida ideal.
 
