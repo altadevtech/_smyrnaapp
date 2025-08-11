@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useSettings } from '../contexts/SettingsContext'
-import { LogOut, User, FileText, Users, Home, Settings, Layout, Menu, X, Tag, MessageSquare, ChevronDown } from 'lucide-react'
+import { LogOut, User, FileText, Users, Home, Settings, Layout, Menu, X, Tag, MessageSquare, ChevronDown, LayoutDashboard } from 'lucide-react'
 import MainMenu from './MainMenu'
 import ThemeToggle from './ThemeToggle'
 import api from '../services/api'
@@ -12,24 +12,27 @@ const Navbar = () => {
   const { settings } = useSettings()
   const navigate = useNavigate()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [adminDropdownOpen, setAdminDropdownOpen] = useState(false)
   const [accountDropdownOpen, setAccountDropdownOpen] = useState(false)
 
   // Fechar dropdown quando clicar fora
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (accountDropdownOpen && !event.target.closest('.dropdown')) {
+      if ((adminDropdownOpen || accountDropdownOpen) && !event.target.closest('.dropdown')) {
+        setAdminDropdownOpen(false)
         setAccountDropdownOpen(false)
       }
     }
 
     document.addEventListener('click', handleClickOutside)
     return () => document.removeEventListener('click', handleClickOutside)
-  }, [accountDropdownOpen])
+  }, [adminDropdownOpen, accountDropdownOpen])
 
   const handleLogout = () => {
     logout()
     navigate('/')
     setMobileMenuOpen(false)
+    setAdminDropdownOpen(false)
     setAccountDropdownOpen(false)
   }
 
@@ -41,8 +44,14 @@ const Navbar = () => {
     setMobileMenuOpen(false)
   }
 
+  const toggleAdminDropdown = () => {
+    setAdminDropdownOpen(!adminDropdownOpen)
+    setAccountDropdownOpen(false)
+  }
+
   const toggleAccountDropdown = () => {
     setAccountDropdownOpen(!accountDropdownOpen)
+    setAdminDropdownOpen(false)
   }
 
   return (
@@ -77,36 +86,61 @@ const Navbar = () => {
           {/* Desktop Menu */}
           <div className="desktop-menu">
             {user ? (
-              // Menu para usuários logados (Admin)
-              <ul className="nav-list">
-                <li><Link to="/dashboard"><Settings size={18} /> Dashboard</Link></li>
-                <li><Link to="/admin/pages"><FileText size={18} /> Páginas</Link></li>
-                <li><Link to="/admin/posts"><FileText size={18} /> Posts</Link></li>
-                {user.role === 'admin' && (
-                  <>
-                    <li><Link to="/admin/categories"><Tag size={18} /> Categorias</Link></li>
-                    <li><Link to="/admin/menus"><MessageSquare size={18} /> Menus</Link></li>
-                    <li><Link to="/admin/templates"><Layout size={18} /> Templates</Link></li>
-                  </>
-                )}
+              // Menu para usuários logados (Admin) - Mais compacto
+              <ul className="nav-list compact">
+                <li><Link to="/dashboard" className="nav-item-compact"><LayoutDashboard size={18} /> Dashboard</Link></li>
                 
-                {/* Dropdown de Conta */}
+                {/* Dropdown Administrativo */}
                 <li className="dropdown">
-                  <button onClick={toggleAccountDropdown} className="dropdown-btn">
+                  <button onClick={toggleAdminDropdown} className="dropdown-btn admin-dropdown-btn">
+                    <Settings size={18} />
+                    <span>Administração</span>
+                    <ChevronDown size={16} className={`chevron ${adminDropdownOpen ? 'open' : ''}`} />
+                  </button>
+                  
+                  {adminDropdownOpen && (
+                    <ul className="dropdown-menu admin-dropdown">
+                      <li className="dropdown-section">
+                        <span className="dropdown-section-title">Conteúdo</span>
+                      </li>
+                      <li><Link to="/admin/pages" onClick={() => setAdminDropdownOpen(false)}><FileText size={16} /> Páginas</Link></li>
+                      <li><Link to="/admin/posts" onClick={() => setAdminDropdownOpen(false)}><FileText size={16} /> Posts</Link></li>
+                      <li><Link to="/admin/categories" onClick={() => setAdminDropdownOpen(false)}><Tag size={16} /> Categorias</Link></li>
+                      
+                      <li className="dropdown-divider"></li>
+                      <li className="dropdown-section">
+                        <span className="dropdown-section-title">Estrutura</span>
+                      </li>
+                      <li><Link to="/admin/menus" onClick={() => setAdminDropdownOpen(false)}><MessageSquare size={16} /> Menus</Link></li>
+                      <li><Link to="/admin/templates" onClick={() => setAdminDropdownOpen(false)}><Layout size={16} /> Templates</Link></li>
+                      
+                      {user.role === 'admin' && (
+                        <>
+                          <li className="dropdown-divider"></li>
+                          <li className="dropdown-section">
+                            <span className="dropdown-section-title">Sistema</span>
+                          </li>
+                          <li><Link to="/admin/users" onClick={() => setAdminDropdownOpen(false)}><Users size={16} /> Usuários</Link></li>
+                        </>
+                      )}
+                    </ul>
+                  )}
+                </li>
+                
+                {/* Dropdown de Conta - Mais compacto */}
+                <li className="dropdown">
+                  <button onClick={toggleAccountDropdown} className="dropdown-btn account-dropdown-btn">
                     <User size={18} />
                     <span>{user.name}</span>
                     <ChevronDown size={16} className={`chevron ${accountDropdownOpen ? 'open' : ''}`} />
                   </button>
                   
                   {accountDropdownOpen && (
-                    <ul className="dropdown-menu">
+                    <ul className="dropdown-menu account-dropdown">
                       <li className="dropdown-header">
-                        <span className="user-role">({user.role})</span>
+                        <span className="user-role">{user.role}</span>
                       </li>
                       <li><Link to="/profile" onClick={() => setAccountDropdownOpen(false)}><User size={16} /> Meu Perfil</Link></li>
-                      {user.role === 'admin' && (
-                        <li><Link to="/admin/users" onClick={() => setAccountDropdownOpen(false)}><Users size={16} /> Gerenciar Usuários</Link></li>
-                      )}
                       <li className="dropdown-divider"></li>
                       <li className="theme-toggle-wrapper">
                         <ThemeToggle variant="button-text" size="small" />

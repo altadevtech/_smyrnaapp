@@ -4413,9 +4413,402 @@ svg[stroke="#646cff"] {
   border-color: var(--border-color) !important;
 }
 
-[data-theme="dark"] code[style*="backgroundColor: #f1f5f9"] {
+/* Menu administrativo compacto e melhorado */
+.nav-list.compact {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.nav-item-compact {
+  display: flex !important;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem !important;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  color: var(--navbar-text) !important;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.nav-item-compact:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
+}
+
+/* Dropdown administrativo melhorado */
+.admin-dropdown-btn {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: var(--navbar-text) !important;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.admin-dropdown-btn:hover {
+  background: rgba(255, 255, 255, 0.15) !important;
+  transform: translateY(-1px);
+}
+
+.account-dropdown-btn {
+  background: transparent !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: var(--navbar-text) !important;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.account-dropdown-btn:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  transform: translateY(-1px);
+}
+
+/* Dropdown menus com tema correto - Abertura VERTICAL */
+.dropdown-menu.admin-dropdown,
+.dropdown-menu.account-dropdown {
   background-color: var(--card-bg) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: var(--card-shadow) !important;
+  border-radius: 8px;
+  padding: 0.5rem 0;
+  min-width: 220px;
+  max-height: 400px;
+  overflow-y: auto;
+  z-index: 1000;
+  /* Posicionamento vertical */
+  position: absolute;
+  top: 100%;
+  right: 0;
+  left: auto;
+}
+
+.dropdown-menu.admin-dropdown {
+  min-width: 250px;
+}
+
+/* Seções do dropdown */
+.dropdown-section {
+  padding: 0.5rem 1rem 0.25rem;
+}
+
+.dropdown-section-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-secondary) !important;
+  letter-spacing: 0.5px;
+}
+
+/* Items do dropdown */
+.dropdown-menu li a,
+.dropdown-menu li button {
+  display: flex !important;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem !important;
   color: var(--text-color) !important;
+  text-decoration: none;
+  border: none;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.dropdown-menu li a:hover,
+.dropdown-menu li button:hover {
+  background-color: var(--primary-color) !important;
+  color: white !important;
+  transform: translateX(4px);
+}
+
+/* Garantir que o dropdown seja sempre uma lista vertical */
+.dropdown-menu {
+  display: block !important;
+  list-style: none !important;
+}
+
+.dropdown-menu li {
+  display: block !important;
+  width: 100% !important;
+  margin: 0 !important;
+}
+
+/* Divisores */
+.dropdown-divider {
+  height: 1px;
+  background-color: var(--border-color) !important;
+  margin: 0.5rem 0;
+}
+
+/* Header do dropdown */
+.dropdown-header {
+  padding: 0.75rem 1rem 0.5rem;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 0.5rem;
+}
+
+.user-role {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--primary-color) !important;
+  background: rgba(var(--primary-color-rgb, 59, 130, 246), 0.1);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+/* Botão de logout */
+.dropdown-logout-btn {
+  color: var(--danger-color) !important;
+}
+
+.dropdown-logout-btn:hover {
+  background-color: var(--danger-color) !important;
+  color: white !important;
+}
+
+/* Theme toggle no dropdown - Corrigido para ambos os temas */
+.theme-toggle-wrapper {
+  padding: 0.5rem 1rem !important;
+}
+
+.theme-toggle-wrapper .theme-toggle-btn {
+  width: 100%;
+  justify-content: flex-start;
+  background: var(--card-bg) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-color) !important;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+  opacity: 1 !important; /* Garantir visibilidade */
+}
+
+.theme-toggle-wrapper .theme-toggle-btn:hover {
+  background-color: var(--primary-color) !important;
+  color: white !important;
+  border-color: var(--primary-color) !important;
+  transform: translateX(4px);
+  opacity: 1 !important;
+}
+
+/* Correção específica para tema claro - VISIBILIDADE GARANTIDA */
+[data-theme="light"] .theme-toggle-wrapper .theme-toggle-btn {
+  background: #f8f9fa !important;
+  border: 1px solid #d1d5db !important;
+  color: #374151 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+[data-theme="light"] .theme-toggle-wrapper .theme-toggle-btn:hover {
+  background-color: var(--primary-color) !important;
+  color: white !important;
+  opacity: 1 !important;
+}
+
+/* Correção específica para tema dark */
+[data-theme="dark"] .theme-toggle-wrapper .theme-toggle-btn {
+  background: var(--card-bg) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-color) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* CORREÇÃO FORÇADA: Botão tema sempre visível no tema claro */
+:root .theme-toggle-wrapper .theme-toggle-btn,
+body:not([data-theme="dark"]) .theme-toggle-wrapper .theme-toggle-btn,
+.navbar .theme-toggle-wrapper .theme-toggle-btn {
+  background-color: #f8f9fa !important;
+  border: 1px solid #d1d5db !important;
+  color: #374151 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+}
+
+:root .theme-toggle-wrapper .theme-toggle-btn:hover,
+body:not([data-theme="dark"]) .theme-toggle-wrapper .theme-toggle-btn:hover {
+  background-color: #3b82f6 !important;
+  color: white !important;
+  border-color: #3b82f6 !important;
+}
+
+/* Para garantir que no tema claro o botão não herde transparência */
+[data-theme="light"] .dropdown-menu .theme-toggle-btn,
+:not([data-theme]) .dropdown-menu .theme-toggle-btn {
+  opacity: 1 !important;
+  background-color: #f8f9fa !important;
+  border-color: #d1d5db !important;
+  color: #374151 !important;
+}
+
+/* Estilos gerais para botão de tema */
+.theme-toggle-btn {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: var(--navbar-text) !important;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.theme-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+  transform: translateY(-1px);
+}
+
+.theme-toggle-btn.small {
+  padding: 0.4rem 0.6rem;
+  font-size: 0.8rem;
+}
+
+/* Botão de tema na navbar - fora dos dropdowns */
+.navbar .theme-toggle-btn {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: var(--navbar-text) !important;
+}
+
+.navbar .theme-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+  color: var(--navbar-text) !important;
+}
+
+/* Animação do chevron */
+.chevron {
+  transition: transform 0.2s ease;
+}
+
+.chevron.open {
+  transform: rotate(180deg);
+}
+
+/* Responsividade para o menu compacto - DROPDOWN VERTICAL */
+@media (max-width: 1024px) {
+  .nav-list.compact {
+    gap: 0.25rem;
+  }
+  
+  .nav-item-compact,
+  .admin-dropdown-btn,
+  .account-dropdown-btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+  }
+  
+  .nav-item-compact span,
+  .admin-dropdown-btn span,
+  .account-dropdown-btn span {
+    display: none;
+  }
+  
+  .dropdown-menu.admin-dropdown,
+  .dropdown-menu.account-dropdown {
+    min-width: 200px;
+    /* Forçar posicionamento vertical */
+    position: absolute !important;
+    top: 100% !important;
+    right: 0 !important;
+    left: auto !important;
+    bottom: auto !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .nav-list.compact {
+    display: none; /* Escondido no mobile - usa o menu mobile */
+  }
+}
+
+/* Melhorias visuais para o dropdown - VERTICAL */
+.dropdown-menu {
+  position: absolute !important;
+  top: 100% !important;
+  right: 0 !important;
+  left: auto !important;
+  margin-top: 0.5rem;
+  animation: dropdownFadeIn 0.2s ease-out;
+  /* Forçar direção vertical */
+  flex-direction: column !important;
+  display: block !important;
+  /* Sobrescrever qualquer display flex que possa existir */
+}
+
+/* Corrigir herança de flex dos navs */
+.dropdown-menu.admin-dropdown ul,
+.dropdown-menu.account-dropdown ul {
+  display: block !important;
+  flex-direction: column !important;
+}
+
+.navbar ul.dropdown-menu {
+  display: block !important;
+  flex-direction: column !important;
+  justify-content: flex-start !important;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Hover effects melhorados */
+.dropdown:hover .dropdown-btn {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Estado ativo do dropdown */
+.dropdown-btn.active,
+.dropdown-btn:focus {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  outline: none;
+}
+
+/* Scroll customizado para dropdown longo */
+.dropdown-menu::-webkit-scrollbar {
+  width: 4px;
+}
+
+.dropdown-menu::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+.dropdown-menu::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 2px;
+}
+
+.dropdown-menu::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
 }
 
 /* Correções específicas para Blog Sidebar */
