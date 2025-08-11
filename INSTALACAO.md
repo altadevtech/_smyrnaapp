@@ -1,9 +1,13 @@
-# Instruções de Instalação - Smyrna CMS
+# Smyrna CMS - Instruções de Instalação 
 
-## ✅ Projeto Pronto para Uso!
+## ✅ Projeto em fase de desenvolvimento
+Para implementação futura:
+1. Sistema de Menu Recursivo (os menus poderão ser hierarquizados e será possível criar novas páginas filhas e submenus)
+2. Implantação de templates com estrutura de blocos (ideia inspirada no Elementor, para facilitar a edição do layout por parte dos usuários sem conhecimento de HTML. A proposta será o usuário poder estruturar um layout apenas arrastando componentes e interindo o conteúdo)
+3. Aprimoramento do chaveanto dos temas BLACK e WHITE, abrangendo todos os elementos HTML
+4. Ajuste responsivo das tabelas na área administrativa
 
-O Smyrna CMS está completamente configurado e funcional.
-
+## Instruções de Instalação 
 ### 1. Verificar Node.js
 
 Certifique-se que o Node.js está instalado:
