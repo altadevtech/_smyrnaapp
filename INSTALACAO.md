@@ -42,12 +42,10 @@ npm run dev
 ```
 
 ### 4. Acessar o Sistema
-
 - **Frontend**: http://localhost:3000
 - **API**: http://localhost:5000/api
 
 ### 5. Fazer Login
-
 Use um dos usuários padrão:
 
 **Admin:**
@@ -58,9 +56,9 @@ Use um dos usuários padrão:
 - Email: editor@smyrna.com  
 - Senha: editor123
 
-## 🏗️ Estrutura do Projeto Criada
+## 🏗️ Arquitetura do Projeto
 
-✅ **Frontend React completo:**
+✅ **Frontend React v18:**
 - Sistema de autenticação com JWT
 - Dashboard com estatísticas
 - Gerenciamento de páginas e posts
@@ -86,29 +84,17 @@ Use um dos usuários padrão:
 - Dashboard com métricas
 - Interface responsiva
 
-## 🎯 Próximos Passos
-
+## 🎯 Para rodar local
 1. Instale o Node.js
 2. Execute `npm install`
 3. Inicie os servidores
 4. Faça login e explore o sistema
 5. Comece a criar conteúdo!
 
-O sistema está completamente funcional e pronto para uso!
 
-## 🔧 Problemas Resolvidos
-
-### ✅ Erro: "require is not defined in ES module scope"
-**Solução**: Convertido todo backend para ES Modules (import/export).
-
-### ✅ Erro: "'vite' não é reconhecido como um comando"
-**Solução**: Execute `npm install` para instalar todas as dependências.
-
-### ✅ Erro: "invalid ELF header" (SQLite3)
-**Solução**: Removido better-sqlite3 problemático, usando sqlite3 padrão otimizado.
-
-### ✅ Erro: "terser not found"
-**Solução**: Configurado Vite para usar esbuild em vez de terser.
+## 🔧 Problemas Identificados
+1. Erro ao trocar o tema Dark e Light (parte dos elementos HTML não são afetados)
+2. Falta de recursividade no menu
 
 ### ❓ Porta em uso
 **Solução**: Se as portas 3000 ou 5000 estiverem em uso, você pode alterar no código ou encerrar os processos existentes.
