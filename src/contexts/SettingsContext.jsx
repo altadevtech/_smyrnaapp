@@ -53,13 +53,37 @@ export const SettingsProvider = ({ children }) => {
 
   useEffect(() => {
     loadSettings()
+    
+    // Inicializar tema do localStorage ou usar padrão
+    const savedTheme = localStorage.getItem('theme') || settings.theme || 'light'
+    applyTheme(savedTheme)
   }, [])
+
+  useEffect(() => {
+    // Aplicar tema quando settings mudarem
+    if (settings.theme) {
+      applyTheme(settings.theme)
+    }
+  }, [settings.theme])
+
+  const applyTheme = (theme) => {
+    document.documentElement.setAttribute('data-theme', theme)
+    localStorage.setItem('theme', theme)
+    setSettings(prev => ({ ...prev, theme }))
+  }
+
+  const toggleTheme = () => {
+    const newTheme = settings.theme === 'light' ? 'dark' : 'light'
+    applyTheme(newTheme)
+  }
 
   const value = {
     settings,
     loading,
     updateSettings,
-    refreshSettings
+    refreshSettings,
+    applyTheme,
+    toggleTheme
   }
 
   return (

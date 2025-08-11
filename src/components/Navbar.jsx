@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { useSettings } from '../contexts/SettingsContext'
 import { LogOut, User, FileText, Users, Home, Settings, Layout, Menu, X, Tag, MessageSquare, ChevronDown } from 'lucide-react'
 import MainMenu from './MainMenu'
+import ThemeToggle from './ThemeToggle'
 import api from '../services/api'
 
 const Navbar = () => {
@@ -107,6 +108,10 @@ const Navbar = () => {
                         <li><Link to="/admin/users" onClick={() => setAccountDropdownOpen(false)}><Users size={16} /> Gerenciar Usuários</Link></li>
                       )}
                       <li className="dropdown-divider"></li>
+                      <li className="theme-toggle-wrapper">
+                        <ThemeToggle variant="button-text" size="small" />
+                      </li>
+                      <li className="dropdown-divider"></li>
                       <li>
                         <button onClick={handleLogout} className="dropdown-logout-btn">
                           <LogOut size={16} /> Sair
@@ -121,6 +126,7 @@ const Navbar = () => {
               <div className="public-navigation">
                 <MainMenu className="main-navigation" orientation="horizontal" />
                 <div className="auth-actions">
+                  <ThemeToggle size="small" />
                   <Link to="/login" className="login-btn">
                     <User size={16} />
                     <span>Entrar</span>

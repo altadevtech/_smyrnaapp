@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { useSettings } from '../contexts/SettingsContext'
 import { User, Settings, Palette, Upload, Save, Mail, Phone, MapPin, Globe, Eye, EyeOff } from 'lucide-react'
+import ThemeToggle from '../components/ThemeToggle'
 import api from '../services/api'
 import toast from 'react-hot-toast'
 
@@ -136,14 +137,6 @@ const Profile = () => {
       [e.target.name]: e.target.value
     }
     updateSettings(newSettings)
-  }
-
-  const applyTheme = (theme) => {
-    const newSettings = { ...settings, theme }
-    updateSettings(newSettings)
-    document.documentElement.setAttribute('data-theme', theme)
-    localStorage.setItem('theme', theme)
-    toast.success(`Tema ${theme === 'light' ? 'Claro' : 'Escuro'} aplicado!`)
   }
 
   const tabs = [
@@ -421,68 +414,21 @@ const Profile = () => {
 
       {activeTab === 'themes' && (
         <div className="card">
-          <h2>Temas de Cores</h2>
-          <p style={{ marginBottom: '2rem', color: '#6b7280' }}>
-            Escolha o tema de cores para a interface do sistema.
+          <h2>Personalização de Temas</h2>
+          <p style={{ marginBottom: '2rem', color: 'var(--text-secondary)' }}>
+            Escolha o tema de cores que melhor se adapta ao seu ambiente de trabalho.
           </p>
 
-          <div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}>
-            {/* Tema Claro */}
-            <div 
-              style={{
-                border: settings.theme === 'light' ? '3px solid #3b82f6' : '1px solid #e5e7eb',
-                borderRadius: '0.75rem',
-                padding: '1.5rem',
-                cursor: 'pointer',
-                background: '#ffffff'
-              }}
-              onClick={() => applyTheme('light')}
-            >
-              <h3 style={{ color: '#1f2937', marginBottom: '1rem' }}>Tema Claro</h3>
-              <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
-                <div style={{ width: '20px', height: '20px', backgroundColor: '#ffffff', border: '1px solid #e5e7eb', borderRadius: '50%' }}></div>
-                <div style={{ width: '20px', height: '20px', backgroundColor: '#f9fafb', borderRadius: '50%' }}></div>
-                <div style={{ width: '20px', height: '20px', backgroundColor: '#3b82f6', borderRadius: '50%' }}></div>
-                <div style={{ width: '20px', height: '20px', backgroundColor: '#1f2937', borderRadius: '50%' }}></div>
-              </div>
-              <p style={{ color: '#6b7280', fontSize: '0.875rem' }}>
-                Interface clara e moderna, ideal para ambientes bem iluminados.
-              </p>
-              {settings.theme === 'light' && (
-                <div style={{ marginTop: '1rem', color: '#3b82f6', fontWeight: 'bold' }}>
-                  ✓ Tema Ativo
-                </div>
-              )}
-            </div>
+          <ThemeToggle variant="cards" />
 
-            {/* Tema Escuro */}
-            <div 
-              style={{
-                border: settings.theme === 'dark' ? '3px solid #3b82f6' : '1px solid #e5e7eb',
-                borderRadius: '0.75rem',
-                padding: '1.5rem',
-                cursor: 'pointer',
-                background: '#1f2937',
-                color: '#ffffff'
-              }}
-              onClick={() => applyTheme('dark')}
-            >
-              <h3 style={{ color: '#ffffff', marginBottom: '1rem' }}>Tema Escuro</h3>
-              <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
-                <div style={{ width: '20px', height: '20px', backgroundColor: '#1f2937', borderRadius: '50%' }}></div>
-                <div style={{ width: '20px', height: '20px', backgroundColor: '#374151', borderRadius: '50%' }}></div>
-                <div style={{ width: '20px', height: '20px', backgroundColor: '#3b82f6', borderRadius: '50%' }}></div>
-                <div style={{ width: '20px', height: '20px', backgroundColor: '#f9fafb', borderRadius: '50%' }}></div>
-              </div>
-              <p style={{ color: '#d1d5db', fontSize: '0.875rem' }}>
-                Interface escura e elegante, reduz o cansaço visual em ambientes com pouca luz.
-              </p>
-              {settings.theme === 'dark' && (
-                <div style={{ marginTop: '1rem', color: '#3b82f6', fontWeight: 'bold' }}>
-                  ✓ Tema Ativo
-                </div>
-              )}
-            </div>
+          <div style={{ marginTop: '2rem', padding: '1rem', backgroundColor: 'var(--bg-secondary)', borderRadius: '0.5rem', border: '1px solid var(--border-color)' }}>
+            <h4 style={{ marginBottom: '0.5rem', color: 'var(--text-color)' }}>ℹ️ Informações sobre Temas</h4>
+            <ul style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', paddingLeft: '1.25rem' }}>
+              <li><strong>Tema Claro:</strong> Interface clara e moderna, ideal para ambientes bem iluminados.</li>
+              <li><strong>Tema Escuro:</strong> Interface escura que reduz o cansaço visual em ambientes com pouca luz.</li>
+              <li><strong>Aplicação Automática:</strong> O tema selecionado é aplicado instantaneamente em todo o sistema.</li>
+              <li><strong>Persistência:</strong> Sua escolha é salva e mantida entre sessões.</li>
+            </ul>
           </div>
         </div>
       )}
