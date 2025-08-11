@@ -153,32 +153,28 @@ const Profile = () => {
       </h1>
 
       {/* Tabs */}
-      <div style={{ marginBottom: '2rem', borderBottom: '1px solid #e5e7eb' }}>
-        <div style={{ display: 'flex', gap: '1rem' }}>
-          {tabs.map(tab => {
-            const Icon = tab.icon
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                style={{
-                  padding: '0.75rem 1rem',
-                  border: 'none',
-                  background: activeTab === tab.id ? '#3b82f6' : 'transparent',
-                  color: activeTab === tab.id ? 'white' : '#6b7280',
-                  borderRadius: '0.5rem 0.5rem 0 0',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  fontWeight: activeTab === tab.id ? 'bold' : 'normal'
-                }}
-              >
-                <Icon size={18} />
-                {tab.label}
-              </button>
-            )
-          })}
+      <div style={{ marginBottom: '2rem', borderBottom: '1px solid var(--border-color)' }}>
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              style={{
+                padding: '0.75rem 1.5rem',
+                border: 'none',
+                borderRadius: '0.5rem',
+                cursor: 'pointer',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                transition: 'all 0.2s',
+                background: activeTab === tab.id ? 'var(--primary-color)' : 'transparent',
+                color: activeTab === tab.id ? 'white' : 'var(--text-secondary)',
+              }}
+            >
+              <tab.icon size={16} style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} />
+              {tab.label}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -320,7 +316,7 @@ const Profile = () => {
                       style={{ 
                         maxWidth: '200px', 
                         maxHeight: '100px',
-                        border: '1px solid #e5e7eb',
+                        border: '1px solid var(--border-color)',
                         borderRadius: '0.5rem',
                         padding: '0.5rem'
                       }} 
@@ -337,7 +333,7 @@ const Profile = () => {
                     style={{ display: 'none' }}
                   />
                 </label>
-                <p style={{ fontSize: '0.875rem', color: '#6b7280', marginTop: '0.5rem' }}>
+                <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>
                   Formatos aceitos: PNG, JPG, SVG (máx. 5MB)
                 </p>
               </div>

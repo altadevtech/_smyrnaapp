@@ -165,15 +165,15 @@ const Menus = () => {
       className={`menu-item ${level > 0 ? 'menu-item-child' : ''}`}
       style={{
         marginLeft: level > 0 ? '2rem' : '0',
-        borderLeft: level > 0 ? '4px solid #e5e7eb' : 'none',
+        borderLeft: level > 0 ? '4px solid var(--border-color)' : 'none',
         paddingLeft: level > 0 ? '1rem' : '0'
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <GripVertical size={16} style={{ color: '#9ca3af', cursor: 'grab' }} />
+          <GripVertical size={16} style={{ color: 'var(--text-secondary)', cursor: 'grab' }} />
           {level > 0 && (
-            <span style={{ color: '#9ca3af' }}>└─</span>
+            <span style={{ color: 'var(--text-secondary)' }}>└─</span>
           )}
           {menu.icon && (
             <i className={menu.icon}></i>
@@ -396,7 +396,7 @@ const Menus = () => {
 
       <div className="card">
         <h3 style={{ marginBottom: '1rem' }}>Menus Cadastrados</h3>
-        <p style={{ color: '#666', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
           Organize os menus arrastando e soltando para reordenar
         </p>
         

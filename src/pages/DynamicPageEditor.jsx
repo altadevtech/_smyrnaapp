@@ -167,7 +167,7 @@ const DynamicPageEditor = () => {
             </div>
           </div>
 
-          <div className="sidebar" style={{ flex: 1, backgroundColor: '#f8f9fa', padding: '1rem', borderRadius: '8px' }}>
+          <div className="sidebar" style={{ flex: 1, backgroundColor: 'var(--card-bg)', padding: '1rem', borderRadius: '8px' }}>
             <div className="editor-help">
               <h3 style={{ marginTop: 0, color: '#333' }}>� Editor de Conteúdo</h3>
               

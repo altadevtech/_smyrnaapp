@@ -60,7 +60,7 @@ const BlogSidebar = ({ onCategorySelect, selectedCategorySlug }) => {
               >
                 <div 
                   className="category-color"
-                  style={{ backgroundColor: '#64748b' }}
+                  style={{ backgroundColor: 'var(--text-secondary)' }}
                 />
                 <span className="category-name">Todas as categorias</span>
                 <span className="post-count">
@@ -96,11 +96,11 @@ const BlogSidebar = ({ onCategorySelect, selectedCategorySlug }) => {
       <style jsx>{`
         .blog-sidebar {
           width: 300px;
-          background: #f8fafc;
+          background: var(--card-bg);
           border-radius: 12px;
           overflow: hidden;
           height: fit-content;
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+          box-shadow: var(--card-shadow);
         }
 
         .sidebar-section {
@@ -113,10 +113,10 @@ const BlogSidebar = ({ onCategorySelect, selectedCategorySlug }) => {
           gap: 0.5rem;
           font-size: 1.1rem;
           font-weight: 600;
-          color: #1e293b;
+          color: var(--text-color);
           margin: 0 0 1rem 0;
           padding-bottom: 0.75rem;
-          border-bottom: 2px solid #e2e8f0;
+          border-bottom: 2px solid var(--border-color);
         }
 
         .categories-list {
@@ -135,11 +135,11 @@ const BlogSidebar = ({ onCategorySelect, selectedCategorySlug }) => {
           gap: 0.75rem;
           padding: 0.75rem;
           text-decoration: none;
-          color: #475569;
+          color: var(--text-color);
           border-radius: 8px;
           transition: all 0.2s;
-          background: white;
-          border: 1px solid #e2e8f0;
+          background: var(--card-bg);
+          border: 1px solid var(--border-color);
           width: 100%;
           cursor: pointer;
           font-family: inherit;
@@ -147,21 +147,21 @@ const BlogSidebar = ({ onCategorySelect, selectedCategorySlug }) => {
         }
 
         .category-link:hover {
-          background: #f1f5f9;
-          color: #1e293b;
+          background: var(--bg-secondary);
+          color: var(--text-color);
           transform: translateY(-1px);
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          box-shadow: var(--card-shadow);
         }
 
         .category-link.active {
-          background: #3b82f6;
+          background: var(--primary-color);
           color: white;
-          border-color: #3b82f6;
+          border-color: var(--primary-color);
           box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
         }
 
         .category-link.active:hover {
-          background: #2563eb;
+          background: var(--primary-hover);
           transform: translateY(-1px);
         }
 
@@ -182,15 +182,15 @@ const BlogSidebar = ({ onCategorySelect, selectedCategorySlug }) => {
           align-items: center;
           gap: 0.25rem;
           font-size: 0.875rem;
-          color: #64748b;
-          background: #f1f5f9;
+          color: var(--text-secondary);
+          background: var(--bg-secondary);
           padding: 0.25rem 0.5rem;
           border-radius: 12px;
           font-weight: 600;
         }
 
         .no-categories {
-          color: #64748b;
+          color: var(--text-secondary);
           font-style: italic;
           text-align: center;
           margin: 1rem 0;
@@ -198,7 +198,7 @@ const BlogSidebar = ({ onCategorySelect, selectedCategorySlug }) => {
 
         .loading {
           text-align: center;
-          color: #64748b;
+          color: var(--text-secondary);
           padding: 1rem 0;
         }
 

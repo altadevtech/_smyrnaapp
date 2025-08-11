@@ -69,7 +69,7 @@ const PublicPost = () => {
               <span 
                 className="category-tag" 
                 style={{ 
-                  backgroundColor: post.category_color || '#6366f1',
+                  backgroundColor: post.category_color || 'var(--primary-color)',
                   color: 'white',
                   padding: '0.5rem 1rem',
                   borderRadius: '1.5rem',

@@ -197,12 +197,12 @@ const PostEditor = () => {
 
         <div className="post-editor-sidebar">
           <div className="editor-help">
-            <h3 style={{ marginTop: 0, color: '#333', fontSize: '1.25rem' }}>📝 Editor de Posts</h3>
+            <h3 style={{ marginTop: 0, color: 'var(--text-color)', fontSize: '1.25rem' }}>📝 Editor de Posts</h3>
             
             <div className="help-sections">
               <div className="help-section" style={{ marginBottom: '1.5rem' }}>
-                <h4 style={{ color: '#2563eb', fontSize: '16px', marginBottom: '0.5rem' }}>🎨 Recursos do Editor</h4>
-                <ul style={{ fontSize: '14px', color: '#666', marginLeft: '1rem' }}>
+                <h4 style={{ color: 'var(--primary-color)', fontSize: '16px', marginBottom: '0.5rem' }}>🎨 Recursos do Editor</h4>
+                <ul style={{ fontSize: '14px', color: 'var(--text-secondary)', marginLeft: '1rem' }}>
                   <li><strong>Visual:</strong> Editor WYSIWYG com formatação</li>
                   <li><strong>HTML:</strong> Edição direta do código</li>
                   <li><strong>Preview:</strong> Visualização do resultado final</li>
@@ -210,16 +210,16 @@ const PostEditor = () => {
               </div>
 
               <div className="help-section" style={{ marginBottom: '1.5rem' }}>
-                <h4 style={{ color: '#16a34a', fontSize: '16px', marginBottom: '0.5rem' }}>📊 Status de Publicação</h4>
-                <ul style={{ fontSize: '14px', color: '#666', marginLeft: '1rem' }}>
+                <h4 style={{ color: 'var(--success-color)', fontSize: '16px', marginBottom: '0.5rem' }}>📊 Status de Publicação</h4>
+                <ul style={{ fontSize: '14px', color: 'var(--text-secondary)', marginLeft: '1rem' }}>
                   <li><strong>Rascunho:</strong> Não aparece no site público</li>
                   <li><strong>Publicado:</strong> Visível na página de blog</li>
                 </ul>
               </div>
 
               <div className="help-section" style={{ marginBottom: '1.5rem' }}>
-                <h4 style={{ color: '#dc2626', fontSize: '16px', marginBottom: '0.5rem' }}>💡 Dicas Importantes</h4>
-                <ul style={{ fontSize: '14px', color: '#666', marginLeft: '1rem' }}>
+                <h4 style={{ color: 'var(--danger-color)', fontSize: '16px', marginBottom: '0.5rem' }}>💡 Dicas Importantes</h4>
+                <ul style={{ fontSize: '14px', color: 'var(--text-secondary)', marginLeft: '1rem' }}>
                   <li>Use títulos chamativos e descritivos</li>
                   <li>Posts são exibidos em ordem cronológica</li>
                   <li>Você pode usar HTML e widgets no conteúdo</li>
@@ -228,8 +228,8 @@ const PostEditor = () => {
               </div>
 
               <div className="help-section">
-                <h4 style={{ color: '#7c3aed', fontSize: '16px', marginBottom: '0.5rem' }}>🔧 Funcionalidades</h4>
-                <ul style={{ fontSize: '14px', color: '#666', marginLeft: '1rem' }}>
+                <h4 style={{ color: 'var(--primary-color)', fontSize: '16px', marginBottom: '0.5rem' }}>🔧 Funcionalidades</h4>
+                <ul style={{ fontSize: '14px', color: 'var(--text-secondary)', marginLeft: '1rem' }}>
                   <li>Formatação rica de texto</li>
                   <li>Inserção de links e imagens</li>
                   <li>Listas numeradas e com marcadores</li>

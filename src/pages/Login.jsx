@@ -71,7 +71,7 @@ const Login = () => {
         </button>
       </form>
 
-      <div style={{ marginTop: '2rem', padding: '1rem', backgroundColor: '#f8f9fa', borderRadius: '4px' }}>
+      <div style={{ marginTop: '2rem', padding: '1rem', backgroundColor: 'var(--bg-secondary)', borderRadius: '4px' }}>
         <h4>Usuários de Teste:</h4>
         <p><strong>Admin:</strong> admin@smyrna.com / admin123</p>
         <p><strong>Editor:</strong> editor@smyrna.com / editor123</p>

@@ -11,21 +11,21 @@
 }
 
 .error {
-  color: #dc3545;
+  color: var(--danger-color) !important;
   text-align: center;
   padding: 1rem;
-  background-color: #f8d7da;
-  border: 1px solid #f5c6cb;
+  background-color: color-mix(in srgb, var(--danger-color) 10%, var(--bg-color)) !important;
+  border: 1px solid color-mix(in srgb, var(--danger-color) 30%, var(--border-color)) !important;
   border-radius: 4px;
   margin-bottom: 1rem;
 }
 
 .success {
-  color: #155724;
+  color: var(--success-color) !important;
   text-align: center;
   padding: 1rem;
-  background-color: #d4edda;
-  border: 1px solid #c3e6cb;
+  background-color: color-mix(in srgb, var(--success-color) 10%, var(--bg-color)) !important;
+  border: 1px solid color-mix(in srgb, var(--success-color) 30%, var(--border-color)) !important;
   border-radius: 4px;
   margin-bottom: 1rem;
 }
@@ -34,10 +34,10 @@
   max-width: 400px;
   margin: 2rem auto;
   padding: 2rem;
-  background: white;
-  color: black;
+  background: var(--card-bg) !important;
+  color: var(--text-color) !important;
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  box-shadow: var(--card-shadow);
 }
 
 .editor {
@@ -61,7 +61,7 @@
 }
 
 .post-editor-sidebar {
-  background-color: #f8f9fa;
+  background-color: var(--bg-secondary) !important;
   padding: 1.5rem;
   border-radius: 8px;
   height: fit-content;
@@ -84,22 +84,22 @@
 
 /* Rich Text Editor Styles */
 .rich-text-editor {
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border-color) !important;
   border-radius: 6px;
   overflow: hidden;
-  background: white;
+  background: var(--card-bg) !important;
 }
 
 .rich-text-editor .editor-tabs {
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border-color) !important;
 }
 
 .rich-text-editor .editor-toolbar {
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border-color) !important;
 }
 
 .rich-text-editor .widget-toolbar {
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border-color) !important;
 }
 
 .rich-text-editor .visual-editor {
@@ -133,10 +133,10 @@
 
 /* React Quill Customizations */
 .quill-rich-text-editor {
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border-color) !important;
   border-radius: 6px;
   overflow: hidden;
-  background: white;
+  background: var(--card-bg) !important;
 }
 
 .quill-rich-text-editor .ql-container {
@@ -288,11 +288,11 @@
 
 .page-header h1 {
   margin: 0 0 1rem 0;
-  color: #333;
+  color: var(--text-color);
 }
 
 .page-meta {
-  color: #666;
+  color: var(--text-secondary);
   font-size: 0.9rem;
   display: flex;
   gap: 1rem;
@@ -307,11 +307,11 @@
 }
 
 .template-footer {
-  border-top: 1px solid #ddd;
+  border-top: 1px solid var(--border-color);
   padding-top: 2rem;
   margin-top: 3rem;
   text-align: center;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 /* Widget Styles */
@@ -332,8 +332,8 @@
 .widget-video h3,
 .widget-content h3 {
   margin-bottom: 1rem;
-  color: #333;
-  border-bottom: 2px solid #007bff;
+  color: var(--text-color);
+  border-bottom: 2px solid var(--primary-color);
   padding-bottom: 0.5rem;
 }
 
@@ -345,10 +345,10 @@
 }
 
 .news-item {
-  background: #f8f9fa;
+  background: var(--bg-secondary);
   padding: 1rem;
   border-radius: 8px;
-  border-left: 4px solid #007bff;
+  border-left: 4px solid var(--primary-color);
 }
 
 .news-item h4 {
@@ -356,17 +356,17 @@
 }
 
 .news-item h4 a {
-  color: #333;
+  color: var(--text-color);
   text-decoration: none;
 }
 
 .news-item h4 a:hover {
-  color: #007bff;
+  color: var(--primary-color);
 }
 
 .news-item p {
   margin: 0.5rem 0;
-  color: #666;
+  color: var(--text-secondary);
   line-height: 1.4;
 }
 
@@ -374,7 +374,7 @@
   display: flex;
   gap: 1rem;
   font-size: 0.8rem;
-  color: #888;
+  color: var(--text-secondary);
   margin-top: 0.5rem;
 }
 
@@ -407,7 +407,7 @@
 .image-caption {
   text-align: center;
   font-style: italic;
-  color: #666;
+  color: var(--text-secondary);
   margin-top: 0.5rem;
 }
 
@@ -423,7 +423,7 @@
   align-items: center;
   margin-bottom: 2rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .header-left {
@@ -674,7 +674,7 @@
   text-align: center;
   margin-bottom: 4rem;
   padding: 3rem 0;
-  background: linear-gradient(135deg, #646cff 0%, #747bff 100%);
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
   border-radius: 12px;
   color: white;
 }
@@ -682,12 +682,14 @@
 .hero-section h1 {
   font-size: 3rem;
   margin-bottom: 1rem;
+  color: white;
 }
 
 .hero-section p {
   font-size: 1.25rem;
   margin-bottom: 2rem;
   opacity: 0.9;
+  color: white;
 }
 
 .hero-actions {
@@ -833,11 +835,11 @@
 }
 
 .post-card, .page-card {
-  background: white;
-  color: black;
+  background: var(--card-bg) !important;
+  color: var(--text-color) !important;
   border-radius: 3px;
   padding: 0rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: var(--card-shadow);
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
@@ -1354,7 +1356,165 @@ textarea::placeholder {
   color: var(--text-color);
 }
 
-/* Widget Theming */
+/* Article Content Theming - Override hardcoded colors */
+.article-content {
+  color: var(--text-color) !important;
+}
+
+.article-content h1, 
+.article-content h2, 
+.article-content h3, 
+.article-content h4, 
+.article-content h5, 
+.article-content h6 {
+  color: var(--text-color) !important;
+  margin: 2rem 0 1rem 0;
+  font-weight: 600;
+}
+
+.article-content p {
+  color: var(--text-color) !important;
+}
+
+.article-title {
+  color: var(--text-color) !important;
+}
+
+.article-header {
+  color: var(--text-color);
+}
+
+.article-meta .meta-item {
+  color: var(--text-secondary) !important;
+}
+
+/* Navigation Menu Theming */
+.main-menu .menu-text,
+.main-menu .menu-link {
+  color: var(--navbar-text) !important;
+}
+
+.main-menu.horizontal .menu-link {
+  color: var(--navbar-text) !important;
+}
+
+.main-menu.vertical .menu-link {
+  color: var(--text-color) !important;
+}
+
+/* Page Headers */
+.page-header,
+.page-header h1,
+.page-header h2,
+.page-header h3,
+.page-header h4,
+.page-header h5,
+.page-header h6 {
+  color: var(--text-color) !important;
+}
+
+/* Dynamic Home Content */
+.dynamic-home h1,
+.dynamic-home h2,
+.dynamic-home h3,
+.dynamic-home h4,
+.dynamic-home h5,
+.dynamic-home h6 {
+  color: var(--text-color) !important;
+}
+
+.dynamic-home p,
+.dynamic-home span,
+.dynamic-home div {
+  color: var(--text-color) !important;
+}
+
+/* Public Container Content */
+.public-container h1,
+.public-container h2,
+.public-container h3,
+.public-container h4,
+.public-container h5,
+.public-container h6 {
+  color: var(--text-color) !important;
+}
+
+.public-container p,
+.public-container span,
+.public-container div {
+  color: var(--text-color) !important;
+}
+
+/* Meta Information */
+.meta-item,
+.article-meta span {
+  color: var(--text-secondary) !important;
+}
+
+/* Ensure all text elements follow theme */
+* {
+  color: inherit;
+}
+
+/* Force theme variables on problematic elements */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-color) !important;
+}
+
+p, span, div:not(.navbar):not(.main-menu) {
+  color: var(--text-color);
+}
+
+/* Navbar and Menu Specifics */
+.navbar, .navbar * {
+  color: var(--navbar-text);
+}
+
+.main-menu, .main-menu * {
+  color: var(--navbar-text);
+}
+
+/* Override any hardcoded colors in public areas */
+.public-container,
+.public-container * {
+  color: var(--text-color);
+}
+
+.public-container h1,
+.public-container h2,
+.public-container h3,
+.public-container h4,
+.public-container h5,
+.public-container h6 {
+  color: var(--text-color) !important;
+}
+
+/* Meta elements */
+.article-meta,
+.article-meta *,
+.meta-item,
+.meta-item * {
+  color: var(--text-secondary) !important;
+}
+
+/* Links in content */
+.article-content a,
+.public-container a:not(.btn) {
+  color: var(--primary-color);
+}
+
+.article-content a:hover,
+.public-container a:not(.btn):hover {
+  color: var(--primary-hover);
+}
+
+/* Ensure article titles always use theme colors */
+.article-title,
+.page-title,
+h1.article-title,
+h1.page-title {
+  color: var(--text-color) !important;
+}
 .widget-banner,
 .widget-news,
 .widget-login,
@@ -1568,6 +1728,24 @@ textarea::placeholder {
 .navbar .auth-actions .theme-toggle-btn:hover {
   background: rgba(255, 255, 255, 0.2);
   border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* SVG Icons Theming */
+svg {
+  color: inherit;
+}
+
+.navbar svg {
+  color: var(--navbar-text);
+}
+
+.meta-item svg {
+  color: var(--text-secondary);
+}
+
+/* Ensure all icons inherit color */
+.lucide {
+  color: inherit;
 }
 [data-theme="dark"] body {
   background-color: var(--bg-color);
@@ -2566,7 +2744,7 @@ textarea::placeholder {
 .article-title {
   font-size: clamp(1.75rem, 4vw, 2.5rem);
   font-weight: 700;
-  color: #1f2937;
+  color: var(--text-color);
   margin: 0 0 1rem 0;
   line-height: 1.2;
 }
@@ -2576,7 +2754,7 @@ textarea::placeholder {
   flex-wrap: wrap;
   gap: 1.5rem;
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .meta-item {
@@ -3865,4 +4043,412 @@ select:focus {
 .main-menu.vertical .menu-toggle-btn:hover::before,
 .main-menu.vertical .menu-link:hover::before {
   left: 100%;
+}
+
+/* Correções adicionais para elementos com cores hardcoded */
+.sidebar, .editor-help {
+  background-color: var(--bg-secondary) !important;
+}
+
+.sidebar h3, .sidebar h4, .editor-help h3, .editor-help h4 {
+  color: var(--text-color) !important;
+}
+
+.sidebar ul, .sidebar p, .editor-help ul, .editor-help p {
+  color: var(--text-secondary) !important;
+}
+
+.help-section h4 {
+  color: var(--primary-color) !important;
+}
+
+/* Correções para elementos específicos do editor */
+.dynamic-page-editor .sidebar {
+  background-color: var(--bg-secondary) !important;
+}
+
+.dynamic-page-editor .sidebar * {
+  color: var(--text-color) !important;
+}
+
+.dynamic-page-editor .help-section ul {
+  color: var(--text-secondary) !important;
+}
+
+.dynamic-page-editor code {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-color) !important;
+}
+
+/* Correções para login */
+.login-info {
+  background-color: var(--bg-secondary) !important;
+}
+
+/* Correções para post categories */
+.post-category .category-tag {
+  color: white !important;
+}
+
+/* Garantir que todos os elementos sigam o tema - regras universais */
+.container *, .card *, .public-container *, .blog-layout *, .sidebar *, .editor-help * {
+  color: var(--text-color) !important;
+}
+
+/* Exceções para elementos específicos */
+.category-tag, .btn-primary, .btn-success, .btn-danger, .btn-warning {
+  color: white !important;
+}
+
+/* Texto secundário */
+.text-secondary, .meta, .subtitle, .description {
+  color: var(--text-secondary) !important;
+}
+
+/* Backgrounds */
+.bg-light, .sidebar, .editor-help {
+  background-color: var(--bg-secondary) !important;
+}
+
+/* Bordas */
+[style*="border"], [style*="border-bottom"], [style*="border-top"] {
+  border-color: var(--border-color) !important;
+}
+
+/* Anular estilos inline com cores hardcoded */
+[style*="color: #333"], [style*="color: #666"], [style*="color: #6b7280"], [style*="color: #555"], [style*="color: black"] {
+  color: var(--text-color) !important;
+}
+
+[style*="background-color: #f8f9fa"], [style*="backgroundColor: '#f8f9fa'"] {
+  background-color: var(--bg-secondary) !important;
+}
+
+[style*="color: #2563eb"], [style*="color: '#2563eb'"] {
+  color: var(--primary-color) !important;
+}
+
+/* Corrigir tabelas que ainda podem ter cores hardcoded */
+table, td, th {
+  color: var(--text-color) !important;
+  border-color: var(--border-color) !important;
+}
+
+table thead {
+  background-color: var(--table-header-bg) !important;
+}
+
+/* Inputs e forms */
+input, textarea, select {
+  background-color: var(--input-bg) !important;
+  color: var(--text-color) !important;
+  border-color: var(--input-border) !important;
+}
+
+/* Correções finais e abrangentes para todos os elementos restantes */
+/* Anular todas as cores hardcoded específicas encontradas */
+*[style*="color: #333"] * { color: var(--text-color) !important; }
+*[style*="color: #666"] * { color: var(--text-secondary) !important; }
+*[style*="color: #6b7280"] * { color: var(--text-secondary) !important; }
+*[style*="color: #555"] * { color: var(--text-secondary) !important; }
+*[style*="color: #6c757d"] * { color: var(--text-secondary) !important; }
+*[style*="color: #9ca3af"] * { color: var(--text-secondary) !important; }
+*[style*="color: #2563eb"] * { color: var(--primary-color) !important; }
+*[style*="color: #16a34a"] * { color: var(--success-color) !important; }
+*[style*="color: #dc2626"] * { color: var(--danger-color) !important; }
+*[style*="color: #7c3aed"] * { color: var(--primary-color) !important; }
+*[style*="color: #1e40af"] * { color: var(--primary-color) !important; }
+*[style*="color: #6366f1"] * { color: var(--primary-color) !important; }
+
+/* Anular todos os backgrounds hardcoded específicos */
+*[style*="backgroundColor: #f8f9fa"] * { background-color: var(--bg-secondary) !important; }
+*[style*="backgroundColor: #f0f0f0"] * { background-color: var(--bg-secondary) !important; }
+*[style*="backgroundColor: #f1f5f9"] * { background-color: var(--bg-secondary) !important; }
+*[style*="backgroundColor: #dbeafe"] * { background-color: var(--bg-secondary) !important; }
+*[style*="backgroundColor: #f0f9ff"] * { background-color: var(--bg-secondary) !important; }
+*[style*="backgroundColor: #fafafa"] * { background-color: var(--bg-secondary) !important; }
+*[style*="backgroundColor: #64748b"] * { background-color: var(--text-secondary) !important; }
+
+/* Aplicar theme aos elementos sidebar e editor específicos */
+.post-editor-sidebar, .page-editor-sidebar, .dynamic-editor-sidebar {
+  background-color: var(--bg-secondary) !important;
+}
+
+.post-editor-sidebar *, .page-editor-sidebar *, .dynamic-editor-sidebar * {
+  color: var(--text-color) !important;
+}
+
+.post-editor-sidebar h3, .post-editor-sidebar h4,
+.page-editor-sidebar h3, .page-editor-sidebar h4,
+.dynamic-editor-sidebar h3, .dynamic-editor-sidebar h4 {
+  color: var(--text-color) !important;
+}
+
+.post-editor-sidebar ul, .post-editor-sidebar p,
+.page-editor-sidebar ul, .page-editor-sidebar p,
+.dynamic-editor-sidebar ul, .dynamic-editor-sidebar p {
+  color: var(--text-secondary) !important;
+}
+
+/* Widget styles */
+.widget-placeholder, .widget-image-placeholder, .widget-content-placeholder {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-secondary) !important;
+}
+
+/* Code blocks */
+code {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-color) !important;
+}
+
+/* Help notes */
+.help-note {
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.help-note * {
+  color: var(--text-color) !important;
+}
+
+/* Menus específicos */
+.menu-item-grip, .menu-hierarchy-indicator {
+  color: var(--text-secondary) !important;
+}
+
+/* Categorias */
+.category-color-preview {
+  color: var(--primary-color) !important;
+}
+
+/* Correções específicas para Login Form */
+.login-form * {
+  color: var(--text-color) !important;
+}
+
+.login-form h2, .login-form h4 {
+  color: var(--text-color) !important;
+}
+
+.login-form label {
+  color: var(--text-color) !important;
+}
+
+.login-form input {
+  background-color: var(--input-bg) !important;
+  color: var(--text-color) !important;
+  border-color: var(--input-border) !important;
+}
+
+.login-form input:focus {
+  border-color: var(--input-focus) !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+}
+
+/* Correções específicas para Dashboard */
+.dashboard h1, .dashboard h2, .dashboard h3 {
+  color: var(--text-color) !important;
+}
+
+.dashboard p, .dashboard span {
+  color: var(--text-color) !important;
+}
+
+.dashboard small {
+  color: var(--text-secondary) !important;
+}
+
+/* Grid de estatísticas */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.grid .card {
+  background: var(--card-bg) !important;
+  color: var(--text-color) !important;
+  border: 1px solid var(--border-color) !important;
+  transition: all 0.3s ease;
+  padding: 1.5rem !important;
+}
+
+.grid .card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--card-shadow);
+}
+
+.grid .card h3 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--text-color) !important;
+}
+
+.grid .card p {
+  margin: 0;
+  color: var(--text-secondary) !important;
+  font-weight: 500;
+}
+
+/* Corrigir div interno dos cards */
+.grid .card div:first-child {
+  border: none !important;
+  width: 100% !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+}
+
+/* Atividade recente */
+.recent-activity {
+  background: var(--card-bg) !important;
+  border: 1px solid var(--border-color);
+}
+
+.activity-item {
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+.activity-item:last-child {
+  border-bottom: none !important;
+}
+
+/* Botões de ação rápida */
+.quick-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* Correções específicas para botões com cores hardcoded */
+a.btn, button.btn {
+  background-color: var(--primary-color) !important;
+  color: white !important;
+  border: 1px solid var(--primary-color) !important;
+  text-decoration: none !important;
+}
+
+a.btn:hover, button.btn:hover {
+  background-color: var(--primary-hover) !important;
+  color: white !important;
+  border-color: var(--primary-hover) !important;
+}
+
+/* Correção para elementos com cores hardcoded */
+div[style*="color: #666"] {
+  color: var(--text-secondary) !important;
+}
+
+div[style*="border: 2px solid #333"] {
+  border: none !important;
+}
+
+/* Correção para SVG icons */
+svg[stroke="#646cff"] {
+  stroke: var(--primary-color) !important;
+}
+
+/* Correções adicionais para forçar tema em todos os elementos */
+[data-theme="dark"] * {
+  border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .card * {
+  color: var(--text-color) !important;
+  background-color: transparent !important;
+}
+
+[data-theme="dark"] .card {
+  background-color: var(--card-bg) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* Forçar tema nos botões independente da origem */
+[data-theme="dark"] a, 
+[data-theme="dark"] button {
+  color: var(--text-color);
+}
+
+[data-theme="dark"] .btn {
+  background-color: var(--primary-color) !important;
+  color: white !important;
+  border-color: var(--primary-color) !important;
+}
+
+[data-theme="dark"] .btn:hover {
+  background-color: var(--primary-hover) !important;
+}
+
+/* Correção específica para elementos inline */
+[data-theme="dark"] div[style*="background"] {
+  background-color: var(--card-bg) !important;
+}
+
+[data-theme="dark"] div[style*="border"] {
+  border-color: var(--border-color) !important;
+}
+
+/* Correções específicas para elementos inline */
+[data-theme="dark"] h3[style*="color: #333"],
+[data-theme="dark"] h4[style*="color: #2563eb"],
+[data-theme="dark"] h4[style*="color: #16a34a"],
+[data-theme="dark"] h4[style*="color: #dc2626"],
+[data-theme="dark"] h4[style*="color: #7c3aed"] {
+  color: var(--text-color) !important;
+}
+
+[data-theme="dark"] ul[style*="color: #666"],
+[data-theme="dark"] span[style*="color: #666"],
+[data-theme="dark"] p[style*="color: #666"] {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] div[style*="backgroundColor: #f8f9fa"],
+[data-theme="dark"] div[style*="backgroundColor: #dbeafe"] {
+  background-color: var(--card-bg) !important;
+}
+
+[data-theme="dark"] div[style*="border: 1px solid #93c5fd"] {
+  border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] code[style*="backgroundColor: #f1f5f9"] {
+  background-color: var(--card-bg) !important;
+  color: var(--text-color) !important;
+}
+
+/* Correções específicas para Blog Sidebar */
+.blog-sidebar {
+  background: var(--card-bg) !important;
+  color: var(--text-color) !important;
+}
+
+.blog-sidebar * {
+  color: var(--text-color) !important;
+}
+
+.sidebar-section {
+  background-color: var(--card-bg) !important;
+}
+
+.sidebar-title {
+  color: var(--text-color) !important;
+}
+
+.categories-list, .category-item, .category-link {
+  color: var(--text-color) !important;
+}
+
+.category-name {
+  color: var(--text-color) !important;
+}
+
+.post-count {
+  color: var(--text-secondary) !important;
+}
+
+/* Anular background hardcoded específico da sidebar */
+.blog-sidebar[style*="background: #f8fafc"] {
+  background: var(--card-bg) !important;
 }

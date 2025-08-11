@@ -43,14 +43,14 @@ const Dashboard = () => {
   }
 
   return (
-    <div>
+    <div className="dashboard">
       <h1>Dashboard</h1>
       <p>Bem-vindo, <strong>{user.name}</strong>!</p>
 
       <div className="grid" style={{ marginTop: '2rem' }}>
         <div className="card">
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <FileText size={32} color="#646cff" />
+            <FileText size={32} style={{ color: 'var(--primary-color)' }} />
             <div>
               <h3>{stats.totalPages}</h3>
               <p>Páginas</p>
@@ -60,7 +60,7 @@ const Dashboard = () => {
 
         <div className="card">
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <FileText size={32} color="#646cff" />
+            <FileText size={32} style={{ color: 'var(--primary-color)' }} />
             <div>
               <h3>{stats.totalPosts}</h3>
               <p>Posts</p>
@@ -71,7 +71,7 @@ const Dashboard = () => {
         {user.role === 'admin' && (
           <div className="card">
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <Users size={32} color="#646cff" />
+              <Users size={32} style={{ color: 'var(--primary-color)' }} />
               <div>
                 <h3>{stats.totalUsers}</h3>
                 <p>Usuários</p>
@@ -84,16 +84,16 @@ const Dashboard = () => {
       <div style={{ marginTop: '3rem' }}>
         <h2>Atividade Recente</h2>
         {stats.recentActivity.length > 0 ? (
-          <div className="card">
+          <div className="card recent-activity">
             {stats.recentActivity.map((activity, index) => (
-              <div key={index} style={{ 
+              <div key={index} className="activity-item" style={{ 
                 padding: '1rem 0', 
-                borderBottom: index < stats.recentActivity.length - 1 ? '1px solid #eee' : 'none' 
+                borderBottom: index < stats.recentActivity.length - 1 ? '1px solid var(--border-color)' : 'none' 
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <Eye size={16} />
+                  <Eye size={16} style={{ color: 'var(--primary-color)' }} />
                   <span><strong>{activity.author_name}</strong> {activity.action} "{activity.title}"</span>
-                  <small style={{ marginLeft: 'auto', color: '#666' }}>
+                  <small style={{ marginLeft: 'auto', color: 'var(--text-secondary)' }}>
                     {new Date(activity.created_at).toLocaleDateString()}
                   </small>
                 </div>
@@ -101,13 +101,15 @@ const Dashboard = () => {
             ))}
           </div>
         ) : (
-          <p>Nenhuma atividade recente.</p>
+          <div className="card">
+            <p>Nenhuma atividade recente.</p>
+          </div>
         )}
       </div>
 
       <div style={{ marginTop: '3rem' }}>
         <h2>Ações Rápidas</h2>
-        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+        <div className="quick-actions">
           <a href="/admin/pages/new" className="btn btn-primary">Nova Página</a>
           <a href="/admin/posts/new" className="btn btn-primary">Novo Post</a>
           {user.role === 'admin' && (
