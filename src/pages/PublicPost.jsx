@@ -64,6 +64,25 @@ const PublicPost = () => {
 
       <article className="post-article">
         <header className="article-header">
+          {post.category_name && (
+            <div className="article-category" style={{ marginBottom: '1rem' }}>
+              <span 
+                className="category-tag" 
+                style={{ 
+                  backgroundColor: post.category_color || '#6366f1',
+                  color: 'white',
+                  padding: '0.5rem 1rem',
+                  borderRadius: '1.5rem',
+                  fontSize: '0.875rem',
+                  fontWeight: '600',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em'
+                }}
+              >
+                {post.category_name}
+              </span>
+            </div>
+          )}
           <h1 className="article-title">{post.title}</h1>
           <div className="article-meta">
             <span className="meta-item">

@@ -116,9 +116,24 @@ class Database {
           content TEXT NOT NULL,
           status TEXT NOT NULL DEFAULT 'draft',
           author_id INTEGER NOT NULL,
+          category_id INTEGER,
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
           updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-          FOREIGN KEY (author_id) REFERENCES users (id)
+          FOREIGN KEY (author_id) REFERENCES users (id),
+          FOREIGN KEY (category_id) REFERENCES categories (id)
+        )
+      `
+
+      // Tabela de categorias
+      const categoryTable = `
+        CREATE TABLE IF NOT EXISTS categories (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL UNIQUE,
+          slug TEXT NOT NULL UNIQUE,
+          description TEXT,
+          color TEXT DEFAULT '#3b82f6',
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
       `
 
@@ -149,14 +164,35 @@ class Database {
         )
       `
 
+      // Tabela de menus hierárquicos
+      const menuTable = `
+        CREATE TABLE IF NOT EXISTS menus (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          title TEXT NOT NULL,
+          url TEXT,
+          target TEXT DEFAULT '_self',
+          parent_id INTEGER,
+          page_id INTEGER,
+          sort_order INTEGER DEFAULT 0,
+          is_active BOOLEAN DEFAULT true,
+          css_class TEXT,
+          icon TEXT,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (parent_id) REFERENCES menus (id) ON DELETE CASCADE,
+          FOREIGN KEY (page_id) REFERENCES pages (id) ON DELETE SET NULL
+        )
+      `
+
       this.db.serialize(() => {
         let completed = 0
-        const totalTables = 5
+        const totalTables = 7  // Adicionada tabela de menus
         const checkComplete = () => {
           completed++
           if (completed === totalTables) {
             this.createDefaultTemplates()
             this.createDefaultUsers()
+            this.createDefaultCategories()
             resolve()
           }
         }
@@ -201,12 +237,33 @@ class Database {
           }
         })
         
+        this.db.run(categoryTable, (err) => {
+          if (err) {
+            console.error('❌ Erro ao criar tabela categories:', err)
+            reject(err)
+          } else {
+            console.log('✅ Tabela categories criada/verificada')
+            checkComplete()
+          }
+        })
+        
         this.db.run(postTable, (err) => {
           if (err) {
             console.error('❌ Erro ao criar tabela posts:', err)
             reject(err)
           } else {
             console.log('✅ Tabela posts criada/verificada')
+            checkComplete()
+          }
+        })
+
+        this.db.run(menuTable, (err) => {
+          if (err) {
+            console.error('❌ Erro ao criar tabela menus:', err)
+            reject(err)
+          } else {
+            console.log('✅ Tabela menus criada/verificada')
+            this.createDefaultMenus()
             checkComplete()
           }
         })
@@ -265,6 +322,67 @@ class Database {
     } catch (error) {
       console.error('❌ Erro ao criar senhas hash:', error)
     }
+  }
+
+  createDefaultCategories() {
+    console.log('🏷️  Verificando categorias padrão...')
+    
+    // Verificar se já existem categorias
+    this.db.get('SELECT COUNT(*) as count FROM categories', (err, result) => {
+      if (err) {
+        console.error('❌ Erro ao verificar categorias existentes:', err)
+        return
+      }
+
+      console.log('📊 Categorias existentes no banco:', result.count)
+
+      if (result.count === 0) {
+        console.log('➕ Criando categorias padrão...')
+        
+        const defaultCategories = [
+          {
+            name: 'Geral',
+            slug: 'geral',
+            description: 'Categoria geral para posts diversos',
+            color: '#6366f1'
+          },
+          {
+            name: 'Tecnologia',
+            slug: 'tecnologia',
+            description: 'Posts sobre tecnologia e inovação',
+            color: '#06b6d4'
+          },
+          {
+            name: 'Negócios',
+            slug: 'negocios',
+            description: 'Conteúdo relacionado a negócios e economia',
+            color: '#10b981'
+          },
+          {
+            name: 'Anúncios',
+            slug: 'anuncios',
+            description: 'Comunicados e anúncios importantes',
+            color: '#f59e0b'
+          }
+        ]
+
+        defaultCategories.forEach((category, index) => {
+          this.db.run(
+            'INSERT INTO categories (name, slug, description, color) VALUES (?, ?, ?, ?)',
+            [category.name, category.slug, category.description, category.color],
+            function(err) {
+              if (err) {
+                console.error(`❌ Erro ao criar categoria ${category.name}:`, err)
+              } else {
+                console.log(`✅ Categoria "${category.name}" criada, ID:`, this.lastID)
+              }
+            }
+          )
+        })
+      } else {
+        console.log('🏷️  Categorias já existem no banco de dados')
+      }
+    })
   }
 
   createDefaultTemplates() {
@@ -371,6 +489,44 @@ class Database {
         )
       } else {
         console.log('📋 Templates já existem no banco de dados')
+      }
+    })
+  }
+
+  createDefaultMenus() {
+    this.db.get('SELECT COUNT(*) as count FROM menus', (err, row) => {
+      if (err) {
+        console.error('❌ Erro ao verificar menus:', err)
+        return
+      }
+
+      if (row.count === 0) {
+        console.log('🍜 Criando menus padrão...')
+
+        // Menu principal
+        const defaultMenus = [
+          { title: 'Home', url: '/', sort_order: 1, is_active: true },
+          { title: 'Sobre', url: '/sobre', sort_order: 2, is_active: true },
+          { title: 'Serviços', url: '/servicos', sort_order: 3, is_active: true },
+          { title: 'Blog', url: '/blog', sort_order: 4, is_active: true },
+          { title: 'Contato', url: '/contato', sort_order: 5, is_active: true }
+        ]
+
+        defaultMenus.forEach((menu, index) => {
+          this.db.run(
+            'INSERT INTO menus (title, url, sort_order, is_active) VALUES (?, ?, ?, ?)',
+            [menu.title, menu.url, menu.sort_order, menu.is_active],
+            function(err) {
+              if (err) {
+                console.error(`❌ Erro ao criar menu ${menu.title}:`, err)
+              } else {
+                console.log(`✅ Menu ${menu.title} criado, ID:`, this.lastID)
+              }
+            }
+          )
+        })
+      } else {
+        console.log('🍜 Menus já existem no banco de dados')
       }
     })
   }

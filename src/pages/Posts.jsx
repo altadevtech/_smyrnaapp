@@ -67,6 +67,7 @@ const Posts = () => {
             <thead>
               <tr>
                 <th>Título</th>
+                <th>Categoria</th>
                 <th>Status</th>
                 <th>Autor</th>
                 <th>Data de Criação</th>
@@ -78,6 +79,25 @@ const Posts = () => {
               {posts.map(post => (
                 <tr key={post.id}>
                   <td><strong>{post.title}</strong></td>
+                  <td>
+                    {post.category_name ? (
+                      <span 
+                        className="category-badge" 
+                        style={{ 
+                          backgroundColor: post.category_color || '#6366f1',
+                          color: 'white',
+                          padding: '0.25rem 0.5rem',
+                          borderRadius: '0.25rem',
+                          fontSize: '0.875rem',
+                          fontWeight: '500'
+                        }}
+                      >
+                        {post.category_name}
+                      </span>
+                    ) : (
+                      <span style={{ color: '#666', fontStyle: 'italic' }}>Sem categoria</span>
+                    )}
+                  </td>
                   <td>
                     <span className={`status-badge status-${post.status}`}>
                       {post.status === 'published' ? 'Publicado' : 'Rascunho'}

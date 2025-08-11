@@ -9,9 +9,11 @@ router.get('/public', (req, res) => {
   const db = Database.getDb()
   
   db.all(
-    `SELECT p.id, p.title, p.content, p.created_at, p.updated_at, u.name as author_name 
+    `SELECT p.id, p.title, p.content, p.created_at, p.updated_at, 
+            u.name as author_name, c.name as category_name, c.slug as category_slug, c.color as category_color 
      FROM posts p 
      JOIN users u ON p.author_id = u.id 
+     LEFT JOIN categories c ON p.category_id = c.id 
      WHERE p.status = 'published' 
      ORDER BY p.created_at DESC 
      LIMIT 10`,
@@ -39,9 +41,10 @@ router.get('/public/:slug', (req, res) => {
   const db = Database.getDb()
   
   db.get(
-    `SELECT p.*, u.name as author_name 
+    `SELECT p.*, u.name as author_name, c.name as category_name, c.slug as category_slug, c.color as category_color 
      FROM posts p 
      JOIN users u ON p.author_id = u.id 
+     LEFT JOIN categories c ON p.category_id = c.id 
      WHERE p.id = ? AND p.status = 'published'`,
     [id],
     (err, post) => {
@@ -66,9 +69,11 @@ router.get('/', (req, res) => {
   const db = Database.getDb()
   
   db.all(
-    `SELECT p.id, p.title, p.content, p.status, p.created_at, p.updated_at, u.name as author_name 
+    `SELECT p.id, p.title, p.content, p.status, p.created_at, p.updated_at, 
+            u.name as author_name, c.name as category_name, c.slug as category_slug, c.color as category_color 
      FROM posts p 
      JOIN users u ON p.author_id = u.id 
+     LEFT JOIN categories c ON p.category_id = c.id 
      ORDER BY p.created_at DESC`,
     (err, posts) => {
       if (err) {
@@ -85,9 +90,10 @@ router.get('/:id', (req, res) => {
   const db = Database.getDb()
   
   db.get(
-    `SELECT p.*, u.name as author_name 
+    `SELECT p.*, u.name as author_name, c.name as category_name, c.slug as category_slug, c.color as category_color 
      FROM posts p 
      JOIN users u ON p.author_id = u.id 
+     LEFT JOIN categories c ON p.category_id = c.id 
      WHERE p.id = ?`,
     [id],
     (err, post) => {
@@ -106,26 +112,34 @@ router.get('/:id', (req, res) => {
 
 // Criar post
 router.post('/', (req, res) => {
-  const { title, content, status = 'draft' } = req.body
+  console.log('📝 Tentativa de criar post:', req.body)
+  console.log('👤 Usuário autenticado:', req.user)
+  
+  const { title, content, status = 'draft', category_id } = req.body
 
   if (!title || !content) {
+    console.log('❌ Erro: Título ou conteúdo faltando')
     return res.status(400).json({ message: 'Título e conteúdo são obrigatórios' })
   }
 
   if (!['draft', 'published'].includes(status)) {
+    console.log('❌ Erro: Status inválido:', status)
     return res.status(400).json({ message: 'Status inválido' })
   }
 
   const db = Database.getDb()
   
+  console.log('💾 Executando inserção no banco...')
   db.run(
-    'INSERT INTO posts (title, content, status, author_id) VALUES (?, ?, ?, ?)',
-    [title, content, status, req.user.id],
+    'INSERT INTO posts (title, content, status, author_id, category_id) VALUES (?, ?, ?, ?, ?)',
+    [title, content, status, req.user.id, category_id || null],
     function(err) {
       if (err) {
+        console.error('❌ Erro ao inserir post no banco:', err)
         return res.status(500).json({ message: 'Erro ao criar post' })
       }
 
+      console.log('✅ Post criado com sucesso, ID:', this.lastID)
       res.status(201).json({ 
         id: this.lastID,
         message: 'Post criado com sucesso' 
@@ -137,7 +151,7 @@ router.post('/', (req, res) => {
 // Atualizar post
 router.put('/:id', (req, res) => {
   const { id } = req.params
-  const { title, content, status } = req.body
+  const { title, content, status, category_id } = req.body
 
   if (!title || !content) {
     return res.status(400).json({ message: 'Título e conteúdo são obrigatórios' })
@@ -165,8 +179,8 @@ router.put('/:id', (req, res) => {
     }
 
     db.run(
-      'UPDATE posts SET title = ?, content = ?, status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
-      [title, content, status, id],
+      'UPDATE posts SET title = ?, content = ?, status = ?, category_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+      [title, content, status, category_id || null, id],
       function(err) {
         if (err) {
           return res.status(500).json({ message: 'Erro ao atualizar post' })

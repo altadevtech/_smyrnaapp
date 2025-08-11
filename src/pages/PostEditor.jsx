@@ -15,19 +15,33 @@ const PostEditor = () => {
     defaultValues: {
       title: '',
       content: '',
-      status: 'draft'
+      status: 'draft',
+      category_id: ''
     }
   })
   
   const [loading, setLoading] = useState(false)
   const [initialLoading, setInitialLoading] = useState(isEditing)
   const [content, setContent] = useState('')
+  const [categories, setCategories] = useState([])
 
   useEffect(() => {
+    fetchCategories()
     if (isEditing) {
       fetchPost()
     }
   }, [id])
+
+  const fetchCategories = async () => {
+    try {
+      const response = await api.get('/categories')
+      setCategories(response.data)
+      console.log('Categorias carregadas:', response.data)
+    } catch (error) {
+      console.error('Erro ao carregar categorias:', error)
+      toast.error('Erro ao carregar categorias')
+    }
+  }
 
   // Função para atualizar o conteúdo do RichTextEditor (estabilizada com useCallback)
   const handleContentChange = useCallback((newContent) => {
@@ -43,6 +57,7 @@ const PostEditor = () => {
       setValue('title', post.title)
       setValue('content', post.content)
       setValue('status', post.status)
+      setValue('category_id', post.category_id || '')
       setContent(post.content || '')
     } catch (error) {
       toast.error('Erro ao carregar post')
@@ -55,8 +70,9 @@ const PostEditor = () => {
     setLoading(true)
     
     try {
-      // Validar se há conteúdo
-      if (!content || content.trim() === '') {
+      // Validar se há conteúdo (removendo HTML tags para verificar se há texto real)
+      const textContent = content.replace(/<[^>]*>/g, '').trim()
+      if (!content || !textContent) {
         toast.error('Conteúdo é obrigatório')
         setLoading(false)
         return
@@ -65,8 +81,11 @@ const PostEditor = () => {
       const postData = {
         title: data.title,
         content: content,
-        status: data.status
+        status: data.status,
+        category_id: data.category_id || null
       }
+
+      console.log('Dados do post:', postData)
 
       if (isEditing) {
         await api.put(`/posts/${id}`, postData)
@@ -112,6 +131,22 @@ const PostEditor = () => {
                   {errors.title.message}
                 </div>
               )}
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="category_id">Categoria</label>
+              <select
+                id="category_id"
+                className="form-control"
+                {...register('category_id')}
+              >
+                <option value="">Selecionar categoria</option>
+                {categories.map(category => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="form-group">

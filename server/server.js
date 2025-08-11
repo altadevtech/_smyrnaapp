@@ -11,6 +11,8 @@ import dashboardRoutes from './routes/dashboard.js'
 import templateRoutes from './routes/templates.js'
 import widgetRoutes from './routes/widgets.js'
 import settingsRoutes from './routes/settings.js'
+import categoriesRoutes from './routes/categories.js'
+import menuRoutes from './routes/menus.js'
 import debugRoutes from './routes/debug.js'
 
 const __filename = fileURLToPath(import.meta.url)
@@ -60,6 +62,8 @@ async function initializeServer() {
     app.use('/api/templates', templateRoutes)
     app.use('/api/widgets', widgetRoutes)
     app.use('/api/settings', settingsRoutes)
+    app.use('/api/categories', categoriesRoutes)
+    app.use('/api/menus', menuRoutes)
     app.use('/api/debug', debugRoutes)
 
     // Serve React app for all other routes

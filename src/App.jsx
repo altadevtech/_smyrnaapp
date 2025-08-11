@@ -14,6 +14,8 @@ import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Pages from './pages/Pages'
 import Posts from './pages/Posts'
+import Categories from './pages/Categories'
+import Menus from './pages/Menus'
 import Users from './pages/Users'
 import Profile from './pages/Profile'
 import DynamicPageEditor from './pages/DynamicPageEditor'
@@ -42,6 +44,7 @@ function App() {
               <Route path="/pages" element={<PublicPages />} />
               <Route path="/page/:slug" element={<DynamicPublicPage />} />
               <Route path="/blog" element={<PublicBlog />} />
+              <Route path="/blog/categoria/:categorySlug" element={<PublicBlog />} />
               <Route path="/blog/:slug" element={<PublicPost />} />
               <Route path="/login" element={<Login />} />
               <Route path="/admin/login" element={<Login />} />
@@ -100,6 +103,22 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <PostEditor />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/admin/categories" 
+                element={
+                  <ProtectedRoute requiredRole="admin">
+                    <Categories />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/admin/menus" 
+                element={
+                  <ProtectedRoute requiredRole="admin">
+                    <Menus />
                   </ProtectedRoute>
                 } 
               />

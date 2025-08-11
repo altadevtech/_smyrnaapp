@@ -100,22 +100,24 @@ router.get('/stats', (req, res) => {
       
       // Buscar atividade recente
       const recentActivityQuery = `
-        SELECT 
-          'criou página' as action,
-          p.title,
-          u.name as author_name,
-          p.created_at
-        FROM pages p
-        JOIN users u ON p.author_id = u.id
-        UNION ALL
-        SELECT 
-          'criou post' as action,
-          p.title,
-          u.name as author_name,
-          p.created_at
-        FROM posts p
-        JOIN users u ON p.author_id = u.id
-        ORDER BY created_at DESC
+        SELECT * FROM (
+          SELECT 
+            'criou página' as action,
+            p.title,
+            u.name as author_name,
+            p.created_at as activity_date
+          FROM pages p
+          JOIN users u ON p.author_id = u.id
+          UNION ALL
+          SELECT 
+            'criou post' as action,
+            p.title,
+            u.name as author_name,
+            p.created_at as activity_date
+          FROM posts p
+          JOIN users u ON p.author_id = u.id
+        ) 
+        ORDER BY activity_date DESC
         LIMIT 10
       `
 

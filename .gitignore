@@ -72,3 +72,8 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
+
+# Arquivos de apresentação executiva (não versionar)
+RESUMO-EXECUTIVO.md
+APRESENTACAO-5MIN.md
+FUNDAMENTOS-2MIN.md

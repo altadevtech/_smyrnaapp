@@ -13,6 +13,7 @@ Sistema de gerenciamento de conteúdo (CMS) simples e eficiente desenvolvido com
 - **🆕 Templates dinâmicos**: Páginas configuráveis com layouts personalizados
 - **🆕 Sistema de widgets**: 7 tipos de widgets configuráveis
 - **🆕 Home dinâmica**: Página inicial configurável via admin
+- **🆕 Sistema de menus hierárquicos**: Navegação moderna com dropdown e submenus
 
 ## 📋 Funcionalidades
 
@@ -39,6 +40,14 @@ Sistema de gerenciamento de conteúdo (CMS) simples e eficiente desenvolvido com
 6. **Video**: Player de vídeo
 7. **Content**: Conteúdo HTML livre
 
+### 🧭 Sistema de Menus Hierárquicos
+- **Menus multinível**: Suporte a submenus e páginas filhas
+- **Navegação moderna**: Dropdown com hover/click responsivo
+- **Links opcionais**: Itens pai podem ter ou não links para páginas
+- **Design responsivo**: Menu hamburger para dispositivos móveis
+- **Animações suaves**: Transições CSS modernas
+- **Controle granular**: Admin completo via interface administrativa
+
 ### 🛠️ Área Admin
 - Gerenciamento de páginas dinâmicas
 - Editor de templates com preview
@@ -57,6 +66,7 @@ Sistema de gerenciamento de conteúdo (CMS) simples e eficiente desenvolvido com
 - **🆕 Templates**: Sistema de templates com blocos configuráveis
 - **🆕 Widgets**: 7 tipos de widgets (Banner, Notícias, Login, Contato, Imagem, Vídeo, Conteúdo)
 - **🆕 Slugs**: URLs amigáveis para SEO
+- **🆕 Menus**: Sistema hierárquico com dropdown e submenus responsivos
 
 ### Administração
 - **Dashboard**: Estatísticas e atividade recente
@@ -64,6 +74,7 @@ Sistema de gerenciamento de conteúdo (CMS) simples e eficiente desenvolvido com
 - **Permissões**: Controle granular de acesso
 - **🆕 Templates**: Criação e edição de templates (apenas admins)
 - **🆕 Editor visual**: Interface drag-and-drop para widgets
+- **🆕 Menus**: Gerenciamento completo de menus hierárquicos
 
 ### 🆕 Sistema de Templates e Widgets
 
@@ -95,6 +106,42 @@ Os widgets podem ser chamados com parâmetros personalizados:
 - `alt`: Texto alternativo para acessibilidade
 - `caption`: Legenda exibida abaixo da imagem
 - `borderRadius`: Bordas arredondadas (ex: "8px", "50%")
+
+### 🆕 Sistema de Menus Hierárquicos Avançado
+
+#### Funcionalidades Principais:
+- **🌳 Estrutura hierárquica**: Menus pais e filhos com múltiplos níveis
+- **🔗 Links opcionais**: Itens pai podem funcionar como links OU apenas organizadores
+- **📱 Design responsivo**: Dropdown desktop + menu hamburger mobile
+- **🎨 Animações modernas**: Transições CSS suaves e feedback visual
+- **⚡ Performance otimizada**: Carregamento dinâmico da estrutura de menus
+
+#### Comportamentos por Dispositivo:
+
+**💻 Desktop (Menu Horizontal):**
+- Hover no item pai → abre dropdown automaticamente
+- Itens com página vinculada → clicáveis + dropdown
+- Itens organizadores → apenas dropdown (sem link)
+- Click fora → fecha dropdown
+- Animações de rotação nos ícones
+
+**📱 Mobile (Menu Vertical):**
+- Menu hamburger com slide suave
+- Toque no item pai com link → navega para página
+- Botão toggle separado → abre/fecha submenu
+- Expansão/contração animada dos submenus
+- Navegação por níveis com ícones indicativos
+
+#### Configurações Administrativas:
+- **Título**: Nome exibido no menu
+- **URL Externa**: Link direto para URL externa
+- **Página Vinculada**: Associação com páginas do sistema
+- **Ícone**: Classe CSS para ícones (ex: FontAwesome)
+- **Target**: `_blank`, `_self`, etc.
+- **CSS Class**: Classes customizadas
+- **Ordem**: Posicionamento via drag-and-drop
+- **Status**: Ativo/Inativo
+- **Menu Pai**: Definição da hierarquia
 
 ## 🛠️ Tecnologias
 
@@ -209,6 +256,19 @@ O sistema vem com dois usuários pré-configurados:
 - author_id (INTEGER FK)
 - created_at, updated_at (DATETIME)
 
+### 🆕 Tabela: menus
+- id (INTEGER PRIMARY KEY)
+- title (TEXT)
+- url (TEXT)
+- page_slug (TEXT)
+- target (TEXT)
+- icon (TEXT)
+- css_class (TEXT)
+- parent_id (INTEGER FK)
+- sort_order (INTEGER)
+- status (TEXT: 'active' | 'inactive')
+- created_at, updated_at (DATETIME)
+
 ## 🔐 Sistema de Permissões
 
 ### Admin
@@ -253,6 +313,15 @@ npm run lint         # Executa ESLint
 - `POST /api/widgets` - Cria novo widget
 - `PUT /api/widgets/:id` - Atualiza widget
 - `DELETE /api/widgets/:id` - Remove widget
+
+### 🆕 Menus
+- `GET /api/menus` - Lista todos os menus
+- `GET /api/menus/hierarchy` - Estrutura hierárquica dos menus
+- `GET /api/menus/:id` - Busca menu específico
+- `POST /api/menus` - Cria novo menu
+- `PUT /api/menus/:id` - Atualiza menu
+- `DELETE /api/menus/:id` - Remove menu
+- `PATCH /api/menus/:id/order` - Reordena menus
 
 ### Autenticação
 - `POST /api/auth/login` - Login do usuário
@@ -307,6 +376,14 @@ Renderiza páginas dinamicamente com base no template selecionado:
 - Posiciona widgets nas seções definidas
 - Aplica configurações de cabeçalho/rodapé
 
+### 🆕 MainMenu.jsx
+Componente de navegação hierárquica moderno:
+- **Dropdown inteligente**: Hover/click responsivo
+- **Links opcionais**: Itens pai podem ter ou não links
+- **Design responsivo**: Menu hamburger para mobile
+- **Animações**: Transições CSS suaves
+- **Acessibilidade**: ARIA labels e navegação por teclado
+
 ### 🆕 Templates Padrão
 **Template 1 - Layout Básico:**
 ```json
@@ -345,7 +422,7 @@ Renderiza páginas dinamicamente com base no template selecionado:
 
 ## 🚧 Melhorias Futuras
 - [ ] Substituição do Editor de texto rico (WYSIWYG) por uma ferramenta de edição via blocos
-- [ ] Sistema de Menu Recursivo (os menus poderão ser hierarquizados e será possível criar novas páginas filhas e submenus)
+- [x] **Sistema de Menu Hierárquico** ✅ (CONCLUÍDO - os menus agora são hierarquizados com dropdown moderno e responsivo)
 - [ ] Implantação de templates com estrutura de blocos (ideia inspirada no Elementor, para facilitar a edição do layout por parte dos usuários sem conhecimento de HTML. A proposta será o usuário poder estruturar um layout apenas arrastando componentes e interindo o conteúdo)
 - [ ] Aprimoramento do chaveanto dos temas BLACK e WHITE, abrangendo todos os elementos HTML
 - [ ] Ajuste responsivo das tabelas na área administrativa

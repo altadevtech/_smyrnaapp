@@ -18,9 +18,11 @@
     "render-build": "npm install && npm run render-postbuild && npm run build"
   },
   "dependencies": {
+    "@types/react-beautiful-dnd": "^13.1.8",
     "axios": "^1.6.7",
     "lucide-react": "^0.344.0",
     "react": "^18.2.0",
+    "react-beautiful-dnd": "^13.1.1",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.50.1",
     "react-hot-toast": "^2.4.1",

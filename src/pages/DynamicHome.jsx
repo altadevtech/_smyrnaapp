@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import api from '../services/api'
 import ContentRenderer from '../components/ContentRenderer'
+import MainMenu from '../components/MainMenu'
 import { FileText, ArrowRight, Calendar, User } from 'lucide-react'
 
 const DynamicHome = () => {

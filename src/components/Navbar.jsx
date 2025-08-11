@@ -2,44 +2,34 @@ import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useSettings } from '../contexts/SettingsContext'
-import { LogOut, User, FileText, Users, Home, Settings, Layout, Menu, X } from 'lucide-react'
+import { LogOut, User, FileText, Users, Home, Settings, Layout, Menu, X, Tag, MessageSquare, ChevronDown } from 'lucide-react'
+import MainMenu from './MainMenu'
 import api from '../services/api'
 
 const Navbar = () => {
   const { user, logout } = useAuth()
   const { settings } = useSettings()
   const navigate = useNavigate()
-  const [publicPages, setPublicPages] = useState([])
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [accountDropdownOpen, setAccountDropdownOpen] = useState(false)
 
+  // Fechar dropdown quando clicar fora
   useEffect(() => {
-    // Carregar páginas públicas para o menu (sem dependência de autenticação)
-    const loadPublicPages = async () => {
-      try {
-        console.log('📋 Carregando páginas públicas para menu...')
-        const response = await api.get('/pages/public')
-        console.log('✅ Páginas públicas carregadas:', response.data.length)
-        
-        // Filtrar páginas únicas e válidas
-        const uniquePages = response.data.filter((page, index, self) => 
-          page.title && page.title.trim() !== '' && 
-          self.findIndex(p => p.id === page.id) === index
-        )
-        
-        setPublicPages(uniquePages)
-      } catch (error) {
-        console.error('❌ Erro ao carregar páginas públicas:', error)
-        setPublicPages([])
+    const handleClickOutside = (event) => {
+      if (accountDropdownOpen && !event.target.closest('.dropdown')) {
+        setAccountDropdownOpen(false)
       }
     }
-    
-    loadPublicPages()
-  }, []) // Removida dependência de user
+
+    document.addEventListener('click', handleClickOutside)
+    return () => document.removeEventListener('click', handleClickOutside)
+  }, [accountDropdownOpen])
 
   const handleLogout = () => {
     logout()
     navigate('/')
     setMobileMenuOpen(false)
+    setAccountDropdownOpen(false)
   }
 
   const toggleMobileMenu = () => {
@@ -48,6 +38,10 @@ const Navbar = () => {
 
   const closeMobileMenu = () => {
     setMobileMenuOpen(false)
+  }
+
+  const toggleAccountDropdown = () => {
+    setAccountDropdownOpen(!accountDropdownOpen)
   }
 
   return (
@@ -89,37 +83,50 @@ const Navbar = () => {
                 <li><Link to="/admin/posts"><FileText size={18} /> Posts</Link></li>
                 {user.role === 'admin' && (
                   <>
-                    <li><Link to="/admin/users"><Users size={18} /> Usuários</Link></li>
+                    <li><Link to="/admin/categories"><Tag size={18} /> Categorias</Link></li>
+                    <li><Link to="/admin/menus"><MessageSquare size={18} /> Menus</Link></li>
                     <li><Link to="/admin/templates"><Layout size={18} /> Templates</Link></li>
                   </>
                 )}
-                <li><Link to="/profile"><User size={18} /> Perfil</Link></li>
-                <li className="user-info">
-                  <span>{user.name} ({user.role})</span>
-                </li>
-                <li>
-                  <button onClick={handleLogout} className="logout-btn">
-                    <LogOut size={18} />
+                
+                {/* Dropdown de Conta */}
+                <li className="dropdown">
+                  <button onClick={toggleAccountDropdown} className="dropdown-btn">
+                    <User size={18} />
+                    <span>{user.name}</span>
+                    <ChevronDown size={16} className={`chevron ${accountDropdownOpen ? 'open' : ''}`} />
                   </button>
+                  
+                  {accountDropdownOpen && (
+                    <ul className="dropdown-menu">
+                      <li className="dropdown-header">
+                        <span className="user-role">({user.role})</span>
+                      </li>
+                      <li><Link to="/profile" onClick={() => setAccountDropdownOpen(false)}><User size={16} /> Meu Perfil</Link></li>
+                      {user.role === 'admin' && (
+                        <li><Link to="/admin/users" onClick={() => setAccountDropdownOpen(false)}><Users size={16} /> Gerenciar Usuários</Link></li>
+                      )}
+                      <li className="dropdown-divider"></li>
+                      <li>
+                        <button onClick={handleLogout} className="dropdown-logout-btn">
+                          <LogOut size={16} /> Sair
+                        </button>
+                      </li>
+                    </ul>
+                  )}
                 </li>
               </ul>
             ) : (
-              // Menu para visitantes públicos
-              <ul className="nav-list">
-                <li><Link to="/"><Home size={18} /> Início</Link></li>
-                
-                {/* Páginas dinâmicas criadas via admin */}
-                {publicPages.slice(0, 3).map(page => (
-                  <li key={page.id}>
-                    <Link to={`/page/${page.slug || page.id}`}>
-                      <FileText size={18} /> {page.title}
-                    </Link>
-                  </li>
-                ))}
-                
-                <li><Link to="/blog"><FileText size={18} /> Blog</Link></li>
-                <li><Link to="/login" className="login-btn">Login</Link></li>
-              </ul>
+              // Menu público moderno
+              <div className="public-navigation">
+                <MainMenu className="main-navigation" orientation="horizontal" />
+                <div className="auth-actions">
+                  <Link to="/login" className="login-btn">
+                    <User size={16} />
+                    <span>Entrar</span>
+                  </Link>
+                </div>
+              </div>
             )}
           </div>
         </div>
@@ -129,20 +136,28 @@ const Navbar = () => {
           {user ? (
             // Menu mobile para usuários logados
             <ul className="mobile-nav-list">
-              <li className="mobile-user-info">
+              <li className="mobile-user-header">
                 <User size={18} />
                 <span>{user.name} ({user.role})</span>
               </li>
+              
               <li><Link to="/dashboard" onClick={closeMobileMenu}><Settings size={18} /> Dashboard</Link></li>
               <li><Link to="/admin/pages" onClick={closeMobileMenu}><FileText size={18} /> Páginas</Link></li>
               <li><Link to="/admin/posts" onClick={closeMobileMenu}><FileText size={18} /> Posts</Link></li>
               {user.role === 'admin' && (
                 <>
-                  <li><Link to="/admin/users" onClick={closeMobileMenu}><Users size={18} /> Usuários</Link></li>
+                  <li><Link to="/admin/categories" onClick={closeMobileMenu}><Tag size={18} /> Categorias</Link></li>
+                  <li><Link to="/admin/menus" onClick={closeMobileMenu}><MessageSquare size={18} /> Menus</Link></li>
                   <li><Link to="/admin/templates" onClick={closeMobileMenu}><Layout size={18} /> Templates</Link></li>
                 </>
               )}
-              <li><Link to="/profile" onClick={closeMobileMenu}><User size={18} /> Perfil</Link></li>
+              
+              {/* Seção de Conta */}
+              <li className="mobile-section-header">Conta</li>
+              <li><Link to="/profile" onClick={closeMobileMenu}><User size={18} /> Meu Perfil</Link></li>
+              {user.role === 'admin' && (
+                <li><Link to="/admin/users" onClick={closeMobileMenu}><Users size={18} /> Gerenciar Usuários</Link></li>
+              )}
               <li>
                 <button onClick={handleLogout} className="mobile-logout-btn">
                   <LogOut size={18} /> Sair
@@ -151,21 +166,25 @@ const Navbar = () => {
             </ul>
           ) : (
             // Menu mobile para visitantes públicos
-            <ul className="mobile-nav-list">
-              <li><Link to="/" onClick={closeMobileMenu}><Home size={18} /> Início</Link></li>
+            <div className="mobile-public-menu">
+              <div className="mobile-menu-header">
+                <Link to="/" onClick={closeMobileMenu} className="mobile-home-link">
+                  <Home size={18} />
+                  <span>Início</span>
+                </Link>
+              </div>
               
-              {/* Páginas dinâmicas criadas via admin */}
-              {publicPages.map(page => (
-                <li key={page.id}>
-                  <Link to={`/page/${page.slug || page.id}`} onClick={closeMobileMenu}>
-                    <FileText size={18} /> {page.title}
-                  </Link>
-                </li>
-              ))}
+              <div className="mobile-main-navigation">
+                <MainMenu orientation="vertical" onLinkClick={closeMobileMenu} />
+              </div>
               
-              <li><Link to="/blog" onClick={closeMobileMenu}><FileText size={18} /> Blog</Link></li>
-              <li><Link to="/login" onClick={closeMobileMenu} className="mobile-login-btn">Login</Link></li>
-            </ul>
+              <div className="mobile-auth-section">
+                <Link to="/login" onClick={closeMobileMenu} className="mobile-login-btn">
+                  <User size={18} />
+                  <span>Entrar</span>
+                </Link>
+              </div>
+            </div>
           )}
         </div>
       </div>
