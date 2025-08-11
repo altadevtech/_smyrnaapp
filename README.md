@@ -1,6 +1,22 @@
-# Smyrna CMS
+# Sistema WIKI leve, flexível e eficiente com React e Node.js
 
-Sistema de gerenciamento de conteúdo (CMS) simples e eficiente desenvolvido com React e Node.js, utilizando SQLite como banco de dados local. O sistema já nasce com a ambição de ser a opção a ser adotada por aqueles que precisam de um sistema flexível, robusto, performático e leve. Desenvolvido com as tecnologias mais eficientes e consolidadas da atualidade e boas práticas de segurança e programação, nosso sistema ainda está em constante evolução. Sugestões serão muito bem vindas.
+Este projeto nasceu como um CMS simples e robusto, desenvolvido com React no frontend e Node.js no backend, utilizando SQLite como banco de dados local. Agora, evolui com uma nova proposta: tornar-se uma plataforma WIKI moderna, ideal para equipes, comunidades ou projetos que precisam documentar e compartilhar conhecimento de forma estruturada, colaborativa e segura.
+
+Construído com tecnologias consolidadas e boas práticas de desenvolvimento, o sistema mantém seu compromisso com performance, leveza e segurança, enquanto incorpora recursos essenciais para uma WIKI funcional e escalável.
+
+### Principais funcionalidades planejadas:
+✅ Editor de conteúdo com suporte a Markdown e rich text
+✅ Sistema de versionamento de páginas
+✅ Histórico de edições com comparação de versões
+✅ Pesquisa inteligente com destaque de termos
+✅ Organização hierárquica por categorias e tags
+✅ Controle de acesso e permissões por usuário
+✅ Sistema de comentários e discussões por página
+✅ Dashboard com estatísticas de uso e contribuições
+✅ Modo offline com sincronização local
+✅ Exportação de conteúdo em formatos como PDF e HTML
+
+O projeto está em constante evolução e aberto a sugestões da comunidade. Se você busca uma solução WIKI leve, moderna e personalizável, este sistema pode ser o ponto de partida ideal.
 
 ## 🚀 Características
 
