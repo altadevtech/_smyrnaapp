@@ -1,5 +1,13 @@
 # 🚀 Deploy no Render.com - Smyrna Wiki
 
+## ✅ Correções Implementadas
+
+### Problemas Resolvidos:
+1. **ES Module Error**: Scripts convertidos para usar `import/export` ao invés de `require`
+2. **Port Configuration**: Porta alterada de 5000 para 10000 (padrão Render)
+3. **SQLite Rebuild**: Script otimizado para ambiente de produção
+4. **API URLs**: Configuração automática para produção
+
 ## Pré-requisitos
 - Conta no [Render.com](https://render.com)
 - Código no GitHub/GitLab
@@ -9,9 +17,10 @@
 
 ### 1. Preparar o Repositório
 Certifique-se que os seguintes arquivos estão commitados:
-- `render.yaml` - Configuração do Render
-- `package.json` - Com scripts `start` e `render-build`
-- `.env.example` - Exemplo de variáveis de ambiente
+- `render.yaml` - Configuração do Render ✅
+- `package.json` - Com scripts `start` e `render-build` ✅
+- `.env.example` - Exemplo de variáveis de ambiente ✅
+- `scripts/rebuild-sqlite.js` - Script ES Module ✅
 
 ### 2. Conectar no Render
 1. Acesse [render.com](https://render.com) e faça login
@@ -32,14 +41,18 @@ O Render irá detectar automaticamente o arquivo `render.yaml` com estas configu
 ### 4. Variáveis de Ambiente
 As seguintes variáveis serão configuradas automaticamente:
 - `NODE_ENV=production`
-- `PORT=10000`
+- `PORT=10000` ✅ (corrigido)
 - `JWT_SECRET=` (gerado automaticamente)
 - `DB_PATH=./server/smyrna.db`
+- `npm_config_build_from_source=true` ✅
+- `npm_config_sqlite=/usr` ✅
+- `PYTHON=/usr/bin/python3` ✅
 
 ### 5. Deploy
 1. Clique em "Create Web Service"
 2. O Render irá:
    - Instalar dependências (`npm install`)
+   - Rebuildar SQLite3 (`npm run rebuild-sqlite`) ✅
    - Fazer build do frontend (`npm run build`)
    - Iniciar o servidor (`npm run server`)
 

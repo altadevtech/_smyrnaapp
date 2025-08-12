@@ -20,4 +20,6 @@ services:
         value: "true"
       - key: npm_config_sqlite
         value: "/usr"
+      - key: PYTHON
+        value: "/usr/bin/python3"
     autoDeploy: true

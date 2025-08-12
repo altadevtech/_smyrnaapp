@@ -15,7 +15,7 @@
     "test-sqlite": "node scripts/test-sqlite.js",
     "rebuild-sqlite": "node scripts/rebuild-sqlite.js",
     "render-postbuild": "npm run rebuild-sqlite",
-    "render-build": "npm install && npm run render-postbuild && npm run build"
+    "render-build": "npm install && npm run rebuild-sqlite && npm run build"
   },
   "dependencies": {
     "@types/react-beautiful-dnd": "^13.1.8",
