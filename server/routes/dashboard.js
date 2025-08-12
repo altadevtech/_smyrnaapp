@@ -60,10 +60,10 @@ router.get('/stats', (req, res) => {
   const countPages = () => new Promise((resolve, reject) => {
     db.get('SELECT COUNT(*) as count FROM pages', (err, result) => {
       if (err) {
-        console.error('Erro ao contar páginas:', err)
+        console.error('Erro ao contar páginas do wiki:', err)
         reject(err)
       } else {
-        console.log('Páginas encontradas:', result)
+        console.log('Páginas do wiki encontradas:', result)
         resolve(result?.count || 0)
       }
     })

@@ -23,8 +23,8 @@ router.get('/public', async (req, res) => {
     if (!tableExists) {
       // Retornar configurações padrão se tabela não existe
       return res.json({
-        siteName: 'Smyrna CMS',
-        siteDescription: 'Sistema de Gerenciamento de Conteúdo',
+        siteName: 'Smyrna Wiki',
+        siteDescription: 'Sistema de Wiki e Gerenciamento de Conhecimento',
         logo: '',
         contactEmail: '',
         contactPhone: '',
@@ -50,8 +50,8 @@ router.get('/public', async (req, res) => {
 
     // Adicionar valores padrão para chaves que não existem
     const defaultSettings = {
-      siteName: 'Smyrna CMS',
-      siteDescription: 'Sistema de Gerenciamento de Conteúdo',
+      siteName: 'Smyrna Wiki',
+      siteDescription: 'Sistema de Wiki e Gerenciamento de Conhecimento',
       logo: '',
       contactEmail: '',
       contactPhone: '',
@@ -105,8 +105,8 @@ router.get('/', async (req, res) => {
 
       // Inserir configurações padrão
       const defaultSettings = [
-        { key: 'siteName', value: 'Smyrna CMS' },
-        { key: 'siteDescription', value: 'Sistema de Gerenciamento de Conteúdo' },
+        { key: 'siteName', value: 'Smyrna Wiki' },
+        { key: 'siteDescription', value: 'Sistema de Wiki e Gerenciamento de Conhecimento' },
         { key: 'logo', value: '' },
         { key: 'contactEmail', value: '' },
         { key: 'contactPhone', value: '' },

@@ -238,7 +238,7 @@ function finalCheck() {
       }
       
       console.log('\n🎉 Banco de dados verificado e corrigido!')
-      console.log('✅ Agora você pode tentar criar/atualizar páginas novamente')
+      console.log('✅ Agora você pode tentar criar/atualizar páginas do wiki novamente')
       
       db.close()
     })

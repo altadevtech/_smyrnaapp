@@ -43,8 +43,8 @@ const Home = () => {
   return (
     <div className="public-home">
       <section className="hero-section">
-        <h1>Bem-vindo ao Smyrna CMS</h1>
-        <p>Sistema de gerenciamento de conteúdo simples e eficiente.</p>
+        <h1>Bem-vindo ao Smyrna Wiki</h1>
+        <p>Sistema de wiki e gerenciamento de conhecimento simples e eficiente.</p>
         <div className="hero-actions">
           <Link to="/blog" className="btn btn-primary">
             <FileText size={18} /> Ver Blog
@@ -54,7 +54,7 @@ const Home = () => {
 
       <section className="content-sections">
         <div className="section-card">
-          <h2><FileText size={24} /> Páginas</h2>
+          <h2><FileText size={24} /> Wiki</h2>
           {pages.length > 0 ? (
             <div className="content-list">
               {pages.slice(0, 3).map(page => (
@@ -73,7 +73,7 @@ const Home = () => {
               ))}
               {pages.length > 3 && (
                 <Link to="/pages" className="view-all">
-                  Ver todas as páginas <ArrowRight size={14} />
+                  Ver todo o wiki <ArrowRight size={14} />
                 </Link>
               )}
             </div>

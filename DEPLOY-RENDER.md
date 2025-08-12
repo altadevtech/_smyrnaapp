@@ -1,4 +1,4 @@
-# 🚀 Deploy no Render.com - Smyrna CMS
+# 🚀 Deploy no Render.com - Smyrna Wiki
 
 ## Pré-requisitos
 - Conta no [Render.com](https://render.com)
@@ -22,7 +22,7 @@ Certifique-se que os seguintes arquivos estão commitados:
 ### 3. Configuração do Serviço
 O Render irá detectar automaticamente o arquivo `render.yaml` com estas configurações:
 
-- **Name**: smyrna-cms
+- **Name**: smyrna-wiki
 - **Environment**: Node
 - **Region**: Oregon
 - **Plan**: Free (pode ser alterado depois)

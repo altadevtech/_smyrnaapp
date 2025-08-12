@@ -341,14 +341,15 @@ const Templates = () => {
 
       {templates.length > 0 ? (
         <div className="card">
-          <table className="table">
+          <div className="table-responsive">
+            <table className="table">
             <thead>
               <tr>
                 <th>Nome</th>
                 <th>Descrição</th>
-                <th>Blocos</th>
+                <th className="hide-mobile">Blocos</th>
                 <th>Padrão</th>
-                <th>Data de Criação</th>
+                <th className="hide-mobile">Data de Criação</th>
                 <th>Ações</th>
               </tr>
             </thead>
@@ -357,18 +358,18 @@ const Templates = () => {
                 <tr key={template.id}>
                   <td><strong>{template.name}</strong></td>
                   <td>{template.description || '-'}</td>
-                  <td>{template.layout?.blocks?.length || 0} widgets</td>
+                  <td className="hide-mobile">{template.layout?.blocks?.length || 0} widgets</td>
                   <td>
                     {template.is_default && (
-                      <span className="status-badge status-published">Padrão</span>
+                      <span className="status-badge active">Padrão</span>
                     )}
                   </td>
-                  <td>{new Date(template.created_at).toLocaleDateString()}</td>
+                  <td className="hide-mobile">{new Date(template.created_at).toLocaleDateString()}</td>
                   <td>
-                    <div className="actions">
+                    <div className="action-buttons">
                       <button
                         onClick={() => handleEdit(template)}
-                        className="btn btn-sm"
+                        className="action-btn edit"
                         title="Editar"
                       >
                         <Edit size={16} />
@@ -376,7 +377,7 @@ const Templates = () => {
                       {!template.is_default && (
                         <button
                           onClick={() => handleDelete(template.id)}
-                          className="btn btn-sm btn-danger"
+                          className="action-btn delete"
                           title="Excluir"
                         >
                           <Trash2 size={16} />
@@ -388,6 +389,7 @@ const Templates = () => {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       ) : (
         <div className="card">

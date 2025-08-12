@@ -53,7 +53,7 @@ const Dashboard = () => {
             <FileText size={32} color="#646cff" />
             <div>
               <h3>{stats.totalPages}</h3>
-              <p>Páginas</p>
+              <p>Wiki</p>
             </div>
           </div>
         </div>

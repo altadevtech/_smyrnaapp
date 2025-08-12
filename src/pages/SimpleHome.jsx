@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 const SimpleHome = () => {
   return (
     <div>
-      <h1>Smyrna CMS - Home Simples</h1>
+      <h1>Smyrna Wiki - Home Simples</h1>
       <p>Sistema funcionando!</p>
       <div>
         <Link to="/admin/login">Área Administrativa</Link>

@@ -34,9 +34,9 @@ const PostEditor = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await api.get('/categories')
+      const response = await api.get('/categories?type=blog')
       setCategories(response.data)
-      console.log('Categorias carregadas:', response.data)
+      console.log('Categorias de blog carregadas:', response.data)
     } catch (error) {
       console.error('Erro ao carregar categorias:', error)
       toast.error('Erro ao carregar categorias')

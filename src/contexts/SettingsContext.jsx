@@ -13,8 +13,8 @@ export const useSettings = () => {
 
 export const SettingsProvider = ({ children }) => {
   const [settings, setSettings] = useState({
-    siteName: 'Smyrna CMS',
-    siteDescription: 'Sistema de Gerenciamento de Conteúdo',
+    siteName: 'Smyrna Wiki',
+    siteDescription: 'Sistema de Wiki e Gerenciamento de Conhecimento',
     logo: '',
     contactEmail: '',
     contactPhone: '',

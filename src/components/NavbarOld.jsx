@@ -15,10 +15,8 @@ import {
   Phone,
   LayoutDashboard,
   Users,
-  PenTool,
-  Tag
+  PenTool
 } from 'lucide-react'
-import './Navbar.css'
 
 const Navbar = () => {
   const { user, logout } = useAuth()
@@ -39,13 +37,10 @@ const Navbar = () => {
 
   // Menu administrativo
   const adminMenuItems = [
-    { to: '/admin/categories', label: 'Categorias', icon: Tag },
     { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { to: '/admin/pages', label: 'Wiki', icon: FileText },
-    { to: '/admin/posts', label: 'Posts', icon: PenTool },
-    ...(user?.role === 'admin' ? [
-      { to: '/admin/users', label: 'Usuários', icon: Users }
-    ] : [])
+    { to: '/pages', label: 'Wiki', icon: FileText },
+    { to: '/posts', label: 'Posts', icon: PenTool },
+    ...(user?.role === 'admin' ? [{ to: '/users', label: 'Usuários', icon: Users }] : [])
   ]
 
   // Detectar scroll para efeito no header

@@ -1,0 +1,49 @@
+/* Modern Navbar Styles */
+.user-menu-container {
+  position: relative;
+}
+
+/* Mobile Responsive Fixes */
+@media (max-width: 768px) {
+  .desktop-menu {
+    display: none !important;
+  }
+  
+  .mobile-menu-toggle {
+    display: flex !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .mobile-menu-toggle {
+    display: none !important;
+  }
+}
+
+/* Hover effects for interactive elements */
+.navbar-menu-item:hover {
+  color: #667eea !important;
+  background: rgba(102, 126, 234, 0.05) !important;
+}
+
+.user-menu-trigger:hover {
+  background: rgba(102, 126, 234, 0.15) !important;
+}
+
+.mobile-menu-item:hover {
+  background: rgba(102, 126, 234, 0.05) !important;
+}
+
+/* Smooth transitions */
+* {
+  transition: all 0.3s ease;
+}
+
+/* Override any conflicting styles */
+.navbar-new {
+  all: unset;
+}
+
+.navbar-new * {
+  box-sizing: border-box;
+}

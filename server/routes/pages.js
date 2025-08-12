@@ -4,23 +4,48 @@ import { authenticateToken } from '../middleware/auth.js'
 
 const router = express.Router()
 
-// Listar páginas públicas (sem autenticação)
+// Listar artigos do wiki públicos (sem autenticação) com busca e filtros
 router.get('/public', (req, res) => {
   const db = Database.getDb()
+  const { search, tag, category } = req.query
   
-  db.all(
-    `SELECT p.id, p.title, p.content, p.slug, p.created_at, p.updated_at, u.name as author_name 
-     FROM pages p 
-     JOIN users u ON p.author_id = u.id 
-     WHERE p.status = 'published' AND (p.is_home IS NULL OR p.is_home = false)
-     ORDER BY p.updated_at DESC`,
-    (err, pages) => {
-      if (err) {
-        return res.status(500).json({ message: 'Erro ao buscar páginas' })
-      }
-      res.json(pages)
+  let query = `
+    SELECT p.id, p.title, p.content, p.slug, p.created_at, p.updated_at, 
+           u.name as author_name, c.name as category_name, c.color as category_color
+    FROM pages p 
+    JOIN users u ON p.author_id = u.id 
+    LEFT JOIN categories c ON p.category_id = c.id AND c.type = 'wiki'
+    WHERE p.status = 'published' AND (p.is_home IS NULL OR p.is_home = false)
+  `
+  
+  const params = []
+  
+  // Filtro por busca de texto
+  if (search) {
+    query += ` AND (p.title LIKE ? OR p.content LIKE ?)`
+    params.push(`%${search}%`, `%${search}%`)
+  }
+  
+  // Filtro por categoria
+  if (category) {
+    query += ` AND p.category_id = ?`
+    params.push(category)
+  }
+  
+  // Filtro por tag (busca no conteúdo por tags)
+  if (tag) {
+    query += ` AND p.content LIKE ?`
+    params.push(`%#${tag}%`)
+  }
+  
+  query += ` ORDER BY p.updated_at DESC`
+  
+  db.all(query, params, (err, pages) => {
+    if (err) {
+      return res.status(500).json({ message: 'Erro ao buscar artigos do wiki' })
     }
-  )
+    res.json(pages)
+  })
 })
 
 // Buscar página específica por slug (público)
@@ -125,20 +150,21 @@ router.get('/home', (req, res) => {
 // Todas as rotas abaixo necessitam autenticação
 router.use(authenticateToken)
 
-// Listar páginas (admin/editor)
+// Listar artigos do wiki (admin/editor)
 router.get('/', (req, res) => {
   const db = Database.getDb()
   
   db.all(
     `SELECT p.id, p.title, p.content, p.status, p.slug, p.is_home, p.created_at, p.updated_at, 
-            u.name as author_name, t.name as template_name 
+            u.name as author_name, t.name as template_name, c.name as category_name, c.color as category_color
      FROM pages p 
      JOIN users u ON p.author_id = u.id 
      LEFT JOIN templates t ON p.template_id = t.id
+     LEFT JOIN categories c ON p.category_id = c.id AND c.type = 'wiki'
      ORDER BY p.updated_at DESC`,
     (err, pages) => {
       if (err) {
-        return res.status(500).json({ message: 'Erro ao buscar páginas' })
+        return res.status(500).json({ message: 'Erro ao buscar artigos do wiki' })
       }
       res.json(pages)
     }
@@ -181,7 +207,7 @@ router.get('/:id', (req, res) => {
 
 // Criar página
 router.post('/', (req, res) => {
-  const { title, content, status = 'draft', templateId = 1, slug, widgetData, isHome = false } = req.body
+  const { title, content, status = 'draft', templateId = 1, slug, widgetData, isHome = false, category_id } = req.body
 
   if (!title || !content) {
     return res.status(400).json({ message: 'Título e conteúdo são obrigatórios' })
@@ -202,18 +228,18 @@ router.post('/', (req, res) => {
     .replace(/-+/g, '-')
     .trim('-')
 
-  // Se definindo como home, remover flag de outras páginas
+  // Se definindo como home, remover flag de outros artigos do wiki
   if (isHome) {
     db.run('UPDATE pages SET is_home = false WHERE is_home = true', (err) => {
       if (err) {
-        console.error('Erro ao atualizar páginas home:', err)
+        console.error('Erro ao atualizar artigos home do wiki:', err)
       }
     })
   }
   
   db.run(
-    'INSERT INTO pages (title, content, status, author_id, template_id, slug, widget_data, is_home) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-    [title, content, status, req.user.id, templateId, finalSlug, widgetData ? JSON.stringify(widgetData) : null, isHome],
+    'INSERT INTO pages (title, content, status, author_id, template_id, slug, widget_data, is_home, category_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    [title, content, status, req.user.id, templateId, finalSlug, widgetData ? JSON.stringify(widgetData) : null, isHome, category_id || null],
     function(err) {
       if (err) {
         if (err.message.includes('UNIQUE constraint failed: pages.slug')) {
@@ -231,58 +257,75 @@ router.post('/', (req, res) => {
 })
 
 // Atualizar página
-router.put('/:id', (req, res) => {
+router.put('/:id', authenticateToken, (req, res) => {
   const { id } = req.params
-  const { title, content, status, templateId, slug, widgetData, isHome } = req.body
+  const { title, content, status, templateId, slug, widgetData, isHome, category_id } = req.body
+
+  console.log('📝 Atualizando página ID:', id)
+  console.log('📋 Dados recebidos:', { title, status, slug, isHome, category_id })
 
   if (!title || !content) {
+    console.log('❌ Título ou conteúdo ausente')
     return res.status(400).json({ message: 'Título e conteúdo são obrigatórios' })
   }
 
   if (status && !['draft', 'published'].includes(status)) {
+    console.log('❌ Status inválido:', status)
     return res.status(400).json({ message: 'Status inválido' })
   }
 
   const db = Database.getDb()
   
-  // Verificar se o usuário pode editar esta página
-  db.get('SELECT author_id FROM pages WHERE id = ?', [id], (err, page) => {
+  // Verificar se o usuário pode editar esta página e obter dados completos
+  db.get('SELECT * FROM pages WHERE id = ?', [id], (err, page) => {
     if (err) {
+      console.error('❌ Erro ao buscar página:', err)
       return res.status(500).json({ message: 'Erro ao buscar página' })
     }
 
     if (!page) {
+      console.log('❌ Página não encontrada:', id)
       return res.status(404).json({ message: 'Página não encontrada' })
     }
 
+    console.log('✅ Página encontrada:', page.title, 'Author:', page.author_id)
+
     // Admin pode editar qualquer página, editor só suas próprias
     if (req.user.role !== 'admin' && page.author_id !== req.user.id) {
+      console.log('❌ Sem permissão. User:', req.user.id, 'Author:', page.author_id, 'Role:', req.user.role)
       return res.status(403).json({ message: 'Sem permissão para editar esta página' })
     }
 
-    // Se definindo como home, remover flag de outras páginas
+    console.log('✅ Permissão validada para usuário:', req.user.id)
+
+    // Se definindo como home, remover flag de outros artigos do wiki
     if (isHome) {
+      console.log('🏠 Definindo como página inicial')
       db.run('UPDATE pages SET is_home = false WHERE is_home = true AND id != ?', [id], (err) => {
         if (err) {
-          console.error('Erro ao atualizar páginas home:', err)
+          console.error('❌ Erro ao atualizar artigos home do wiki:', err)
         }
       })
     }
 
     // Criar versão antes de atualizar
+    console.log('📦 Criando versão antes de atualizar...')
     createPageVersion(db, page, req.user.id, req.body.changeSummary || 'Edição da página', () => {
+      console.log('🔄 Executando UPDATE da página...')
       db.run(
         `UPDATE pages SET title = ?, content = ?, status = ?, template_id = ?, slug = ?, 
-                          widget_data = ?, is_home = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
-        [title, content, status, templateId, slug, widgetData ? JSON.stringify(widgetData) : null, isHome || false, id],
+                          widget_data = ?, is_home = ?, category_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
+        [title, content, status, templateId, slug, widgetData ? JSON.stringify(widgetData) : null, isHome || false, category_id || null, id],
         function(err) {
           if (err) {
+            console.error('❌ Erro no UPDATE:', err)
             if (err.message.includes('UNIQUE constraint failed: pages.slug')) {
               return res.status(400).json({ message: 'Slug já está em uso' })
             }
             return res.status(500).json({ message: 'Erro ao atualizar página' })
           }
 
+          console.log('✅ Página atualizada com sucesso')
           res.json({ message: 'Página atualizada com sucesso' })
         }
       )
@@ -361,7 +404,130 @@ router.delete('/:id', (req, res) => {
 })
 
 // Função auxiliar para criar versão da página
+// Listar versões de uma página
+router.get('/:id/versions', (req, res) => {
+  const { id } = req.params
+  const db = Database.getDb()
+
+  db.all(
+    `SELECT pv.*, u.name as author_name 
+     FROM page_versions pv 
+     LEFT JOIN users u ON pv.author_id = u.id 
+     WHERE pv.page_id = ? 
+     ORDER BY pv.version_number DESC`,
+    [id],
+    (err, versions) => {
+      if (err) {
+        return res.status(500).json({ message: 'Erro ao buscar versões' })
+      }
+      res.json(versions)
+    }
+  )
+})
+
+// Buscar versão específica
+router.get('/:id/versions/:versionNumber', (req, res) => {
+  const { id, versionNumber } = req.params
+  const db = Database.getDb()
+
+  db.get(
+    `SELECT pv.*, u.name as author_name 
+     FROM page_versions pv 
+     LEFT JOIN users u ON pv.author_id = u.id 
+     WHERE pv.page_id = ? AND pv.version_number = ?`,
+    [id, versionNumber],
+    (err, version) => {
+      if (err) {
+        return res.status(500).json({ message: 'Erro ao buscar versão' })
+      }
+
+      if (!version) {
+        return res.status(404).json({ message: 'Versão não encontrada' })
+      }
+
+      res.json(version)
+    }
+  )
+})
+
+// Restaurar versão específica
+router.post('/:id/versions/:versionNumber/restore', (req, res) => {
+  const { id, versionNumber } = req.params
+  const { changeSummary } = req.body
+  const db = Database.getDb()
+
+  // Verificar se o usuário pode editar esta página
+  db.get('SELECT author_id FROM pages WHERE id = ?', [id], (err, page) => {
+    if (err) {
+      return res.status(500).json({ message: 'Erro ao buscar página' })
+    }
+
+    if (!page) {
+      return res.status(404).json({ message: 'Página não encontrada' })
+    }
+
+    // Admin pode editar qualquer página, editor só suas próprias
+    if (req.user.role !== 'admin' && page.author_id !== req.user.id) {
+      return res.status(403).json({ message: 'Sem permissão para editar esta página' })
+    }
+
+    // Buscar a versão a ser restaurada
+    db.get(
+      'SELECT * FROM page_versions WHERE page_id = ? AND version_number = ?',
+      [id, versionNumber],
+      (err, version) => {
+        if (err) {
+          return res.status(500).json({ message: 'Erro ao buscar versão' })
+        }
+
+        if (!version) {
+          return res.status(404).json({ message: 'Versão não encontrada' })
+        }
+
+        // Criar versão atual antes de restaurar
+        db.get('SELECT * FROM pages WHERE id = ?', [id], (err, currentPage) => {
+          if (err) {
+            return res.status(500).json({ message: 'Erro ao buscar página atual' })
+          }
+
+          createPageVersion(db, currentPage, req.user.id, `Backup antes de restaurar versão ${versionNumber}`, () => {
+            // Atualizar página com o conteúdo da versão
+            db.run(
+              `UPDATE pages SET title = ?, content = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
+              [version.title, version.content, id],
+              function(err) {
+                if (err) {
+                  return res.status(500).json({ message: 'Erro ao restaurar versão' })
+                }
+
+                // Criar nova versão para marcar a restauração
+                const restoreSummary = changeSummary || `Restaurada versão ${versionNumber}`
+                createPageVersion(db, { 
+                  id, 
+                  title: version.title, 
+                  content: version.content 
+                }, req.user.id, restoreSummary, () => {
+                  res.json({ 
+                    message: `Versão ${versionNumber} restaurada com sucesso`,
+                    restoredVersion: versionNumber
+                  })
+                })
+              }
+            )
+          })
+        })
+      }
+    )
+  })
+})
+
 function createPageVersion(db, page, authorId, changeSummary, callback) {
+  // Verificar se a página tem dados necessários
+  if (!page || !page.id || !page.title || !page.content) {
+    console.error('Dados da página insuficientes para criar versão:', page)
+    return callback()
+  }
+
   // Obter próximo número de versão
   db.get(
     'SELECT MAX(version_number) as max_version FROM page_versions WHERE page_id = ?',
@@ -382,6 +548,9 @@ function createPageVersion(db, page, authorId, changeSummary, callback) {
         (err) => {
           if (err) {
             console.error('Erro ao criar versão:', err)
+            console.error('Dados:', { page_id: page.id, version: nextVersion, title: page.title, author: authorId })
+          } else {
+            console.log('✅ Versão criada com sucesso:', nextVersion, 'para página', page.id)
           }
           callback()
         }

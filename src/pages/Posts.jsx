@@ -62,34 +62,142 @@ const Posts = () => {
       </div>
 
       {posts.length > 0 ? (
-        <div className="card">
-          <table className="table">
-            <thead>
+        <div className="card" style={{
+          background: 'white',
+          borderRadius: '16px',
+          boxShadow: '0 4px 25px rgba(0, 0, 0, 0.08)',
+          border: '1px solid #e5e7eb',
+          overflow: 'hidden',
+          marginBottom: '2rem'
+        }}>
+          <div className="table-responsive">
+            <table className="table" style={{
+              width: '100%',
+              borderCollapse: 'separate',
+              borderSpacing: '0',
+              margin: '0',
+              background: 'white',
+              borderRadius: '12px',
+              overflow: 'hidden',
+              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
+              border: '1px solid #e5e7eb'
+            }}>
+            <thead style={{
+              background: 'linear-gradient(135deg, rgb(102, 234, 205) 0%, rgb(75, 129, 162) 100%)',
+              color: 'white'
+            }}>
               <tr>
-                <th>Título</th>
-                <th>Categoria</th>
-                <th>Status</th>
-                <th>Autor</th>
-                <th>Data de Criação</th>
-                <th>Última Atualização</th>
-                <th>Ações</th>
+                <th style={{
+                  padding: '1.25rem 1.5rem',
+                  fontWeight: '600',
+                  fontSize: '0.9rem',
+                  textAlign: 'left',
+                  letterSpacing: '0.5px',
+                  border: 'none',
+                  color: 'white',
+                  textTransform: 'uppercase'
+                }}>Título</th>
+                <th style={{
+                  padding: '1.25rem 1.5rem',
+                  fontWeight: '600',
+                  fontSize: '0.9rem',
+                  textAlign: 'left',
+                  letterSpacing: '0.5px',
+                  border: 'none',
+                  color: 'white',
+                  textTransform: 'uppercase'
+                }}>Categoria</th>
+                <th style={{
+                  padding: '1.25rem 1.5rem',
+                  fontWeight: '600',
+                  fontSize: '0.9rem',
+                  textAlign: 'left',
+                  letterSpacing: '0.5px',
+                  border: 'none',
+                  color: 'white',
+                  textTransform: 'uppercase'
+                }}>Status</th>
+                <th style={{
+                  padding: '1.25rem 1.5rem',
+                  fontWeight: '600',
+                  fontSize: '0.9rem',
+                  textAlign: 'left',
+                  letterSpacing: '0.5px',
+                  border: 'none',
+                  color: 'white',
+                  textTransform: 'uppercase'
+                }}>Autor</th>
+                <th className="hide-mobile" style={{
+                  padding: '1.25rem 1.5rem',
+                  fontWeight: '600',
+                  fontSize: '0.9rem',
+                  textAlign: 'left',
+                  letterSpacing: '0.5px',
+                  border: 'none',
+                  color: 'white',
+                  textTransform: 'uppercase'
+                }}>Data de Criação</th>
+                <th className="hide-mobile" style={{
+                  padding: '1.25rem 1.5rem',
+                  fontWeight: '600',
+                  fontSize: '0.9rem',
+                  textAlign: 'left',
+                  letterSpacing: '0.5px',
+                  border: 'none',
+                  color: 'white',
+                  textTransform: 'uppercase'
+                }}>Última Atualização</th>
+                <th style={{
+                  padding: '1.25rem 1.5rem',
+                  fontWeight: '600',
+                  fontSize: '0.9rem',
+                  textAlign: 'left',
+                  letterSpacing: '0.5px',
+                  border: 'none',
+                  color: 'white',
+                  textTransform: 'uppercase'
+                }}>Ações</th>
               </tr>
             </thead>
             <tbody>
               {posts.map(post => (
-                <tr key={post.id}>
-                  <td><strong>{post.title}</strong></td>
-                  <td>
+                <tr key={post.id} style={{
+                  transition: 'all 0.3s ease',
+                  borderBottom: '1px solid #f1f5f9',
+                  background: 'white'
+                }}>
+                  <td style={{
+                    padding: '1.25rem 1.5rem',
+                    fontSize: '0.9rem',
+                    color: '#374151',
+                    border: 'none',
+                    verticalAlign: 'middle',
+                    borderRight: '1px solid #f1f5f9'
+                  }}><strong>{post.title}</strong></td>
+                  <td style={{
+                    padding: '1.25rem 1.5rem',
+                    fontSize: '0.9rem',
+                    color: '#374151',
+                    border: 'none',
+                    verticalAlign: 'middle',
+                    borderRight: '1px solid #f1f5f9'
+                  }}>
                     {post.category_name ? (
                       <span 
                         className="category-badge" 
                         style={{ 
                           backgroundColor: post.category_color || '#6366f1',
                           color: 'white',
-                          padding: '0.25rem 0.5rem',
-                          borderRadius: '0.25rem',
-                          fontSize: '0.875rem',
-                          fontWeight: '500'
+                          padding: '0.375rem 0.875rem',
+                          borderRadius: '25px',
+                          fontSize: '0.75rem',
+                          fontWeight: '600',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.5px',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          minWidth: '80px'
                         }}
                       >
                         {post.category_name}
@@ -98,35 +206,140 @@ const Posts = () => {
                       <span style={{ color: '#666', fontStyle: 'italic' }}>Sem categoria</span>
                     )}
                   </td>
-                  <td>
-                    <span className={`status-badge status-${post.status}`}>
+                  <td style={{
+                    padding: '1.25rem 1.5rem',
+                    fontSize: '0.9rem',
+                    color: '#374151',
+                    border: 'none',
+                    verticalAlign: 'middle',
+                    borderRight: '1px solid #f1f5f9'
+                  }}>
+                    <span 
+                      className={`status-badge ${post.status}`}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        padding: '0.375rem 0.875rem',
+                        borderRadius: '25px',
+                        fontSize: '0.75rem',
+                        fontWeight: '600',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                        minWidth: '80px',
+                        justifyContent: 'center',
+                        background: post.status === 'published' 
+                          ? 'linear-gradient(135deg, #10b981, #059669)' 
+                          : 'linear-gradient(135deg, #f59e0b, #d97706)',
+                        color: 'white',
+                        boxShadow: post.status === 'published' 
+                          ? '0 2px 8px rgba(16, 185, 129, 0.3)' 
+                          : '0 2px 8px rgba(245, 158, 11, 0.3)'
+                      }}
+                    >
                       {post.status === 'published' ? 'Publicado' : 'Rascunho'}
                     </span>
                   </td>
-                  <td>{post.author_name}</td>
-                  <td>{new Date(post.created_at).toLocaleDateString()}</td>
-                  <td>{new Date(post.updated_at).toLocaleDateString()}</td>
-                  <td>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <td style={{
+                    padding: '1.25rem 1.5rem',
+                    fontSize: '0.9rem',
+                    color: '#374151',
+                    border: 'none',
+                    verticalAlign: 'middle',
+                    borderRight: '1px solid #f1f5f9'
+                  }}>{post.author_name}</td>
+                  <td className="hide-mobile" style={{
+                    padding: '1.25rem 1.5rem',
+                    fontSize: '0.9rem',
+                    color: '#374151',
+                    border: 'none',
+                    verticalAlign: 'middle',
+                    borderRight: '1px solid #f1f5f9'
+                  }}>{new Date(post.created_at).toLocaleDateString()}</td>
+                  <td className="hide-mobile" style={{
+                    padding: '1.25rem 1.5rem',
+                    fontSize: '0.9rem',
+                    color: '#374151',
+                    border: 'none',
+                    verticalAlign: 'middle',
+                    borderRight: '1px solid #f1f5f9'
+                  }}>{new Date(post.updated_at).toLocaleDateString()}</td>
+                  <td style={{
+                    padding: '1.25rem 1.5rem',
+                    fontSize: '0.9rem',
+                    color: '#374151',
+                    border: 'none',
+                    verticalAlign: 'middle'
+                  }}>
+                    <div className="action-buttons" style={{
+                      display: 'flex',
+                      gap: '0.5rem',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
                       <button
                         onClick={() => toggleStatus(post.id, post.status)}
-                        className="btn"
-                        style={{ padding: '0.25rem 0.5rem' }}
+                        className="action-btn view"
                         title={post.status === 'published' ? 'Despublicar' : 'Publicar'}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: '38px',
+                          height: '38px',
+                          border: '2px solid #059669',
+                          borderRadius: '10px',
+                          cursor: 'pointer',
+                          transition: 'all 0.3s ease',
+                          fontSize: '0.9rem',
+                          textDecoration: 'none',
+                          background: 'linear-gradient(135deg, #10b981, #059669)',
+                          color: 'white'
+                        }}
                       >
                         {post.status === 'published' ? <EyeOff size={16} /> : <Eye size={16} />}
                       </button>
                       <Link 
                         to={`/admin/posts/edit/${post.id}`} 
-                        className="btn"
-                        style={{ padding: '0.25rem 0.5rem' }}
+                        className="action-btn edit"
+                        title="Editar post"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: '38px',
+                          height: '38px',
+                          border: '2px solid #1d4ed8',
+                          borderRadius: '10px',
+                          cursor: 'pointer',
+                          transition: 'all 0.3s ease',
+                          fontSize: '0.9rem',
+                          textDecoration: 'none',
+                          background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
+                          color: 'white'
+                        }}
                       >
                         <Edit size={16} />
                       </Link>
                       <button
                         onClick={() => handleDelete(post.id)}
-                        className="btn btn-danger"
-                        style={{ padding: '0.25rem 0.5rem' }}
+                        className="action-btn delete"
+                        title="Excluir post"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: '38px',
+                          height: '38px',
+                          border: '2px solid #dc2626',
+                          borderRadius: '10px',
+                          cursor: 'pointer',
+                          transition: 'all 0.3s ease',
+                          fontSize: '0.9rem',
+                          textDecoration: 'none',
+                          background: 'linear-gradient(135deg, #ef4444, #dc2626)',
+                          color: 'white'
+                        }}
                       >
                         <Trash2 size={16} />
                       </button>
@@ -136,6 +349,7 @@ const Posts = () => {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       ) : (
         <div className="card">

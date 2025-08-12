@@ -168,55 +168,268 @@ const Users = () => {
       )}
 
       {users.length > 0 ? (
-        <div className="card">
-          <table className="table">
-            <thead>
+        <div className="card" style={{
+          background: 'white',
+          borderRadius: '16px',
+          boxShadow: '0 4px 25px rgba(0, 0, 0, 0.08)',
+          border: '1px solid #e5e7eb',
+          overflow: 'hidden',
+          marginBottom: '2rem'
+        }}>
+          <div className="table-responsive">
+            <table className="table" style={{
+              width: '100%',
+              borderCollapse: 'separate',
+              borderSpacing: '0',
+              margin: '0',
+              background: 'white',
+              borderRadius: '12px',
+              overflow: 'hidden',
+              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
+              border: '1px solid #e5e7eb'
+            }}>
+            <thead style={{
+              background: 'linear-gradient(135deg, rgb(102, 234, 205) 0%, rgb(75, 129, 162) 100%)',
+              color: 'white'
+            }}>
               <tr>
-                <th>Nome</th>
-                <th>Email</th>
-                <th>Papel</th>
-                <th>Status</th>
-                <th>Data de Criação</th>
-                <th>Ações</th>
+                <th style={{
+                  padding: '1.25rem 1.5rem',
+                  fontWeight: '600',
+                  fontSize: '0.9rem',
+                  textAlign: 'left',
+                  letterSpacing: '0.5px',
+                  border: 'none',
+                  color: 'white',
+                  textTransform: 'uppercase'
+                }}>Nome</th>
+                <th style={{
+                  padding: '1.25rem 1.5rem',
+                  fontWeight: '600',
+                  fontSize: '0.9rem',
+                  textAlign: 'left',
+                  letterSpacing: '0.5px',
+                  border: 'none',
+                  color: 'white',
+                  textTransform: 'uppercase'
+                }}>Email</th>
+                <th style={{
+                  padding: '1.25rem 1.5rem',
+                  fontWeight: '600',
+                  fontSize: '0.9rem',
+                  textAlign: 'left',
+                  letterSpacing: '0.5px',
+                  border: 'none',
+                  color: 'white',
+                  textTransform: 'uppercase'
+                }}>Papel</th>
+                <th style={{
+                  padding: '1.25rem 1.5rem',
+                  fontWeight: '600',
+                  fontSize: '0.9rem',
+                  textAlign: 'left',
+                  letterSpacing: '0.5px',
+                  border: 'none',
+                  color: 'white',
+                  textTransform: 'uppercase'
+                }}>Status</th>
+                <th className="hide-mobile" style={{
+                  padding: '1.25rem 1.5rem',
+                  fontWeight: '600',
+                  fontSize: '0.9rem',
+                  textAlign: 'left',
+                  letterSpacing: '0.5px',
+                  border: 'none',
+                  color: 'white',
+                  textTransform: 'uppercase'
+                }}>Data de Criação</th>
+                <th style={{
+                  padding: '1.25rem 1.5rem',
+                  fontWeight: '600',
+                  fontSize: '0.9rem',
+                  textAlign: 'left',
+                  letterSpacing: '0.5px',
+                  border: 'none',
+                  color: 'white',
+                  textTransform: 'uppercase'
+                }}>Ações</th>
               </tr>
             </thead>
             <tbody>
               {users.map(user => (
-                <tr key={user.id}>
-                  <td><strong>{user.name}</strong></td>
-                  <td>{user.email}</td>
-                  <td>
-                    <span className={`role-badge role-${user.role}`}>
+                <tr key={user.id} style={{
+                  transition: 'all 0.3s ease',
+                  borderBottom: '1px solid #f1f5f9',
+                  background: 'white'
+                }}>
+                  <td style={{
+                    padding: '1.25rem 1.5rem',
+                    fontSize: '0.9rem',
+                    color: '#374151',
+                    border: 'none',
+                    verticalAlign: 'middle',
+                    borderRight: '1px solid #f1f5f9'
+                  }}><strong>{user.name}</strong></td>
+                  <td style={{
+                    padding: '1.25rem 1.5rem',
+                    fontSize: '0.9rem',
+                    color: '#374151',
+                    border: 'none',
+                    verticalAlign: 'middle',
+                    borderRight: '1px solid #f1f5f9'
+                  }}>{user.email}</td>
+                  <td style={{
+                    padding: '1.25rem 1.5rem',
+                    fontSize: '0.9rem',
+                    color: '#374151',
+                    border: 'none',
+                    verticalAlign: 'middle',
+                    borderRight: '1px solid #f1f5f9'
+                  }}>
+                    <span 
+                      className={`role-badge role-${user.role}`}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        padding: '0.375rem 0.875rem',
+                        borderRadius: '25px',
+                        fontSize: '0.75rem',
+                        fontWeight: '600',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                        minWidth: '70px',
+                        justifyContent: 'center',
+                        background: user.role === 'admin' 
+                          ? 'linear-gradient(135deg, #7c3aed, #5b21b6)' 
+                          : 'linear-gradient(135deg, #059669, #047857)',
+                        color: 'white',
+                        boxShadow: user.role === 'admin' 
+                          ? '0 2px 8px rgba(124, 58, 237, 0.3)' 
+                          : '0 2px 8px rgba(5, 150, 105, 0.3)'
+                      }}
+                    >
                       {user.role === 'admin' ? 'Admin' : 'Editor'}
                     </span>
                   </td>
-                  <td>
-                    <span className={`status-badge ${user.status === 'active' ? 'status-published' : 'status-draft'}`}>
+                  <td style={{
+                    padding: '1.25rem 1.5rem',
+                    fontSize: '0.9rem',
+                    color: '#374151',
+                    border: 'none',
+                    verticalAlign: 'middle',
+                    borderRight: '1px solid #f1f5f9'
+                  }}>
+                    <span 
+                      className={`status-badge ${user.status === 'active' ? 'active' : 'inactive'}`}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        padding: '0.375rem 0.875rem',
+                        borderRadius: '25px',
+                        fontSize: '0.75rem',
+                        fontWeight: '600',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                        minWidth: '80px',
+                        justifyContent: 'center',
+                        background: user.status === 'active' 
+                          ? 'linear-gradient(135deg, #3b82f6, #1d4ed8)' 
+                          : 'linear-gradient(135deg, #6b7280, #4b5563)',
+                        color: 'white',
+                        boxShadow: user.status === 'active' 
+                          ? '0 2px 8px rgba(59, 130, 246, 0.3)' 
+                          : '0 2px 8px rgba(107, 114, 128, 0.3)'
+                      }}
+                    >
                       {user.status === 'active' ? 'Ativo' : 'Inativo'}
                     </span>
                   </td>
-                  <td>{new Date(user.created_at).toLocaleDateString()}</td>
-                  <td>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <td className="hide-mobile" style={{
+                    padding: '1.25rem 1.5rem',
+                    fontSize: '0.9rem',
+                    color: '#374151',
+                    border: 'none',
+                    verticalAlign: 'middle',
+                    borderRight: '1px solid #f1f5f9'
+                  }}>{new Date(user.created_at).toLocaleDateString()}</td>
+                  <td style={{
+                    padding: '1.25rem 1.5rem',
+                    fontSize: '0.9rem',
+                    color: '#374151',
+                    border: 'none',
+                    verticalAlign: 'middle'
+                  }}>
+                    <div className="action-buttons" style={{
+                      display: 'flex',
+                      gap: '0.5rem',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
                       <button
                         onClick={() => toggleStatus(user.id, user.status)}
-                        className="btn"
-                        style={{ padding: '0.25rem 0.5rem' }}
+                        className="action-btn reset"
                         title={user.status === 'active' ? 'Desativar' : 'Ativar'}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: '38px',
+                          height: '38px',
+                          border: '2px solid #d97706',
+                          borderRadius: '10px',
+                          cursor: 'pointer',
+                          transition: 'all 0.3s ease',
+                          fontSize: '0.9rem',
+                          textDecoration: 'none',
+                          background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                          color: 'white'
+                        }}
                       >
                         {user.status === 'active' ? <UserX size={16} /> : <UserCheck size={16} />}
                       </button>
                       <button
                         onClick={() => handleEdit(user)}
-                        className="btn"
-                        style={{ padding: '0.25rem 0.5rem' }}
+                        className="action-btn edit"
+                        title="Editar usuário"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: '38px',
+                          height: '38px',
+                          border: '2px solid #1d4ed8',
+                          borderRadius: '10px',
+                          cursor: 'pointer',
+                          transition: 'all 0.3s ease',
+                          fontSize: '0.9rem',
+                          textDecoration: 'none',
+                          background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
+                          color: 'white'
+                        }}
                       >
                         <Edit size={16} />
                       </button>
                       <button
                         onClick={() => handleDelete(user.id)}
-                        className="btn btn-danger"
-                        style={{ padding: '0.25rem 0.5rem' }}
+                        className="action-btn delete"
+                        title="Excluir usuário"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: '38px',
+                          height: '38px',
+                          border: '2px solid #dc2626',
+                          borderRadius: '10px',
+                          cursor: 'pointer',
+                          transition: 'all 0.3s ease',
+                          fontSize: '0.9rem',
+                          textDecoration: 'none',
+                          background: 'linear-gradient(135deg, #ef4444, #dc2626)',
+                          color: 'white'
+                        }}
                       >
                         <Trash2 size={16} />
                       </button>
@@ -226,6 +439,7 @@ const Users = () => {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       ) : (
         <div className="card">

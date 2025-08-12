@@ -1,7 +1,7 @@
-# Instruções do Projeto - Smyrna CMS
+# Instruções do Projeto - Smyrna Wiki
 
 ## Visão Geral
-Este é um sistema de gerenciamento de conteúdo (CMS) desenvolvido com React no frontend e Node.js/Express no backend, utilizando SQLite como banco de dados.
+Este é um sistema de wiki e gerenciamento de conhecimento desenvolvido com React no frontend e Node.js/Express no backend, utilizando SQLite como banco de dados.
 
 ## Arquitetura
 - **Frontend**: React 18 com Vite, React Router, Axios, React Hook Form

@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: smyrna-cms
+    name: smyrna-wiki
     env: node
     region: oregon
     plan: free

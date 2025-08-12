@@ -4,11 +4,22 @@ import { authenticateToken } from '../middleware/auth.js'
 
 const router = express.Router()
 
-// Listar todas as categorias (público)
+// Listar todas as categorias (público) com filtro por tipo
 router.get('/', (req, res) => {
   const db = database.getDb()
+  const { type } = req.query // 'wiki' ou 'blog'
   
-  db.all('SELECT * FROM categories ORDER BY name', (err, categories) => {
+  let query = 'SELECT * FROM categories'
+  let params = []
+  
+  if (type && ['wiki', 'blog'].includes(type)) {
+    query += ' WHERE type = ?'
+    params.push(type)
+  }
+  
+  query += ' ORDER BY name'
+  
+  db.all(query, params, (err, categories) => {
     if (err) {
       console.error('Erro ao buscar categorias:', err)
       return res.status(500).json({ error: 'Erro interno do servidor' })
@@ -58,7 +69,7 @@ router.get('/slug/:slug', (req, res) => {
 // Criar nova categoria (apenas admin)
 router.post('/', authenticateToken, (req, res) => {
   const db = database.getDb()
-  const { name, slug, description, color } = req.body
+  const { name, slug, description, color, type = 'blog' } = req.body
 
   // Verificar se é admin
   if (req.user.role !== 'admin') {
@@ -70,21 +81,33 @@ router.post('/', authenticateToken, (req, res) => {
     return res.status(400).json({ error: 'Nome e slug são obrigatórios' })
   }
 
-  // Verificar se o slug já existe
-  db.get('SELECT id FROM categories WHERE slug = ?', [slug], (err, existingCategory) => {
+  if (!['wiki', 'blog'].includes(type)) {
+    return res.status(400).json({ error: 'Tipo deve ser "wiki" ou "blog"' })
+  }
+
+  // Verificar se o slug já existe no mesmo tipo
+  db.get('SELECT id FROM categories WHERE slug = ? AND type = ?', [slug, type], (err, existingCategory) => {
     if (err) {
       console.error('Erro ao verificar slug:', err)
       return res.status(500).json({ error: 'Erro interno do servidor' })
     }
 
     if (existingCategory) {
-      return res.status(400).json({ error: 'Slug já existe' })
+      return res.status(400).json({ error: `Slug já existe para o tipo ${type}` })
     }
+
+    // Gerar uma cor aleatória se não fornecida
+    const colors = [
+      '#ef4444', '#f97316', '#f59e0b', '#eab308', '#84cc16', '#22c55e',
+      '#10b981', '#14b8a6', '#06b6d4', '#0ea5e9', '#3b82f6', '#6366f1',
+      '#8b5cf6', '#a855f7', '#d946ef', '#ec4899', '#f43f5e'
+    ]
+    const finalColor = color || colors[Math.floor(Math.random() * colors.length)]
 
     // Criar categoria
     db.run(
-      'INSERT INTO categories (name, slug, description, color) VALUES (?, ?, ?, ?)',
-      [name, slug, description || '', color || '#6366f1'],
+      'INSERT INTO categories (name, slug, description, color, type) VALUES (?, ?, ?, ?, ?)',
+      [name, slug, description || '', finalColor, type],
       function(err) {
         if (err) {
           console.error('Erro ao criar categoria:', err)
@@ -109,7 +132,7 @@ router.post('/', authenticateToken, (req, res) => {
 router.put('/:id', authenticateToken, (req, res) => {
   const db = database.getDb()
   const { id } = req.params
-  const { name, slug, description, color } = req.body
+  const { name, slug, description, color, type } = req.body
 
   // Verificar se é admin
   if (req.user.role !== 'admin') {
@@ -119,6 +142,10 @@ router.put('/:id', authenticateToken, (req, res) => {
   // Validações
   if (!name || !slug) {
     return res.status(400).json({ error: 'Nome e slug são obrigatórios' })
+  }
+
+  if (type && !['wiki', 'blog'].includes(type)) {
+    return res.status(400).json({ error: 'Tipo deve ser "wiki" ou "blog"' })
   }
 
   // Verificar se a categoria existe
@@ -132,21 +159,23 @@ router.put('/:id', authenticateToken, (req, res) => {
       return res.status(404).json({ error: 'Categoria não encontrada' })
     }
 
-    // Verificar se o slug já existe em outra categoria
-    db.get('SELECT id FROM categories WHERE slug = ? AND id != ?', [slug, id], (err, existingCategory) => {
+    const finalType = type || category.type
+
+    // Verificar se o slug já existe em outra categoria do mesmo tipo
+    db.get('SELECT id FROM categories WHERE slug = ? AND type = ? AND id != ?', [slug, finalType, id], (err, existingCategory) => {
       if (err) {
         console.error('Erro ao verificar slug:', err)
         return res.status(500).json({ error: 'Erro interno do servidor' })
       }
 
       if (existingCategory) {
-        return res.status(400).json({ error: 'Slug já existe' })
+        return res.status(400).json({ error: `Slug já existe para o tipo ${finalType}` })
       }
 
       // Atualizar categoria
       db.run(
-        'UPDATE categories SET name = ?, slug = ?, description = ?, color = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
-        [name, slug, description || '', color || '#6366f1', id],
+        'UPDATE categories SET name = ?, slug = ?, description = ?, color = ?, type = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+        [name, slug, description || '', color || category.color, finalType, id],
         function(err) {
           if (err) {
             console.error('Erro ao atualizar categoria:', err)
@@ -189,27 +218,43 @@ router.delete('/:id', authenticateToken, (req, res) => {
       return res.status(404).json({ error: 'Categoria não encontrada' })
     }
 
-    // Verificar se há posts usando esta categoria
-    db.get('SELECT COUNT(*) as count FROM posts WHERE category_id = ?', [id], (err, result) => {
-      if (err) {
-        console.error('Erro ao verificar posts da categoria:', err)
-        return res.status(500).json({ error: 'Erro interno do servidor' })
-      }
+    // Verificar se há posts ou pages usando esta categoria
+    const checkQueries = [
+      { table: 'posts', name: 'posts' },
+      { table: 'pages', name: 'páginas wiki' }
+    ]
 
-      if (result.count > 0) {
-        return res.status(400).json({ 
-          error: `Não é possível deletar a categoria. Existem ${result.count} post(s) usando esta categoria.` 
-        })
-      }
+    let totalCount = 0
+    let checkedTables = 0
 
-      // Deletar categoria
-      db.run('DELETE FROM categories WHERE id = ?', [id], function(err) {
+    checkQueries.forEach(({ table, name }) => {
+      db.get(`SELECT COUNT(*) as count FROM ${table} WHERE category_id = ?`, [id], (err, result) => {
         if (err) {
-          console.error('Erro ao deletar categoria:', err)
+          console.error(`Erro ao verificar ${name} da categoria:`, err)
           return res.status(500).json({ error: 'Erro interno do servidor' })
         }
 
-        res.json({ message: 'Categoria deletada com sucesso' })
+        totalCount += result.count
+        checkedTables++
+
+        // Quando todas as verificações terminarem
+        if (checkedTables === checkQueries.length) {
+          if (totalCount > 0) {
+            return res.status(400).json({ 
+              error: `Não é possível deletar a categoria. Existem ${totalCount} item(s) usando esta categoria.` 
+            })
+          }
+
+          // Deletar categoria
+          db.run('DELETE FROM categories WHERE id = ?', [id], function(err) {
+            if (err) {
+              console.error('Erro ao deletar categoria:', err)
+              return res.status(500).json({ error: 'Erro interno do servidor' })
+            }
+
+            res.json({ message: 'Categoria deletada com sucesso' })
+          })
+        }
       })
     })
   })

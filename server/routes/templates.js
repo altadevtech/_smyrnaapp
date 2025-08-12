@@ -181,14 +181,14 @@ router.delete('/:id', requireRole('admin'), (req, res) => {
       return res.status(400).json({ message: 'Não é possível excluir o template padrão' })
     }
 
-    // Verificar se há páginas usando este template
+    // Verificar se há páginas do wiki usando este template
     db.get('SELECT COUNT(*) as count FROM pages WHERE template_id = ?', [id], (err, result) => {
       if (err) {
-        return res.status(500).json({ message: 'Erro ao verificar páginas' })
+        return res.status(500).json({ message: 'Erro ao verificar páginas do wiki' })
       }
 
       if (result.count > 0) {
-        return res.status(400).json({ message: 'Não é possível excluir template em uso por páginas' })
+        return res.status(400).json({ message: 'Não é possível excluir template em uso por páginas do wiki' })
       }
 
       // Excluir template

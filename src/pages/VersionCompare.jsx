@@ -1,375 +1,336 @@
 import React, { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import api from '../services/api'
 import toast from 'react-hot-toast'
-import { 
-  GitCompare, ArrowLeft, Clock, User, 
-  ChevronLeft, ChevronRight
-} from 'lucide-react'
+import { ArrowLeft, Clock, User, Eye, Calendar, FileText, RotateCcw } from 'lucide-react'
 
 const VersionCompare = () => {
-  const { id, version1, version2 } = useParams()
-  const [versions, setVersions] = useState({ version1: null, version2: null })
+  const navigate = useNavigate()
+  const { id, versionNumber } = useParams()
+  const [version, setVersion] = useState(null)
+  const [currentPage, setCurrentPage] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [viewMode, setViewMode] = useState('side-by-side') // side-by-side, unified
+  const [restoring, setRestoring] = useState(false)
 
   useEffect(() => {
-    fetchVersions()
-  }, [id, version1, version2])
+    fetchVersionAndPage()
+  }, [id, versionNumber])
 
-  const fetchVersions = async () => {
+  const fetchVersionAndPage = async () => {
     try {
-      const response = await api.get(`/page-versions/${id}/versions/${version1}/compare/${version2}`)
-      setVersions(response.data)
+      // Buscar versão específica
+      const versionResponse = await api.get(`/pages/${id}/versions/${versionNumber}`)
+      setVersion(versionResponse.data)
+
+      // Buscar página atual para comparação
+      const pageResponse = await api.get(`/pages/${id}`)
+      setCurrentPage(pageResponse.data)
     } catch (error) {
-      console.error('Erro ao carregar versões:', error)
-      toast.error('Erro ao carregar comparação')
+      toast.error('Erro ao carregar versão')
+      navigate(`/admin/pages/${id}/versions`)
     }
     setLoading(false)
   }
 
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleString('pt-BR', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    })
+  const restoreVersion = async () => {
+    const changeSummary = prompt(`Descreva o motivo da restauração da versão ${versionNumber}:`)
+    if (changeSummary === null) return // Usuário cancelou
+
+    setRestoring(true)
+    
+    try {
+      await api.post(`/pages/${id}/versions/${versionNumber}/restore`, {
+        changeSummary: changeSummary || `Restaurada versão ${versionNumber}`
+      })
+      
+      toast.success(`Versão ${versionNumber} restaurada com sucesso!`)
+      navigate(`/admin/pages/${id}/edit`)
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Erro ao restaurar versão')
+    }
+    
+    setRestoring(false)
   }
-
-  const renderSideBySide = () => (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
-      {/* Versão 1 */}
-      <div className="card" style={{ padding: '1.5rem' }}>
-        <div style={{ 
-          borderBottom: '2px solid #ef4444', 
-          paddingBottom: '1rem', 
-          marginBottom: '1.5rem' 
-        }}>
-          <h3 style={{ margin: 0, color: '#ef4444' }}>
-            Versão {versions.version1.version_number} (Anterior)
-          </h3>
-          <div style={{ fontSize: '0.875rem', color: '#666', marginTop: '0.5rem' }}>
-            <Clock size={14} style={{ verticalAlign: 'middle', marginRight: '0.25rem' }} />
-            {formatDate(versions.version1.created_at)}
-            <span style={{ margin: '0 0.5rem' }}>•</span>
-            <User size={14} style={{ verticalAlign: 'middle', marginRight: '0.25rem' }} />
-            {versions.version1.author_name}
-          </div>
-        </div>
-
-        <div style={{ marginBottom: '1.5rem' }}>
-          <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '1rem' }}>Título:</h4>
-          <div style={{ 
-            padding: '0.75rem',
-            backgroundColor: '#fef2f2',
-            border: '1px solid #fecaca',
-            borderRadius: '4px',
-            fontWeight: 'bold'
-          }}>
-            {versions.version1.title}
-          </div>
-        </div>
-
-        <div>
-          <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '1rem' }}>Conteúdo:</h4>
-          <div style={{ 
-            padding: '1rem',
-            backgroundColor: '#fef2f2',
-            border: '1px solid #fecaca',
-            borderRadius: '4px',
-            maxHeight: '400px',
-            overflowY: 'auto',
-            fontSize: '0.875rem',
-            lineHeight: '1.5'
-          }}>
-            <div dangerouslySetInnerHTML={{ __html: versions.version1.content }} />
-          </div>
-        </div>
-      </div>
-
-      {/* Versão 2 */}
-      <div className="card" style={{ padding: '1.5rem' }}>
-        <div style={{ 
-          borderBottom: '2px solid #10b981', 
-          paddingBottom: '1rem', 
-          marginBottom: '1.5rem' 
-        }}>
-          <h3 style={{ margin: 0, color: '#10b981' }}>
-            Versão {versions.version2.version_number} (Posterior)
-          </h3>
-          <div style={{ fontSize: '0.875rem', color: '#666', marginTop: '0.5rem' }}>
-            <Clock size={14} style={{ verticalAlign: 'middle', marginRight: '0.25rem' }} />
-            {formatDate(versions.version2.created_at)}
-            <span style={{ margin: '0 0.5rem' }}>•</span>
-            <User size={14} style={{ verticalAlign: 'middle', marginRight: '0.25rem' }} />
-            {versions.version2.author_name}
-          </div>
-        </div>
-
-        <div style={{ marginBottom: '1.5rem' }}>
-          <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '1rem' }}>Título:</h4>
-          <div style={{ 
-            padding: '0.75rem',
-            backgroundColor: '#f0fdf4',
-            border: '1px solid #bbf7d0',
-            borderRadius: '4px',
-            fontWeight: 'bold'
-          }}>
-            {versions.version2.title}
-          </div>
-        </div>
-
-        <div>
-          <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '1rem' }}>Conteúdo:</h4>
-          <div style={{ 
-            padding: '1rem',
-            backgroundColor: '#f0fdf4',
-            border: '1px solid #bbf7d0',
-            borderRadius: '4px',
-            maxHeight: '400px',
-            overflowY: 'auto',
-            fontSize: '0.875rem',
-            lineHeight: '1.5'
-          }}>
-            <div dangerouslySetInnerHTML={{ __html: versions.version2.content }} />
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-
-  const renderUnified = () => (
-    <div className="card" style={{ padding: '1.5rem' }}>
-      <div style={{ marginBottom: '2rem' }}>
-        <h3 style={{ margin: '0 0 1rem 0' }}>Comparação Unificada</h3>
-        
-        {/* Title Comparison */}
-        <div style={{ marginBottom: '2rem' }}>
-          <h4 style={{ margin: '0 0 1rem 0' }}>Título:</h4>
-          
-          {versions.version1.title !== versions.version2.title ? (
-            <div>
-              <div style={{ 
-                padding: '0.75rem',
-                backgroundColor: '#fef2f2',
-                border: '1px solid #fecaca',
-                borderRadius: '4px',
-                marginBottom: '0.5rem',
-                position: 'relative'
-              }}>
-                <span style={{ 
-                  position: 'absolute',
-                  top: '-8px',
-                  left: '8px',
-                  backgroundColor: '#ef4444',
-                  color: 'white',
-                  padding: '2px 8px',
-                  fontSize: '0.75rem',
-                  borderRadius: '4px'
-                }}>
-                  - V{versions.version1.version_number}
-                </span>
-                {versions.version1.title}
-              </div>
-              
-              <div style={{ 
-                padding: '0.75rem',
-                backgroundColor: '#f0fdf4',
-                border: '1px solid #bbf7d0',
-                borderRadius: '4px',
-                position: 'relative'
-              }}>
-                <span style={{ 
-                  position: 'absolute',
-                  top: '-8px',
-                  left: '8px',
-                  backgroundColor: '#10b981',
-                  color: 'white',
-                  padding: '2px 8px',
-                  fontSize: '0.75rem',
-                  borderRadius: '4px'
-                }}>
-                  + V{versions.version2.version_number}
-                </span>
-                {versions.version2.title}
-              </div>
-            </div>
-          ) : (
-            <div style={{ 
-              padding: '0.75rem',
-              backgroundColor: '#f8f9fa',
-              border: '1px solid #e9ecef',
-              borderRadius: '4px',
-              color: '#666'
-            }}>
-              Sem alterações no título
-            </div>
-          )}
-        </div>
-
-        {/* Content Comparison */}
-        <div>
-          <h4 style={{ margin: '0 0 1rem 0' }}>Conteúdo:</h4>
-          
-          {versions.version1.content !== versions.version2.content ? (
-            <div>
-              <div style={{ 
-                padding: '1rem',
-                backgroundColor: '#fef2f2',
-                border: '1px solid #fecaca',
-                borderRadius: '4px',
-                marginBottom: '1rem',
-                position: 'relative',
-                maxHeight: '300px',
-                overflowY: 'auto'
-              }}>
-                <span style={{ 
-                  position: 'absolute',
-                  top: '-8px',
-                  left: '8px',
-                  backgroundColor: '#ef4444',
-                  color: 'white',
-                  padding: '2px 8px',
-                  fontSize: '0.75rem',
-                  borderRadius: '4px'
-                }}>
-                  - Versão {versions.version1.version_number}
-                </span>
-                <div 
-                  style={{ fontSize: '0.875rem', lineHeight: '1.5', marginTop: '1rem' }}
-                  dangerouslySetInnerHTML={{ __html: versions.version1.content }} 
-                />
-              </div>
-              
-              <div style={{ 
-                padding: '1rem',
-                backgroundColor: '#f0fdf4',
-                border: '1px solid #bbf7d0',
-                borderRadius: '4px',
-                position: 'relative',
-                maxHeight: '300px',
-                overflowY: 'auto'
-              }}>
-                <span style={{ 
-                  position: 'absolute',
-                  top: '-8px',
-                  left: '8px',
-                  backgroundColor: '#10b981',
-                  color: 'white',
-                  padding: '2px 8px',
-                  fontSize: '0.75rem',
-                  borderRadius: '4px'
-                }}>
-                  + Versão {versions.version2.version_number}
-                </span>
-                <div 
-                  style={{ fontSize: '0.875rem', lineHeight: '1.5', marginTop: '1rem' }}
-                  dangerouslySetInnerHTML={{ __html: versions.version2.content }} 
-                />
-              </div>
-            </div>
-          ) : (
-            <div style={{ 
-              padding: '1rem',
-              backgroundColor: '#f8f9fa',
-              border: '1px solid #e9ecef',
-              borderRadius: '4px',
-              color: '#666',
-              textAlign: 'center'
-            }}>
-              Sem alterações no conteúdo
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  )
 
   if (loading) {
-    return <div className="loading">Carregando comparação...</div>
+    return <div className="loading">Carregando versão...</div>
   }
 
-  if (!versions.version1 || !versions.version2) {
-    return (
-      <div className="error-page">
-        <h1>Erro</h1>
-        <p>Não foi possível carregar as versões para comparação.</p>
-        <button onClick={() => window.history.back()} className="btn btn-primary">
-          <ArrowLeft size={18} /> Voltar
-        </button>
-      </div>
-    )
+  if (!version) {
+    return <div>Versão não encontrada</div>
   }
 
   return (
-    <div>
+    <div style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
       {/* Header */}
       <div style={{ 
         display: 'flex', 
-        justifyContent: 'space-between', 
         alignItems: 'center', 
-        marginBottom: '2rem' 
+        gap: '1rem', 
+        marginBottom: '2rem',
+        padding: '1.5rem',
+        background: 'linear-gradient(135deg, rgb(102, 234, 205) 0%, rgb(75, 129, 162) 100%)',
+        borderRadius: '12px',
+        color: 'white'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <button 
-            onClick={() => window.history.back()}
-            className="btn"
-            style={{ padding: '0.5rem' }}
-          >
-            <ArrowLeft size={18} />
-          </button>
-          <h1>
-            <GitCompare size={24} style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} />
-            Comparar Versões
+        <button 
+          onClick={() => navigate(`/admin/pages/${id}/versions`)} 
+          style={{
+            background: 'rgba(255, 255, 255, 0.2)',
+            border: 'none',
+            borderRadius: '8px',
+            padding: '0.75rem',
+            color: 'white',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transition: 'all 0.3s ease'
+          }}
+          onMouseEnter={(e) => {
+            e.target.style.background = 'rgba(255, 255, 255, 0.3)'
+            e.target.style.transform = 'translateY(-2px)'
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.background = 'rgba(255, 255, 255, 0.2)'
+            e.target.style.transform = 'translateY(0)'
+          }}
+        >
+          <ArrowLeft size={20} />
+        </button>
+        <div style={{ flex: 1 }}>
+          <h1 style={{ margin: '0 0 0.5rem 0', fontSize: '1.75rem', fontWeight: '700' }}>
+            <Eye size={24} style={{ marginRight: '0.5rem', verticalAlign: 'middle' }} />
+            Visualizar Versão {versionNumber}
           </h1>
+          <p style={{ margin: 0, opacity: 0.9, fontSize: '1rem' }}>
+            {version.title}
+          </p>
         </div>
-
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
-          <button
-            onClick={() => setViewMode('side-by-side')}
-            className={`btn ${viewMode === 'side-by-side' ? 'btn-primary' : ''}`}
-            style={{ padding: '0.5rem 1rem' }}
-          >
-            <ChevronLeft size={16} style={{ marginRight: '0.25rem' }} />
-            <ChevronRight size={16} style={{ marginRight: '0.5rem' }} />
-            Lado a Lado
-          </button>
-          <button
-            onClick={() => setViewMode('unified')}
-            className={`btn ${viewMode === 'unified' ? 'btn-primary' : ''}`}
-            style={{ padding: '0.5rem 1rem' }}
-          >
-            Unificado
-          </button>
-        </div>
+        <button
+          onClick={restoreVersion}
+          disabled={restoring}
+          style={{
+            background: restoring ? '#9ca3af' : 'rgba(255, 255, 255, 0.2)',
+            border: 'none',
+            borderRadius: '8px',
+            padding: '0.75rem 1.5rem',
+            color: 'white',
+            cursor: restoring ? 'not-allowed' : 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            fontSize: '0.9rem',
+            fontWeight: '600',
+            transition: 'all 0.3s ease'
+          }}
+          onMouseEnter={(e) => {
+            if (!restoring) {
+              e.target.style.background = 'rgba(255, 255, 255, 0.3)'
+              e.target.style.transform = 'translateY(-2px)'
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (!restoring) {
+              e.target.style.background = 'rgba(255, 255, 255, 0.2)'
+              e.target.style.transform = 'translateY(0)'
+            }
+          }}
+        >
+          {restoring ? (
+            <>
+              <div style={{
+                width: '16px',
+                height: '16px',
+                border: '2px solid rgba(255, 255, 255, 0.3)',
+                borderTop: '2px solid white',
+                borderRadius: '50%',
+                animation: 'spin 1s linear infinite'
+              }}></div>
+              Restaurando...
+            </>
+          ) : (
+            <>
+              <RotateCcw size={16} />
+              Restaurar Esta Versão
+            </>
+          )}
+        </button>
       </div>
 
-      {/* Comparison Info */}
-      <div className="card" style={{ marginBottom: '2rem', padding: '1rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div>
-            <h3 style={{ margin: 0 }}>
-              Versão {versions.version1.version_number} ↔ Versão {versions.version2.version_number}
-            </h3>
-            <div style={{ fontSize: '0.875rem', color: '#666', marginTop: '0.25rem' }}>
-              Comparando alterações entre as versões selecionadas
+      {/* Version Info */}
+      <div style={{
+        background: 'white',
+        borderRadius: '12px',
+        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
+        border: '1px solid #e5e7eb',
+        marginBottom: '2rem',
+        overflow: 'hidden'
+      }}>
+        <div style={{
+          padding: '1.5rem',
+          background: '#f8fafc',
+          borderBottom: '1px solid #e5e7eb'
+        }}>
+          <h3 style={{ margin: '0 0 1rem 0', color: '#1e293b', fontSize: '1.2rem', fontWeight: '600' }}>
+            Informações da Versão
+          </h3>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: '1rem',
+            fontSize: '0.9rem'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#64748b' }}>
+              <Clock size={16} />
+              <span><strong>Data:</strong> {new Date(version.created_at).toLocaleString('pt-BR')}</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#64748b' }}>
+              <User size={16} />
+              <span><strong>Autor:</strong> {version.author_name || 'Usuário desconhecido'}</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#64748b' }}>
+              <FileText size={16} />
+              <span><strong>Versão:</strong> {version.version_number}</span>
             </div>
           </div>
-          
-          <div style={{ textAlign: 'right', fontSize: '0.875rem', color: '#666' }}>
-            <div>Diferença de tempo: {
-              Math.abs(new Date(versions.version2.created_at) - new Date(versions.version1.created_at)) / (1000 * 60 * 60 * 24) < 1 
-                ? 'Menos de 1 dia'
-                : `${Math.ceil(Math.abs(new Date(versions.version2.created_at) - new Date(versions.version1.created_at)) / (1000 * 60 * 60 * 24))} dias`
-            }</div>
-          </div>
+          {version.change_summary && (
+            <div style={{ marginTop: '1rem' }}>
+              <strong style={{ color: '#1e293b' }}>Resumo das alterações:</strong>
+              <div style={{
+                marginTop: '0.5rem',
+                padding: '1rem',
+                background: 'white',
+                border: '1px solid #e5e7eb',
+                borderRadius: '8px',
+                color: '#374151'
+              }}>
+                {version.change_summary}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Comparison Content */}
-      {viewMode === 'side-by-side' ? renderSideBySide() : renderUnified()}
+      {/* Content Comparison */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr',
+        gap: '2rem'
+      }}>
+        {/* Version Content */}
+        <div style={{
+          background: 'white',
+          borderRadius: '12px',
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
+          border: '1px solid #e5e7eb',
+          overflow: 'hidden'
+        }}>
+          <div style={{
+            padding: '1rem 1.5rem',
+            background: 'linear-gradient(135deg, rgb(102, 234, 205) 0%, rgb(75, 129, 162) 100%)',
+            color: 'white',
+            fontSize: '1rem',
+            fontWeight: '600'
+          }}>
+            Conteúdo da Versão {versionNumber}
+          </div>
+          <div style={{ padding: '2rem' }}>
+            <h2 style={{ 
+              margin: '0 0 1.5rem 0', 
+              color: '#1e293b',
+              fontSize: '1.5rem',
+              fontWeight: '700',
+              borderBottom: '2px solid #e5e7eb',
+              paddingBottom: '1rem'
+            }}>
+              {version.title}
+            </h2>
+            <div 
+              style={{ 
+                lineHeight: '1.7',
+                color: '#374151',
+                fontSize: '1rem'
+              }}
+              dangerouslySetInnerHTML={{ __html: version.content }}
+            />
+          </div>
+        </div>
+
+        {/* Current Page Comparison */}
+        {currentPage && (
+          <div style={{
+            background: 'white',
+            borderRadius: '12px',
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
+            border: '1px solid #e5e7eb',
+            overflow: 'hidden'
+          }}>
+            <div style={{
+              padding: '1rem 1.5rem',
+              background: '#f8fafc',
+              borderBottom: '1px solid #e5e7eb',
+              color: '#64748b',
+              fontSize: '1rem',
+              fontWeight: '600'
+            }}>
+              Versão Atual (para comparação)
+            </div>
+            <div style={{ padding: '2rem' }}>
+              <h2 style={{ 
+                margin: '0 0 1.5rem 0', 
+                color: '#1e293b',
+                fontSize: '1.5rem',
+                fontWeight: '700',
+                borderBottom: '2px solid #e5e7eb',
+                paddingBottom: '1rem'
+              }}>
+                {currentPage.title}
+              </h2>
+              <div 
+                style={{ 
+                  lineHeight: '1.7',
+                  color: '#374151',
+                  fontSize: '1rem'
+                }}
+                dangerouslySetInnerHTML={{ __html: currentPage.content }}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Warning Box */}
+      <div style={{
+        marginTop: '2rem',
+        padding: '1.5rem',
+        background: 'rgba(239, 68, 68, 0.1)',
+        borderRadius: '12px',
+        border: '1px solid rgba(239, 68, 68, 0.3)',
+        fontSize: '0.9rem',
+        color: '#dc2626'
+      }}>
+        <h4 style={{
+          margin: '0 0 1rem 0',
+          color: '#b91c1c',
+          fontSize: '1rem',
+          fontWeight: '600'
+        }}>
+          ⚠️ Atenção
+        </h4>
+        <p style={{ margin: 0, lineHeight: 1.6 }}>
+          Ao restaurar esta versão, o conteúdo atual da página será substituído. 
+          Uma nova versão será criada automaticamente para preservar o estado atual antes da restauração.
+        </p>
+      </div>
+
+      {/* Adicionar a animação de loading no CSS */}
+      <style jsx>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   )
 }

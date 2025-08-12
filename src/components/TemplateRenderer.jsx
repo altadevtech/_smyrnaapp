@@ -55,7 +55,7 @@ const TemplateRenderer = ({ page, template, widgets = {} }) => {
       {template.show_footer !== false && (
         <footer className="template-footer">
           <div className="footer-content">
-            <p>&copy; 2025 Smyrna CMS. Todos os direitos reservados.</p>
+            <p>&copy; 2025 Smyrna Wiki. Todos os direitos reservados.</p>
           </div>
         </footer>
       )}

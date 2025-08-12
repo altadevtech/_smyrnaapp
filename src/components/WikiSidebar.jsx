@@ -37,7 +37,7 @@ const WikiSidebar = () => {
       const response = await api.get('/pages/public')
       setPages(response.data)
     } catch (error) {
-      console.error('Erro ao carregar páginas:', error)
+      console.error('Erro ao carregar wiki:', error)
     }
   }
 
@@ -55,7 +55,7 @@ const WikiSidebar = () => {
       )
       setFilteredPages(filtered)
     } catch (error) {
-      console.error('Erro ao filtrar páginas:', error)
+      console.error('Erro ao filtrar wiki:', error)
       setFilteredPages([])
     }
   }
@@ -118,7 +118,7 @@ const WikiSidebar = () => {
           }} />
           <input
             type="text"
-            placeholder="Buscar páginas..."
+            placeholder="Buscar no wiki..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             style={{

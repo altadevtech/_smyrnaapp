@@ -89,7 +89,7 @@ class Database {
         )
       `
 
-      // Tabela de páginas
+      // Tabela do wiki
       const pageTable = `
         CREATE TABLE IF NOT EXISTS pages (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -101,10 +101,12 @@ class Database {
           widget_data JSON,
           slug TEXT UNIQUE,
           is_home BOOLEAN DEFAULT false,
+          category_id INTEGER,
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
           updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
           FOREIGN KEY (author_id) REFERENCES users (id),
-          FOREIGN KEY (template_id) REFERENCES templates (id)
+          FOREIGN KEY (template_id) REFERENCES templates (id),
+          FOREIGN KEY (category_id) REFERENCES categories (id)
         )
       `
 
@@ -128,12 +130,15 @@ class Database {
       const categoryTable = `
         CREATE TABLE IF NOT EXISTS categories (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
-          name TEXT NOT NULL UNIQUE,
-          slug TEXT NOT NULL UNIQUE,
+          name TEXT NOT NULL,
+          slug TEXT NOT NULL,
           description TEXT,
+          type TEXT NOT NULL DEFAULT 'blog',
           color TEXT DEFAULT '#3b82f6',
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          UNIQUE(name, type),
+          UNIQUE(slug, type)
         )
       `
 
@@ -184,7 +189,7 @@ class Database {
         )
       `
 
-      // Tabela de versões de páginas
+      // Tabela de versões do wiki
       const pageVersionsTable = `
         CREATE TABLE IF NOT EXISTS page_versions (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -201,7 +206,7 @@ class Database {
         )
       `
 
-      // Tabela de comentários nas páginas
+      // Tabela de comentários no wiki
       const pageCommentsTable = `
         CREATE TABLE IF NOT EXISTS page_comments (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -392,41 +397,75 @@ class Database {
         console.log('➕ Criando categorias padrão...')
         
         const defaultCategories = [
+          // Categorias para Blog
           {
             name: 'Geral',
             slug: 'geral',
             description: 'Categoria geral para posts diversos',
-            color: '#6366f1'
+            color: '#6366f1',
+            type: 'blog'
           },
           {
             name: 'Tecnologia',
             slug: 'tecnologia',
             description: 'Posts sobre tecnologia e inovação',
-            color: '#06b6d4'
+            color: '#06b6d4',
+            type: 'blog'
           },
           {
             name: 'Negócios',
             slug: 'negocios',
             description: 'Conteúdo relacionado a negócios e economia',
-            color: '#10b981'
+            color: '#10b981',
+            type: 'blog'
           },
           {
             name: 'Anúncios',
             slug: 'anuncios',
             description: 'Comunicados e anúncios importantes',
-            color: '#f59e0b'
+            color: '#f59e0b',
+            type: 'blog'
+          },
+          // Categorias para Wiki
+          {
+            name: 'Documentação',
+            slug: 'documentacao',
+            description: 'Documentação técnica e procedimentos',
+            color: '#8b5cf6',
+            type: 'wiki'
+          },
+          {
+            name: 'Tutoriais',
+            slug: 'tutoriais',
+            description: 'Guias e tutoriais passo a passo',
+            color: '#ef4444',
+            type: 'wiki'
+          },
+          {
+            name: 'FAQ',
+            slug: 'faq',
+            description: 'Perguntas frequentes e respostas',
+            color: '#f97316',
+            type: 'wiki'
+          },
+          {
+            name: 'Conhecimento Geral',
+            slug: 'conhecimento-geral',
+            description: 'Conhecimento geral e informações úteis',
+            color: '#22c55e',
+            type: 'wiki'
           }
         ]
 
         defaultCategories.forEach((category, index) => {
           this.db.run(
-            'INSERT INTO categories (name, slug, description, color) VALUES (?, ?, ?, ?)',
-            [category.name, category.slug, category.description, category.color],
+            'INSERT INTO categories (name, slug, description, color, type) VALUES (?, ?, ?, ?, ?)',
+            [category.name, category.slug, category.description, category.color, category.type],
             function(err) {
               if (err) {
                 console.error(`❌ Erro ao criar categoria ${category.name}:`, err)
               } else {
-                console.log(`✅ Categoria "${category.name}" criada, ID:`, this.lastID)
+                console.log(`✅ Categoria "${category.name}" (${category.type}) criada, ID:`, this.lastID)
               }
             }
           )

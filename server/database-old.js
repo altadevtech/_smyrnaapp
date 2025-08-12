@@ -253,8 +253,8 @@ class Database {
         
         // Widget 1 - Banner Principal
         const bannerConfig = {
-          title: 'Bem-vindo ao Smyrna CMS',
-          description: 'Sistema de gerenciamento de conteúdo moderno e eficiente',
+          title: 'Bem-vindo ao Smyrna Wiki',
+          description: 'Sistema de wiki e gerenciamento de conhecimento moderno e eficiente',
           image: '',
           link: '#',
           buttonText: 'Saiba Mais'

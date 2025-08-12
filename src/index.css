@@ -18,28 +18,29 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  text-align: left;
 }
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
+  display: block;
   min-width: 320px;
   min-height: 100vh;
+  text-align: left;
 }
 
 #root {
   max-width: 100%;
-  margin: 0 auto;
+  margin: 0;
   padding: 0rem;
-  text-align: center;
+  text-align: left;
   width: 100%;
 }
 
 .container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 30px 20px;
 }
 
 .btn {
@@ -94,7 +95,7 @@ body {
   list-style: none;
   display: flex;
   gap: 1rem;
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 .navbar a {
@@ -111,8 +112,8 @@ body {
 .card {
   color: black;
   border-radius: 0px;
-  padding-top: 1rem;
-  margin-bottom: 1rem;
+  padding-top: 0rem;
+  margin-bottom: 0rem;
 }
 
 .grid {

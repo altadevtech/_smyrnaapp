@@ -3,13 +3,14 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from './contexts/AuthContext'
 import { SettingsProvider } from './contexts/SettingsContext'
-import Navbar from './components/Navbar'
+import Navbar from './components/NavbarNew'
 import Footer from './components/Footer'
 import DynamicHome from './pages/DynamicHome'
 import PublicPages from './pages/PublicPages'
 import DynamicPublicPage from './pages/DynamicPublicPage'
 import PublicBlog from './pages/PublicBlog'
 import PublicPost from './pages/PublicPost'
+import Contact from './pages/Contact'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Pages from './pages/Pages'
@@ -60,6 +61,7 @@ function App() {
               <Route path="/blog" element={<PublicBlog />} />
               <Route path="/blog/categoria/:categorySlug" element={<PublicBlog />} />
               <Route path="/blog/:slug" element={<PublicPost />} />
+              <Route path="/contact" element={<Contact />} />
               <Route path="/login" element={<Login />} />
               <Route path="/admin/login" element={<Login />} />
               
@@ -105,7 +107,7 @@ function App() {
                 } 
               />
               <Route 
-                path="/admin/pages/:id/versions/compare/:version1/:version2" 
+                path="/admin/pages/:id/versions/:versionNumber" 
                 element={
                   <ProtectedRoute>
                     <VersionCompare />

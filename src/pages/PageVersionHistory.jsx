@@ -1,109 +1,59 @@
 import React, { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import api from '../services/api'
 import toast from 'react-hot-toast'
-import { 
-  History, ArrowLeft, Eye, RotateCcw, GitCompare,
-  Clock, User, FileText, ChevronDown, ChevronRight
-} from 'lucide-react'
+import { ArrowLeft, Clock, User, RotateCcw, Eye, Calendar, FileText } from 'lucide-react'
 
 const PageVersionHistory = () => {
+  const navigate = useNavigate()
   const { id } = useParams()
   const [versions, setVersions] = useState([])
   const [page, setPage] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [selectedVersions, setSelectedVersions] = useState([])
-  const [expandedVersions, setExpandedVersions] = useState(new Set())
+  const [restoring, setRestoring] = useState(null)
 
   useEffect(() => {
-    fetchVersions()
-    fetchPage()
+    fetchPageAndVersions()
   }, [id])
 
-  const fetchVersions = async () => {
+  const fetchPageAndVersions = async () => {
     try {
-      const response = await api.get(`/page-versions/${id}/versions`)
-      setVersions(response.data)
+      // Buscar informações da página
+      const pageResponse = await api.get(`/pages/${id}`)
+      setPage(pageResponse.data)
+
+      // Buscar versões
+      const versionsResponse = await api.get(`/pages/${id}/versions`)
+      setVersions(versionsResponse.data)
     } catch (error) {
-      console.error('Erro ao carregar versões:', error)
-      toast.error('Erro ao carregar histórico')
+      toast.error('Erro ao carregar histórico de versões')
+      navigate('/admin/pages')
     }
     setLoading(false)
   }
 
-  const fetchPage = async () => {
+  const restoreVersion = async (versionNumber) => {
+    const changeSummary = prompt(`Descreva o motivo da restauração da versão ${versionNumber}:`)
+    if (changeSummary === null) return // Usuário cancelou
+
+    setRestoring(versionNumber)
+    
     try {
-      const response = await api.get(`/pages/${id}`)
-      setPage(response.data)
+      await api.post(`/pages/${id}/versions/${versionNumber}/restore`, {
+        changeSummary: changeSummary || `Restaurada versão ${versionNumber}`
+      })
+      
+      toast.success(`Versão ${versionNumber} restaurada com sucesso!`)
+      fetchPageAndVersions() // Recarregar para mostrar nova versão
     } catch (error) {
-      console.error('Erro ao carregar página:', error)
+      toast.error(error.response?.data?.message || 'Erro ao restaurar versão')
     }
+    
+    setRestoring(null)
   }
 
-  const handleRestore = async (versionNumber) => {
-    if (!window.confirm(`Tem certeza que deseja restaurar a versão ${versionNumber}?`)) {
-      return
-    }
-
-    try {
-      await api.post(`/page-versions/${id}/versions/${versionNumber}/restore`)
-      toast.success('Versão restaurada com sucesso!')
-      fetchVersions()
-      fetchPage()
-    } catch (error) {
-      console.error('Erro ao restaurar versão:', error)
-      toast.error('Erro ao restaurar versão')
-    }
-  }
-
-  const handleCompare = () => {
-    if (selectedVersions.length !== 2) {
-      toast.error('Selecione exatamente 2 versões para comparar')
-      return
-    }
-
-    const [v1, v2] = selectedVersions.sort((a, b) => b - a)
-    window.open(`/admin/pages/${id}/versions/compare/${v1}/${v2}`, '_blank')
-  }
-
-  const toggleVersionSelection = (versionNumber) => {
-    setSelectedVersions(prev => {
-      if (prev.includes(versionNumber)) {
-        return prev.filter(v => v !== versionNumber)
-      } else if (prev.length < 2) {
-        return [...prev, versionNumber]
-      } else {
-        toast.warning('Máximo de 2 versões para comparação')
-        return prev
-      }
-    })
-  }
-
-  const toggleVersionExpansion = (versionNumber) => {
-    setExpandedVersions(prev => {
-      const newSet = new Set(prev)
-      if (newSet.has(versionNumber)) {
-        newSet.delete(versionNumber)
-      } else {
-        newSet.add(versionNumber)
-      }
-      return newSet
-    })
-  }
-
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleString('pt-BR', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    })
-  }
-
-  const getContentPreview = (content) => {
-    const textContent = content.replace(/<[^>]*>/g, '')
-    return textContent.length > 200 ? textContent.substring(0, 200) + '...' : textContent
+  const viewVersion = (versionNumber) => {
+    navigate(`/admin/pages/${id}/versions/${versionNumber}`)
   }
 
   if (loading) {
@@ -111,202 +61,306 @@ const PageVersionHistory = () => {
   }
 
   return (
-    <div>
+    <div style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
       {/* Header */}
       <div style={{ 
         display: 'flex', 
-        justifyContent: 'space-between', 
         alignItems: 'center', 
-        marginBottom: '2rem' 
+        gap: '1rem', 
+        marginBottom: '2rem',
+        padding: '1.5rem',
+        background: 'linear-gradient(135deg, rgb(102, 234, 205) 0%, rgb(75, 129, 162) 100%)',
+        borderRadius: '12px',
+        color: 'white'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <button 
-            onClick={() => window.history.back()}
-            className="btn"
-            style={{ padding: '0.5rem' }}
-          >
-            <ArrowLeft size={18} />
-          </button>
-          <h1>
-            <History size={24} style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} />
+        <button 
+          onClick={() => navigate(`/admin/pages/${id}/edit`)} 
+          style={{
+            background: 'rgba(255, 255, 255, 0.2)',
+            border: 'none',
+            borderRadius: '8px',
+            padding: '0.75rem',
+            color: 'white',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transition: 'all 0.3s ease'
+          }}
+          onMouseEnter={(e) => {
+            e.target.style.background = 'rgba(255, 255, 255, 0.3)'
+            e.target.style.transform = 'translateY(-2px)'
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.background = 'rgba(255, 255, 255, 0.2)'
+            e.target.style.transform = 'translateY(0)'
+          }}
+        >
+          <ArrowLeft size={20} />
+        </button>
+        <div>
+          <h1 style={{ margin: '0 0 0.5rem 0', fontSize: '1.75rem', fontWeight: '700' }}>
+            <Clock size={24} style={{ marginRight: '0.5rem', verticalAlign: 'middle' }} />
             Histórico de Versões
           </h1>
-        </div>
-
-        {selectedVersions.length === 2 && (
-          <button
-            onClick={handleCompare}
-            className="btn btn-primary"
-            style={{ padding: '0.5rem 1rem' }}
-          >
-            <GitCompare size={16} style={{ marginRight: '0.5rem' }} />
-            Comparar Versões
-          </button>
-        )}
-      </div>
-
-      {/* Page Info */}
-      {page && (
-        <div className="card" style={{ marginBottom: '2rem', padding: '1rem' }}>
-          <h3 style={{ margin: '0 0 0.5rem 0' }}>
-            <FileText size={18} style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} />
-            {page.title}
-          </h3>
-          <div style={{ fontSize: '0.875rem', color: '#666' }}>
-            <strong>Versão atual:</strong> {versions.length > 0 ? versions[0].version_number : 'N/A'} | 
-            <strong> Total de versões:</strong> {versions.length}
-          </div>
-        </div>
-      )}
-
-      {/* Instructions */}
-      <div className="card" style={{ marginBottom: '2rem', padding: '1rem', backgroundColor: '#f8f9fa' }}>
-        <div style={{ fontSize: '0.875rem', color: '#666' }}>
-          💡 <strong>Instruções:</strong> Clique nas caixas de seleção para escolher 2 versões e compará-las. 
-          Use o botão de restaurar para voltar a uma versão anterior.
+          {page && (
+            <p style={{ margin: 0, opacity: 0.9, fontSize: '1rem' }}>
+              Página: <strong>{page.title}</strong>
+            </p>
+          )}
         </div>
       </div>
 
       {/* Versions List */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        {versions.map((version, index) => {
-          const isExpanded = expandedVersions.has(version.version_number)
-          const isSelected = selectedVersions.includes(version.version_number)
-          const isCurrent = index === 0
+      <div style={{
+        background: 'white',
+        borderRadius: '12px',
+        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
+        border: '1px solid #e5e7eb',
+        overflow: 'hidden'
+      }}>
+        {versions.length === 0 ? (
+          <div style={{
+            padding: '3rem',
+            textAlign: 'center',
+            color: '#64748b'
+          }}>
+            <FileText size={48} style={{ marginBottom: '1rem', opacity: 0.5 }} />
+            <h3 style={{ margin: '0 0 0.5rem 0', color: '#374151' }}>
+              Nenhuma versão encontrada
+            </h3>
+            <p style={{ margin: 0 }}>
+              As versões serão criadas automaticamente quando a página for editada.
+            </p>
+          </div>
+        ) : (
+          <div>
+            {/* Header da tabela */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: '100px 1fr 150px 200px 150px',
+              gap: '1rem',
+              padding: '1rem 1.5rem',
+              background: 'linear-gradient(135deg, rgb(102, 234, 205) 0%, rgb(75, 129, 162) 100%)',
+              color: 'white',
+              fontSize: '0.9rem',
+              fontWeight: '600',
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px'
+            }}>
+              <div>Versão</div>
+              <div>Resumo das Alterações</div>
+              <div>Autor</div>
+              <div>Data</div>
+              <div>Ações</div>
+            </div>
 
-          return (
-            <div 
-              key={version.id} 
-              className="card"
-              style={{ 
-                padding: '1.5rem',
-                border: isSelected ? '2px solid #3b82f6' : '1px solid #e5e7eb',
-                backgroundColor: isCurrent ? '#f0f9ff' : 'white'
-              }}
-            >
-              {/* Version Header */}
-              <div style={{ 
-                display: 'flex', 
-                justifyContent: 'space-between', 
-                alignItems: 'center',
-                marginBottom: '1rem'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  <input
-                    type="checkbox"
-                    checked={isSelected}
-                    onChange={() => toggleVersionSelection(version.version_number)}
-                    style={{ marginRight: '0.5rem' }}
-                  />
-                  
-                  <div>
-                    <h4 style={{ margin: 0, display: 'flex', alignItems: 'center' }}>
-                      Versão {version.version_number}
-                      {isCurrent && (
-                        <span style={{ 
-                          marginLeft: '0.5rem',
-                          padding: '0.25rem 0.5rem',
-                          backgroundColor: '#10b981',
-                          color: 'white',
-                          fontSize: '0.75rem',
-                          borderRadius: '4px'
-                        }}>
-                          ATUAL
-                        </span>
-                      )}
-                    </h4>
-                    <div style={{ fontSize: '0.875rem', color: '#666', marginTop: '0.25rem' }}>
-                      <Clock size={14} style={{ verticalAlign: 'middle', marginRight: '0.25rem' }} />
-                      {formatDate(version.created_at)}
-                      <span style={{ margin: '0 0.5rem' }}>•</span>
-                      <User size={14} style={{ verticalAlign: 'middle', marginRight: '0.25rem' }} />
-                      {version.author_name}
-                    </div>
-                  </div>
+            {/* Lista de versões */}
+            {versions.map((version, index) => (
+              <div 
+                key={version.id}
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '100px 1fr 150px 200px 150px',
+                  gap: '1rem',
+                  padding: '1rem 1.5rem',
+                  borderBottom: index < versions.length - 1 ? '1px solid #e5e7eb' : 'none',
+                  transition: 'all 0.3s ease',
+                  fontSize: '0.9rem'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#f8fafc'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'white'
+                }}
+              >
+                {/* Versão */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}>
+                  <span style={{
+                    background: index === 0 
+                      ? 'linear-gradient(135deg, rgb(102, 234, 205) 0%, rgb(75, 129, 162) 100%)'
+                      : '#e5e7eb',
+                    color: index === 0 ? 'white' : '#374151',
+                    padding: '0.25rem 0.75rem',
+                    borderRadius: '20px',
+                    fontSize: '0.8rem',
+                    fontWeight: '600'
+                  }}>
+                    v{version.version_number}
+                  </span>
+                  {index === 0 && (
+                    <span style={{
+                      background: '#10b981',
+                      color: 'white',
+                      padding: '0.2rem 0.5rem',
+                      borderRadius: '4px',
+                      fontSize: '0.7rem',
+                      fontWeight: '600',
+                      textTransform: 'uppercase'
+                    }}>
+                      Atual
+                    </span>
+                  )}
                 </div>
 
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                {/* Resumo */}
+                <div style={{
+                  color: '#374151',
+                  lineHeight: '1.4'
+                }}>
+                  {version.change_summary || (
+                    <span style={{ fontStyle: 'italic', color: '#9ca3af' }}>
+                      Sem resumo de alterações
+                    </span>
+                  )}
+                </div>
+
+                {/* Autor */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  color: '#64748b'
+                }}>
+                  <User size={14} />
+                  {version.author_name || 'Usuário desconhecido'}
+                </div>
+
+                {/* Data */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  color: '#64748b'
+                }}>
+                  <Calendar size={14} />
+                  {new Date(version.created_at).toLocaleString('pt-BR')}
+                </div>
+
+                {/* Ações */}
+                <div style={{
+                  display: 'flex',
+                  gap: '0.5rem'
+                }}>
                   <button
-                    onClick={() => toggleVersionExpansion(version.version_number)}
-                    className="btn"
-                    style={{ padding: '0.25rem 0.5rem' }}
+                    onClick={() => viewVersion(version.version_number)}
+                    style={{
+                      background: '#f3f4f6',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '6px',
+                      padding: '0.5rem',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      transition: 'all 0.3s ease',
+                      color: '#374151'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.background = '#e5e7eb'
+                      e.target.style.borderColor = '#9ca3af'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.background = '#f3f4f6'
+                      e.target.style.borderColor = '#d1d5db'
+                    }}
+                    title="Visualizar versão"
                   >
-                    {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                    <Eye size={14} />
                   </button>
-                  
-                  {!isCurrent && (
+
+                  {index !== 0 && (
                     <button
-                      onClick={() => handleRestore(version.version_number)}
-                      className="btn btn-warning"
-                      style={{ padding: '0.25rem 0.5rem' }}
+                      onClick={() => restoreVersion(version.version_number)}
+                      disabled={restoring === version.version_number}
+                      style={{
+                        background: restoring === version.version_number 
+                          ? '#9ca3af' 
+                          : 'linear-gradient(135deg, rgb(102, 234, 205) 0%, rgb(75, 129, 162) 100%)',
+                        border: 'none',
+                        borderRadius: '6px',
+                        padding: '0.5rem',
+                        cursor: restoring === version.version_number ? 'not-allowed' : 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        transition: 'all 0.3s ease',
+                        color: 'white'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (restoring !== version.version_number) {
+                          e.target.style.transform = 'translateY(-2px)'
+                          e.target.style.boxShadow = '0 4px 8px rgba(102, 234, 205, 0.3)'
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (restoring !== version.version_number) {
+                          e.target.style.transform = 'translateY(0)'
+                          e.target.style.boxShadow = 'none'
+                        }
+                      }}
                       title="Restaurar esta versão"
                     >
-                      <RotateCcw size={16} />
+                      {restoring === version.version_number ? (
+                        <div style={{
+                          width: '14px',
+                          height: '14px',
+                          border: '2px solid rgba(255, 255, 255, 0.3)',
+                          borderTop: '2px solid white',
+                          borderRadius: '50%',
+                          animation: 'spin 1s linear infinite'
+                        }}></div>
+                      ) : (
+                        <RotateCcw size={14} />
+                      )}
                     </button>
                   )}
                 </div>
               </div>
-
-              {/* Change Summary */}
-              {version.change_summary && (
-                <div style={{ 
-                  marginBottom: '1rem',
-                  padding: '0.75rem',
-                  backgroundColor: '#f8f9fa',
-                  borderRadius: '4px',
-                  fontSize: '0.875rem'
-                }}>
-                  <strong>Resumo das alterações:</strong> {version.change_summary}
-                </div>
-              )}
-
-              {/* Expanded Content */}
-              {isExpanded && (
-                <div style={{ 
-                  marginTop: '1rem',
-                  padding: '1rem',
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '4px',
-                  backgroundColor: '#fafafa'
-                }}>
-                  <h5 style={{ margin: '0 0 0.5rem 0' }}>Título:</h5>
-                  <div style={{ marginBottom: '1rem', fontWeight: 'bold' }}>
-                    {version.title}
-                  </div>
-                  
-                  <h5 style={{ margin: '0 0 0.5rem 0' }}>Conteúdo:</h5>
-                  <div 
-                    style={{ 
-                      maxHeight: '200px',
-                      overflowY: 'auto',
-                      fontSize: '0.875rem',
-                      lineHeight: '1.5'
-                    }}
-                    dangerouslySetInnerHTML={{ __html: version.content }}
-                  />
-                </div>
-              )}
-
-              {/* Content Preview (when not expanded) */}
-              {!isExpanded && (
-                <div style={{ fontSize: '0.875rem', color: '#666' }}>
-                  <strong>Preview:</strong> {getContentPreview(version.content)}
-                </div>
-              )}
-            </div>
-          )
-        })}
+            ))}
+          </div>
+        )}
       </div>
 
-      {versions.length === 0 && (
-        <div className="card" style={{ padding: '2rem', textAlign: 'center' }}>
-          <History size={48} style={{ color: '#d1d5db', marginBottom: '1rem' }} />
-          <h3 style={{ color: '#6b7280' }}>Nenhuma versão encontrada</h3>
-          <p style={{ color: '#9ca3af' }}>
-            As versões serão criadas automaticamente quando a página for editada.
-          </p>
-        </div>
-      )}
+      {/* Info Box */}
+      <div style={{
+        marginTop: '2rem',
+        padding: '1.5rem',
+        background: 'rgba(102, 234, 205, 0.1)',
+        borderRadius: '12px',
+        border: '1px solid rgba(102, 234, 205, 0.3)',
+        fontSize: '0.9rem',
+        color: '#374151'
+      }}>
+        <h4 style={{
+          margin: '0 0 1rem 0',
+          color: '#1e293b',
+          fontSize: '1rem',
+          fontWeight: '600'
+        }}>
+          💡 Sobre o Sistema de Versões
+        </h4>
+        <ul style={{ margin: 0, paddingLeft: '1.5rem', lineHeight: 1.6 }}>
+          <li>Uma nova versão é criada automaticamente sempre que você edita uma página</li>
+          <li>O resumo de alterações ajuda a identificar o que foi modificado</li>
+          <li>Você pode restaurar qualquer versão anterior quando necessário</li>
+          <li>A versão atual é sempre destacada e não pode ser restaurada</li>
+          <li>Todas as ações ficam registradas no histórico com data, hora e autor</li>
+        </ul>
+      </div>
+
+      {/* Adicionar a animação de loading no CSS */}
+      <style jsx>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   )
 }

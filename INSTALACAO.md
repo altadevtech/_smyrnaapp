@@ -1,4 +1,4 @@
-# Smyrna CMS - Instruções de Instalação 
+# Smyrna Wiki - Instruções de Instalação 
 
 ## ✅ Projeto em fase de desenvolvimento
 Para implementação futura:

@@ -14,18 +14,32 @@ const PageEditor = () => {
     defaultValues: {
       title: '',
       content: '',
-      status: 'draft'
+      status: 'draft',
+      category_id: '',
+      tags: '',
+      changeSummary: ''
     }
   })
   
   const [loading, setLoading] = useState(false)
   const [initialLoading, setInitialLoading] = useState(isEditing)
+  const [categories, setCategories] = useState([])
 
   useEffect(() => {
+    fetchCategories()
     if (isEditing) {
       fetchPage()
     }
   }, [id])
+
+  const fetchCategories = async () => {
+    try {
+      const response = await api.get('/categories?type=wiki')
+      setCategories(response.data)
+    } catch (error) {
+      console.error('Erro ao carregar categorias:', error)
+    }
+  }
 
   const fetchPage = async () => {
     try {
@@ -35,6 +49,8 @@ const PageEditor = () => {
       setValue('title', page.title)
       setValue('content', page.content)
       setValue('status', page.status)
+      setValue('category_id', page.category_id || '')
+      setValue('tags', page.tags || '')
     } catch (error) {
       toast.error('Erro ao carregar página')
       navigate('/admin/pages')
@@ -109,6 +125,36 @@ const PageEditor = () => {
           </div>
 
           <div className="form-group">
+            <label htmlFor="category_id">Categoria</label>
+            <select
+              id="category_id"
+              className="form-control"
+              {...register('category_id')}
+            >
+              <option value="">Selecione uma categoria</option>
+              {categories.map(category => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="tags">Tags</label>
+            <input
+              type="text"
+              id="tags"
+              className="form-control"
+              placeholder="Digite tags separadas por vírgula (ex: tutorial, programação, javascript)"
+              {...register('tags')}
+            />
+            <small style={{ color: '#666', fontSize: '0.85rem', display: 'block', marginTop: '0.5rem' }}>
+              Separe as tags com vírgulas. Elas ajudam na busca e organização do conteúdo.
+            </small>
+          </div>
+
+          <div className="form-group">
             <label htmlFor="status">Status</label>
             <select
               id="status"
@@ -119,6 +165,22 @@ const PageEditor = () => {
               <option value="published">Publicada</option>
             </select>
           </div>
+
+          {isEditing && (
+            <div className="form-group">
+              <label htmlFor="changeSummary">Resumo das Alterações</label>
+              <input
+                type="text"
+                id="changeSummary"
+                className="form-control"
+                placeholder="Descreva brevemente as alterações feitas (opcional)"
+                {...register('changeSummary')}
+              />
+              <small style={{ color: '#666', fontSize: '0.85rem', display: 'block', marginTop: '0.5rem' }}>
+                Este resumo será salvo no histórico de versões da página.
+              </small>
+            </div>
+          )}
 
           <div className="actions">
             <button 
@@ -136,6 +198,16 @@ const PageEditor = () => {
             >
               Cancelar
             </button>
+            {isEditing && (
+              <button 
+                type="button" 
+                className="btn"
+                onClick={() => navigate(`/admin/pages/${id}/versions`)}
+                style={{ marginLeft: '0.5rem' }}
+              >
+                Ver Histórico
+              </button>
+            )}
           </div>
         </form>
       </div>
@@ -143,8 +215,10 @@ const PageEditor = () => {
       <div style={{ marginTop: '2rem', fontSize: '0.9rem', color: '#666' }}>
         <h4>Dicas:</h4>
         <ul style={{ paddingLeft: '1.5rem' }}>
-          <li>Use títulos descritivos para suas páginas</li>
-          <li>Páginas com status "Rascunho" não aparecerão no site público</li>
+          <li>Use títulos descritivos para suas páginas do wiki</li>
+          <li>Páginas do wiki com status "Rascunho" não aparecerão no site público</li>
+          <li>Escolha uma categoria para ajudar na organização do conteúdo</li>
+          <li>Use tags relevantes para facilitar a busca (separe por vírgulas)</li>
           <li>Você pode usar HTML básico no conteúdo</li>
           <li>Lembre-se de salvar suas alterações</li>
         </ul>
