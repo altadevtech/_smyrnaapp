@@ -1,193 +1,498 @@
 import React, { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
 import api from '../services/api'
 import ContentRenderer from '../components/ContentRenderer'
-import { FileText, ArrowRight, Calendar, User } from 'lucide-react'
+import { BookOpen, FileText, Calendar, ArrowRight, Settings } from 'lucide-react'
 
-const DynamicHome = () => {
-  const [homePage, setHomePage] = useState(null)
+function DynamicHome() {
+  const { isAuthenticated } = useAuth()
+  const [homepageData, setHomepageData] = useState(null)
+  const [recentPosts, setRecentPosts] = useState([])
+  const [recentPages, setRecentPages] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
 
   useEffect(() => {
-    fetchHomePage()
+    fetchHomepageContent()
+    fetchRecentContent()
+    
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768)
+    }
+    
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
   }, [])
 
-  const fetchHomePage = async () => {
+  const fetchHomepageContent = async () => {
     try {
-      console.log('🏠 Tentando carregar página home...')
-      
-      // Tentar buscar página definida como home
-      const homeResponse = await api.get('/pages/home')
-      if (homeResponse.data) {
-        console.log('✅ Página home encontrada:', homeResponse.data.title)
-        setHomePage(homeResponse.data)
+      const response = await api.get('/settings/homepage')
+      if (response.data) {
+        setHomepageData(response.data)
       } else {
-        console.log('ℹ️ Nenhuma página home definida')
+        // Dados padrão se não houver configuração
+        setHomepageData({
+          title: 'Bem-vindo à Smyrna Wiki',
+          content: '<h2>Sistema de Wiki e Gerenciamento de Conhecimento</h2><p>Este é um sistema completo para organização e compartilhamento de conhecimento.</p>',
+          isEnabled: true
+        })
       }
     } catch (error) {
-      console.log('ℹ️ Nenhuma página home definida ou erro ao carregar:', error.response?.status)
-      setHomePage(null)
+      console.error('Erro ao carregar conteúdo da página inicial:', error)
+      // Usar dados padrão em caso de erro
+      setHomepageData({
+        title: 'Bem-vindo à Smyrna Wiki',
+        content: '<h2>Sistema de Wiki e Gerenciamento de Conhecimento</h2><p>Este é um sistema completo para organização e compartilhamento de conhecimento.</p>',
+        isEnabled: true
+      })
     }
-    setLoading(false)
+  }
+
+  const fetchRecentContent = async () => {
+    try {
+      // Buscar últimas 4 páginas da wiki
+      const pagesResponse = await api.get('/pages/recent?limit=4')
+      setRecentPages(pagesResponse.data || [])
+
+      // Buscar últimos 4 posts do blog
+      const postsResponse = await api.get('/posts/recent?limit=4')
+      setRecentPosts(postsResponse.data || [])
+
+    } catch (error) {
+      console.error('Erro ao carregar conteúdo recente:', error)
+      setError('Erro ao carregar conteúdo recente')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const formatDate = (dateString) => {
+    if (!dateString) return ''
+    const date = new Date(dateString)
+    return date.toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    })
   }
 
   if (loading) {
     return (
-      <div className="public-container">
-        <div className="loading">Carregando página inicial...</div>
-      </div>
-    )
-  }
-
-  // Se há uma página home definida, renderizar conteúdo com shortcodes
-  if (homePage) {
-    console.log('🎨 Renderizando página home dinâmica')
-    
-    return (
-      <div className="public-container">
-        <div className="dynamic-home">
-          <header className="public-header">
-            <h1>{homePage.title}</h1>
-          </header>
-          <div className="dynamic-content">
-            <ContentRenderer content={homePage.content} />
-          </div>
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '60vh',
+        fontSize: '1.1rem',
+        color: '#64748b'
+      }}>
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '1rem',
+          padding: '2rem',
+          background: '#f8fafc',
+          borderRadius: '16px',
+          border: '1px solid #e2e8f0'
+        }}>
+          <div style={{
+            width: '40px',
+            height: '40px',
+            border: '3px solid #e2e8f0',
+            borderTop: '3px solid rgb(102, 234, 205)',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite'
+          }}></div>
+          <p style={{ color: '#64748b', margin: '0', fontWeight: '500' }}>
+            Carregando página inicial...
+          </p>
         </div>
       </div>
     )
   }
 
-  // Fallback para home estática se não há página dinâmica definida
-  console.log('🏠 Renderizando home estática (fallback)')
-  return <StaticHome />
-}
-
-// Componente de fallback (home estática original)
-const StaticHome = () => {
-  const [pages, setPages] = useState([])
-  const [posts, setPosts] = useState([])
-  const [loading, setLoading] = useState(true)
-
-  const generateSlug = (title, id) => {
-    return title.toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9\s]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .trim('-') + '-' + id
-  }
-
-  useEffect(() => {
-    fetchPublicContent()
-  }, [])
-
-  const fetchPublicContent = async () => {
-    try {
-      const [pagesRes, postsRes] = await Promise.all([
-        api.get('/pages/public'),
-        api.get('/posts/public')
-      ])
-      setPages(pagesRes.data)
-      setPosts(postsRes.data)
-    } catch (error) {
-      console.error('Erro ao carregar conteúdo:', error)
-    }
-    setLoading(false)
-  }
-
-  if (loading) {
-    return <div className="loading">Carregando...</div>
-  }
+  // Verificar se há conteúdo personalizado (não padrão)
+  const hasCustomContent = homepageData && 
+    homepageData.title && 
+    homepageData.content && 
+    homepageData.title.trim() !== '' && 
+    homepageData.content.trim() !== '' &&
+    !(homepageData.title === 'Bem-vindo ao Smyrna Wiki' && 
+      homepageData.content.includes('Sistema de Wiki e Gerenciamento de Conhecimento'))
 
   return (
-    <div className="public-container">
-      <div className="public-home">
-        <section className="hero-section">
-          <h1>Bem-vindo ao Smyrna Wiki</h1>
-          <p>Sistema de wiki e gerenciamento de conhecimento simples e eficiente para criar bases de conhecimento modernas e responsivas.</p>
-          <div className="hero-actions">
-            <Link to="/blog" className="btn btn-primary">
-              <FileText size={18} /> Ver Blog
-            </Link>
-            <Link to="/admin/login" className="btn btn-secondary">
-              Área Administrativa
-            </Link>
-          </div>
-        </section>
-
-        <section className="content-sections">
-          <div className="section-card">
-            <h2><FileText size={24} /> Artigos Recentes do Wiki</h2>
-            {pages.length > 0 ? (
-              <div className="content-list">
-                {pages.slice(0, 3).map(page => (
-                  <div key={page.id} className="content-item">
-                    <h3>
-                      <Link to={`/page/${page.slug || generateSlug(page.title, page.id)}`}>
-                        {page.title}
-                      </Link>
-                    </h3>
-                    <p className="page-excerpt">
-                      {page.content.length > 150 
-                        ? page.content.substring(0, 150) + '...' 
-                        : page.content}
-                    </p>
-                    <div className="item-meta">
-                      <span><User size={14} /> {page.author_name}</span>
-                      <span><Calendar size={14} /> {new Date(page.updated_at).toLocaleDateString('pt-BR')}</span>
-                    </div>
-                  </div>
-                ))}
-                {pages.length > 3 && (
-                  <Link to="/pages" className="view-all">
-                    Ver todo o wiki <ArrowRight size={14} />
-                  </Link>
-                )}
-              </div>
-            ) : (
-              <div className="no-content">
-                <FileText size={48} />
-                <p>Nenhuma página publicada ainda.</p>
-              </div>
-            )}
-          </div>
-
-          <div className="section-card">
-            <h2><FileText size={24} /> Posts Recentes</h2>
-            {posts.length > 0 ? (
-              <div className="content-list">
-                {posts.slice(0, 3).map(post => (
-                  <div key={post.id} className="content-item">
-                    <h3>
-                      <Link to={`/blog/${generateSlug(post.title, post.id)}`}>
-                        {post.title}
-                      </Link>
-                    </h3>
-                    <p className="post-excerpt">
-                      {post.content.length > 150 
-                        ? post.content.substring(0, 150) + '...' 
-                        : post.content}
-                    </p>
-                    <div className="item-meta">
-                      <span><User size={14} /> {post.author_name}</span>
-                      <span><Calendar size={14} /> {new Date(post.created_at).toLocaleDateString('pt-BR')}</span>
-                    </div>
-                  </div>
-                ))}
-                <Link to="/blog" className="view-all">
-                  Ver todos os posts <ArrowRight size={14} />
-                </Link>
-              </div>
-            ) : (
-              <div className="no-content">
-                <FileText size={48} />
-                <p>Nenhum post publicado ainda.</p>
-              </div>
-            )}
-          </div>
-        </section>
+    <div style={{
+      maxWidth: '1200px',
+      margin: '0 auto',
+      padding: isMobile ? '1rem' : '2rem 1rem',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+    }}>
+      
+      {/* Header com gradiente igual ao da Wiki */}
+      <div style={{
+        textAlign: 'center',
+        marginBottom: '3rem',
+        background: 'linear-gradient(135deg, rgb(102, 234, 205) 0%, rgb(75, 129, 162) 100%)',
+        padding: '4rem 2rem',
+        borderRadius: '20px',
+        color: 'white',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        <div style={{
+          position: 'absolute',
+          top: '-50%',
+          right: '-20%',
+          width: '40%',
+          height: '200%',
+          background: 'rgba(255, 255, 255, 0.1)',
+          borderRadius: '50%',
+          transform: 'rotate(15deg)'
+        }}></div>
+        
+        <h1 style={{
+          margin: '0 0 1rem 0',
+          fontSize: isMobile ? '2.5rem' : '3.5rem',
+          fontWeight: '700',
+          textShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+          position: 'relative',
+          zIndex: 1
+        }}>
+          <BookOpen 
+            size={isMobile ? 40 : 56} 
+            style={{ 
+              marginRight: '1rem', 
+              verticalAlign: 'middle',
+              filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))'
+            }} 
+          />
+          Wiki Nova Fibra
+        </h1>
+        
+        <p style={{
+          margin: 0,
+          fontSize: isMobile ? '1rem' : '1.25rem',
+          opacity: 0.9,
+          maxWidth: '600px',
+          marginLeft: 'auto',
+          marginRight: 'auto',
+          lineHeight: 1.6,
+          position: 'relative',
+          zIndex: 1
+        }}>
+          {hasCustomContent ? 'Página inicial personalizada' : 'Sistema de gerenciamento de conhecimento colaborativo'}
+        </p>
+        
+        {isAuthenticated && (
+          <a 
+            href="/admin/profile"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              color: 'white',
+              textDecoration: 'none',
+              padding: '0.75rem 1.5rem',
+              borderRadius: '8px',
+              border: '2px solid rgba(255, 255, 255, 0.3)',
+              background: 'rgba(255, 255, 255, 0.1)',
+              fontSize: '0.9rem',
+              fontWeight: '500',
+              transition: 'all 0.3s ease',
+              marginTop: '1.5rem',
+              position: 'relative',
+              zIndex: 1
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.background = 'rgba(255, 255, 255, 0.2)'
+              e.target.style.transform = 'translateY(-2px)'
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.background = 'rgba(255, 255, 255, 0.1)'
+              e.target.style.transform = 'translateY(0)'
+            }}
+          >
+            <Settings size={18} />
+            Configurar Página Inicial
+          </a>
+        )}
       </div>
+
+      {/* Layout de conteúdo 70/30 */}
+      <div 
+        style={{
+          display: 'grid',
+          gridTemplateColumns: isMobile ? '1fr' : '70% 30%',
+          gap: '2rem',
+          width: '100%',
+          alignItems: 'start'
+        }}
+      >
+      {/* Coluna Principal (70%) */}
+      <div 
+        style={{
+          gridColumn: isMobile ? '1' : '1',
+          background: 'white',
+          borderRadius: '16px',
+          boxShadow: '0 4px 25px rgba(0, 0, 0, 0.08)',
+          border: '1px solid #e5e7eb',
+          overflow: 'hidden',
+          minHeight: '400px',
+          padding: '2rem'
+        }}
+      >
+        {hasCustomContent ? (
+          <>
+            <div className="homepage-content">
+              <ContentRenderer content={homepageData.content} />
+            </div>
+          </>
+        ) : (
+          <>
+            <h1 className="homepage-title">Bem-vindo à Smyrna Wiki</h1>
+            <div className="homepage-content">
+              <h2>Sistema de Wiki e Gerenciamento de Conhecimento</h2>
+              <p>Este é um sistema completo para organização e compartilhamento de conhecimento.</p>
+              <h3>Funcionalidades:</h3>
+              <ul>
+                <li>📄 Páginas Wiki organizadas</li>
+                <li>📝 Blog integrado</li>
+                <li>👥 Gerenciamento de usuários</li>
+                <li>🎨 Interface responsiva</li>
+              </ul>
+              {isAuthenticated && (
+                <p style={{ marginTop: '1rem', padding: '1rem', backgroundColor: '#f3f4f6', borderRadius: '0.5rem' }}>
+                  💡 <strong>Administrador:</strong> <a href="/admin/profile">Configure o conteúdo da página inicial</a> no seu perfil.
+                </p>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* Sidebar (30%) */}
+      {!isMobile && (
+        <div 
+          style={{
+            gridColumn: '2',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '1.5rem'
+          }}
+        >
+          {/* Seção de Páginas Recentes */}
+          <div style={{
+            background: 'white',
+            borderRadius: '16px',
+            boxShadow: '0 4px 25px rgba(0, 0, 0, 0.08)',
+            border: '1px solid #e5e7eb',
+            overflow: 'hidden'
+          }}>
+            <div style={{
+              background: 'linear-gradient(135deg, rgb(102, 234, 205) 0%, rgb(75, 129, 162) 100%)',
+              color: 'white',
+              padding: '1rem 1.5rem',
+              fontWeight: '600',
+              fontSize: '1rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}>
+              <FileText size={18} />
+              Páginas Recentes
+            </div>
+            <div style={{ padding: '1.5rem' }}>
+              {recentPages.length > 0 ? (
+                <>
+                  <div style={{ marginBottom: '1rem' }}>
+                    {recentPages.map((page) => (
+                      <div key={page.id} style={{
+                        padding: '0.75rem 0',
+                        borderBottom: '1px solid #f1f5f9',
+                        transition: 'all 0.2s ease'
+                      }}>
+                        <h4 style={{
+                          margin: '0 0 0.25rem 0',
+                          fontSize: '0.9rem',
+                          fontWeight: '600'
+                        }}>
+                          <a 
+                            href={`/page/${page.slug}`}
+                            style={{
+                              color: '#374151',
+                              textDecoration: 'none',
+                              transition: 'color 0.2s ease'
+                            }}
+                            onMouseEnter={(e) => e.target.style.color = 'rgb(102, 234, 205)'}
+                            onMouseLeave={(e) => e.target.style.color = '#374151'}
+                          >
+                            {page.title}
+                          </a>
+                        </h4>
+                        <p style={{
+                          margin: 0,
+                          fontSize: '0.75rem',
+                          color: '#6b7280'
+                        }}>
+                          Atualizada em {formatDate(page.updated_at)}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{ textAlign: 'center' }}>
+                    <a 
+                      href="/pages" 
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        padding: '0.5rem 1rem',
+                        background: '#f8fafc',
+                        color: '#374151',
+                        textDecoration: 'none',
+                        borderRadius: '8px',
+                        fontSize: '0.8rem',
+                        fontWeight: '500',
+                        transition: 'all 0.2s ease',
+                        border: '1px solid #e2e8f0'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.background = 'rgb(102, 234, 205)'
+                        e.target.style.color = 'white'
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.background = '#f8fafc'
+                        e.target.style.color = '#374151'
+                      }}
+                    >
+                      <ArrowRight size={14} />
+                      Ver Todas as Páginas
+                    </a>
+                  </div>
+                </>
+              ) : (
+                <p style={{ margin: 0, color: '#6b7280', fontSize: '0.9rem' }}>
+                  Nenhuma página encontrada.
+                </p>
+              )}
+            </div>
+          </div>
+
+        {/* Seção de Posts Recentes */}
+        <div style={{
+          background: 'white',
+          borderRadius: '16px',
+          boxShadow: '0 4px 25px rgba(0, 0, 0, 0.08)',
+          border: '1px solid #e5e7eb',
+          overflow: 'hidden'
+        }}>
+          <div style={{
+            background: 'linear-gradient(135deg, rgb(102, 234, 205) 0%, rgb(75, 129, 162) 100%)',
+            color: 'white',
+            padding: '1rem 1.5rem',
+            fontWeight: '600',
+            fontSize: '1rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}>
+            <Calendar size={18} />
+            Posts Recentes
+          </div>
+          <div style={{ padding: '1.5rem' }}>
+            {recentPosts.length > 0 ? (
+              <>
+                <div style={{ marginBottom: '1rem' }}>
+                  {recentPosts.map((post) => (
+                    <div key={post.id} style={{
+                      padding: '0.75rem 0',
+                      borderBottom: '1px solid #f1f5f9',
+                      transition: 'all 0.2s ease'
+                    }}>
+                      <h4 style={{
+                        margin: '0 0 0.25rem 0',
+                        fontSize: '0.9rem',
+                        fontWeight: '600'
+                      }}>
+                        <a 
+                          href={`/post/${post.id}`}
+                          style={{
+                            color: '#374151',
+                            textDecoration: 'none',
+                            transition: 'color 0.2s ease'
+                          }}
+                          onMouseEnter={(e) => e.target.style.color = 'rgb(102, 234, 205)'}
+                          onMouseLeave={(e) => e.target.style.color = '#374151'}
+                        >
+                          {post.title}
+                        </a>
+                      </h4>
+                      <p style={{
+                        margin: 0,
+                        fontSize: '0.75rem',
+                        color: '#6b7280'
+                      }}>
+                        Publicado em {formatDate(post.created_at)}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <a 
+                    href="/blog" 
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      padding: '0.5rem 1rem',
+                      background: '#f8fafc',
+                      color: '#374151',
+                      textDecoration: 'none',
+                      borderRadius: '8px',
+                      fontSize: '0.8rem',
+                      fontWeight: '500',
+                      transition: 'all 0.2s ease',
+                      border: '1px solid #e2e8f0'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.background = 'rgb(102, 234, 205)'
+                      e.target.style.color = 'white'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.background = '#f8fafc'
+                      e.target.style.color = '#374151'
+                    }}
+                  >
+                    <ArrowRight size={14} />
+                    Ver Todos os Posts
+                  </a>
+                </div>
+              </>
+            ) : (
+              <p style={{ margin: 0, color: '#6b7280', fontSize: '0.9rem' }}>
+                Nenhum post encontrado.
+              </p>
+            )}
+          </div>
+        </div>
+
+        {error && (
+          <div style={{
+            background: '#fee2e2',
+            color: '#991b1b',
+            padding: '1rem',
+            borderRadius: '12px',
+            border: '1px solid #fecaca'
+          }}>
+            <p style={{ margin: 0 }}>{error}</p>
+          </div>
+        )}
+        </div>
+      )}
+    </div>
     </div>
   )
 }

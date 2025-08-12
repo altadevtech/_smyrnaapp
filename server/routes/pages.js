@@ -147,6 +147,31 @@ router.get('/home', (req, res) => {
   )
 })
 
+// Endpoint público para páginas recentes
+router.get('/recent', (req, res) => {
+  const db = Database.getDb()
+  const { limit = 10 } = req.query
+  
+  db.all(
+    `SELECT p.id, p.title, p.slug, p.created_at, p.updated_at, 
+            u.name as author_name, c.name as category_name, c.color as category_color
+     FROM pages p 
+     JOIN users u ON p.author_id = u.id 
+     LEFT JOIN categories c ON p.category_id = c.id AND c.type = 'wiki'
+     WHERE p.status = 'published' AND (p.is_home IS NULL OR p.is_home = false)
+     ORDER BY p.updated_at DESC
+     LIMIT ?`,
+    [parseInt(limit)],
+    (err, pages) => {
+      if (err) {
+        console.error('Erro ao buscar páginas recentes:', err)
+        return res.status(500).json({ message: 'Erro ao buscar páginas recentes' })
+      }
+      res.json(pages)
+    }
+  )
+})
+
 // Todas as rotas abaixo necessitam autenticação
 router.use(authenticateToken)
 
@@ -207,7 +232,7 @@ router.get('/:id', (req, res) => {
 
 // Criar página
 router.post('/', (req, res) => {
-  const { title, content, status = 'draft', templateId = 1, slug, widgetData, isHome = false, category_id } = req.body
+  const { title, content, status = 'draft', templateId = 1, slug, widgetData, category_id } = req.body
 
   if (!title || !content) {
     return res.status(400).json({ message: 'Título e conteúdo são obrigatórios' })
@@ -227,19 +252,10 @@ router.post('/', (req, res) => {
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-')
     .trim('-')
-
-  // Se definindo como home, remover flag de outros artigos do wiki
-  if (isHome) {
-    db.run('UPDATE pages SET is_home = false WHERE is_home = true', (err) => {
-      if (err) {
-        console.error('Erro ao atualizar artigos home do wiki:', err)
-      }
-    })
-  }
   
   db.run(
-    'INSERT INTO pages (title, content, status, author_id, template_id, slug, widget_data, is_home, category_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-    [title, content, status, req.user.id, templateId, finalSlug, widgetData ? JSON.stringify(widgetData) : null, isHome, category_id || null],
+    'INSERT INTO pages (title, content, status, author_id, template_id, slug, widget_data, category_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+    [title, content, status, req.user.id, templateId, finalSlug, widgetData ? JSON.stringify(widgetData) : null, category_id || null],
     function(err) {
       if (err) {
         if (err.message.includes('UNIQUE constraint failed: pages.slug')) {
@@ -259,10 +275,10 @@ router.post('/', (req, res) => {
 // Atualizar página
 router.put('/:id', authenticateToken, (req, res) => {
   const { id } = req.params
-  const { title, content, status, templateId, slug, widgetData, isHome, category_id } = req.body
+  const { title, content, status, templateId, slug, widgetData, category_id } = req.body
 
   console.log('📝 Atualizando página ID:', id)
-  console.log('📋 Dados recebidos:', { title, status, slug, isHome, category_id })
+  console.log('📋 Dados recebidos:', { title, status, slug, category_id })
 
   if (!title || !content) {
     console.log('❌ Título ou conteúdo ausente')
@@ -298,24 +314,14 @@ router.put('/:id', authenticateToken, (req, res) => {
 
     console.log('✅ Permissão validada para usuário:', req.user.id)
 
-    // Se definindo como home, remover flag de outros artigos do wiki
-    if (isHome) {
-      console.log('🏠 Definindo como página inicial')
-      db.run('UPDATE pages SET is_home = false WHERE is_home = true AND id != ?', [id], (err) => {
-        if (err) {
-          console.error('❌ Erro ao atualizar artigos home do wiki:', err)
-        }
-      })
-    }
-
     // Criar versão antes de atualizar
     console.log('📦 Criando versão antes de atualizar...')
     createPageVersion(db, page, req.user.id, req.body.changeSummary || 'Edição da página', () => {
       console.log('🔄 Executando UPDATE da página...')
       db.run(
         `UPDATE pages SET title = ?, content = ?, status = ?, template_id = ?, slug = ?, 
-                          widget_data = ?, is_home = ?, category_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
-        [title, content, status, templateId, slug, widgetData ? JSON.stringify(widgetData) : null, isHome || false, category_id || null, id],
+                          widget_data = ?, category_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
+        [title, content, status, templateId, slug, widgetData ? JSON.stringify(widgetData) : null, category_id || null, id],
         function(err) {
           if (err) {
             console.error('❌ Erro no UPDATE:', err)

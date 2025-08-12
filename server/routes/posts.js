@@ -61,6 +61,31 @@ router.get('/public/:slug', (req, res) => {
   )
 })
 
+// Endpoint público para posts recentes
+router.get('/recent', (req, res) => {
+  const db = Database.getDb()
+  const { limit = 10 } = req.query
+  
+  db.all(
+    `SELECT p.id, p.title, p.created_at, p.updated_at, 
+            u.name as author_name, c.name as category_name, c.slug as category_slug, c.color as category_color 
+     FROM posts p 
+     JOIN users u ON p.author_id = u.id 
+     LEFT JOIN categories c ON p.category_id = c.id AND c.type = 'blog'
+     WHERE p.status = 'published' 
+     ORDER BY p.created_at DESC 
+     LIMIT ?`,
+    [parseInt(limit)],
+    (err, posts) => {
+      if (err) {
+        console.error('Erro ao buscar posts recentes:', err)
+        return res.status(500).json({ message: 'Erro ao buscar posts recentes' })
+      }
+      res.json(posts)
+    }
+  )
+})
+
 // Todas as rotas abaixo necessitam autenticação
 router.use(authenticateToken)
 

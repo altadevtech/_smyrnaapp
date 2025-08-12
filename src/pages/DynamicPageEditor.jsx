@@ -5,7 +5,7 @@ import api from '../services/api'
 import toast from 'react-hot-toast'
 import { 
   Save, Eye, EyeOff, ArrowLeft, FileText, 
-  Layout, Tag, Home, Settings, Palette 
+  Layout, Tag, Settings, Palette 
 } from 'lucide-react'
 
 const DynamicPageEditor = () => {
@@ -33,7 +33,6 @@ const DynamicPageEditor = () => {
       status: 'draft',
       category_id: '',
       template_id: 1,
-      is_home: false,
       widget_data: {}
     }
   })
@@ -109,8 +108,7 @@ const DynamicPageEditor = () => {
       // Preparar dados para envio
       const payload = {
         ...data,
-        widget_data: JSON.stringify(data.widget_data || {}),
-        is_home: Boolean(data.is_home)
+        widget_data: JSON.stringify(data.widget_data || {})
       }
 
       if (isEditing) {
@@ -140,8 +138,7 @@ const DynamicPageEditor = () => {
       const data = watch()
       const payload = {
         ...data,
-        widget_data: JSON.stringify(data.widget_data || {}),
-        is_home: Boolean(data.is_home)
+        widget_data: JSON.stringify(data.widget_data || {})
       }
 
       if (isEditing) {
@@ -378,19 +375,6 @@ const DynamicPageEditor = () => {
                     </option>
                   ))}
                 </select>
-              </div>
-
-              {/* Página Home */}
-              <div style={{ marginBottom: '1rem' }}>
-                <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
-                  <input
-                    type="checkbox"
-                    {...register('is_home')}
-                    style={{ marginRight: '0.5rem' }}
-                  />
-                  <Home size={14} style={{ marginRight: '0.25rem' }} />
-                  Definir como página inicial
-                </label>
               </div>
 
               {/* Status */}

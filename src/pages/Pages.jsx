@@ -2,7 +2,7 @@
 import { Link } from 'react-router-dom'
 import api from '../services/api'
 import toast from 'react-hot-toast'
-import { Plus, Edit, Trash2, Eye, EyeOff, Home, FileText, History } from 'lucide-react'
+import { Plus, Edit, Trash2, Eye, EyeOff, FileText, History } from 'lucide-react'
 
 const Pages = () => {
   const [pages, setPages] = useState([])
@@ -156,9 +156,6 @@ const Pages = () => {
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                       <strong>{page.title}</strong>
-                      {page.is_home && (
-                        <Home size={16} style={{ color: 'rgb(102, 234, 205)' }} title="Página Home" />
-                      )}
                     </div>
                     {page.template_name && (
                       <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.25rem' }}>

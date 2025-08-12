@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { useSettings } from '../contexts/SettingsContext'
-import { User, Settings, Palette, Upload, Save, Mail, Phone, MapPin, Globe, Eye, EyeOff } from 'lucide-react'
+import { User, Settings, Palette, Upload, Save, Mail, Phone, MapPin, Globe, Eye, EyeOff, Home } from 'lucide-react'
 import api from '../services/api'
 import toast from 'react-hot-toast'
+import RichTextEditor from '../components/RichTextEditor'
 
 const Profile = () => {
   const { user, updateUser } = useAuth()
@@ -21,6 +22,13 @@ const Profile = () => {
     confirmPassword: ''
   })
 
+  // Estados para configuração da página inicial
+  const [homepageData, setHomepageData] = useState({
+    title: '',
+    content: '',
+    layout: 'default'
+  })
+
   // Estados para preview do logo
   const [logoPreview, setLogoPreview] = useState('')
 
@@ -29,7 +37,19 @@ const Profile = () => {
     if (settings.logo) {
       setLogoPreview(settings.logo)
     }
+    
+    // Carregar configuração da página inicial
+    fetchHomepageConfig()
   }, [settings])
+
+  const fetchHomepageConfig = async () => {
+    try {
+      const response = await api.get('/settings/homepage')
+      setHomepageData(response.data)
+    } catch (error) {
+      console.error('Erro ao carregar configuração da página inicial:', error)
+    }
+  }
 
   const handleProfileChange = (e) => {
     setProfileData({
@@ -129,6 +149,33 @@ const Profile = () => {
     }
   }
 
+  const handleHomepageSubmit = async (e) => {
+    e.preventDefault()
+    setLoading(true)
+
+    try {
+      if (!homepageData.title.trim() || !homepageData.content.trim()) {
+        toast.error('Título e conteúdo são obrigatórios')
+        return
+      }
+
+      const response = await api.put('/settings/homepage', homepageData)
+      
+      toast.success('Página inicial configurada com sucesso!')
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Erro ao salvar página inicial')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleHomepageChange = (field, value) => {
+    setHomepageData({
+      ...homepageData,
+      [field]: value
+    })
+  }
+
   const handleSystemChange = (e) => {
     // Atualizar configurações localmente no contexto
     const newSettings = {
@@ -148,6 +195,7 @@ const Profile = () => {
 
   const tabs = [
     { id: 'profile', label: 'Perfil', icon: User },
+    { id: 'homepage', label: 'Página Inicial', icon: Home },
     { id: 'system', label: 'Sistema', icon: Settings },
     { id: 'themes', label: 'Temas', icon: Palette }
   ]
@@ -281,6 +329,59 @@ const Profile = () => {
             <button type="submit" className="btn" disabled={loading} style={{ marginTop: '1rem' }}>
               <Save size={18} style={{ marginRight: '0.5rem' }} />
               {loading ? 'Salvando...' : 'Salvar Perfil'}
+            </button>
+          </form>
+        </div>
+      )}
+
+      {activeTab === 'homepage' && (
+        <div className="card">
+          <h2>Configuração da Página Inicial</h2>
+          <p style={{ marginBottom: '2rem', color: '#6b7280' }}>
+            Configure o conteúdo da página inicial do site. Esta configuração substitui o sistema de páginas home das páginas Wiki.
+          </p>
+
+          <form onSubmit={handleHomepageSubmit}>
+            <div style={{ marginBottom: '1.5rem' }}>
+              <label>Título da Página:</label>
+              <input
+                type="text"
+                value={homepageData.title}
+                onChange={(e) => handleHomepageChange('title', e.target.value)}
+                required
+                style={{ width: '100%' }}
+                placeholder="Digite o título da página inicial"
+              />
+            </div>
+
+            <div style={{ marginBottom: '1.5rem' }}>
+              <label>Layout:</label>
+              <select
+                value={homepageData.layout}
+                onChange={(e) => handleHomepageChange('layout', e.target.value)}
+                style={{ width: '100%' }}
+              >
+                <option value="default">Padrão</option>
+                <option value="full-width">Largura Total</option>
+                <option value="centered">Centralizado</option>
+              </select>
+            </div>
+
+            <div style={{ marginBottom: '1.5rem' }}>
+              <label>Conteúdo:</label>
+              <RichTextEditor
+                value={homepageData.content}
+                onChange={(content) => handleHomepageChange('content', content)}
+                placeholder="Digite o conteúdo da página inicial..."
+              />
+              <p style={{ fontSize: '0.875rem', color: '#6b7280', marginTop: '0.5rem' }}>
+                Você pode usar shortcodes como [recent-posts], [recent-pages], [category-list] etc.
+              </p>
+            </div>
+
+            <button type="submit" className="btn" disabled={loading}>
+              <Save size={18} style={{ marginRight: '0.5rem' }} />
+              {loading ? 'Salvando...' : 'Salvar Página Inicial'}
             </button>
           </form>
         </div>

@@ -80,6 +80,9 @@ const RichTextEditor = ({ value, onChange, placeholder = "Digite o conteúdo..."
       [{ 'color': [] }, { 'background': [] }],
       ['clean']
     ],
+    clipboard: {
+      matchVisual: false,
+    }
   }
 
   const formats = [
