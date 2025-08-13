@@ -22,4 +22,8 @@ services:
         value: "/usr"
       - key: PYTHON
         value: "/usr/bin/python3"
+      - key: npm_config_optional
+        value: "false"
+      - key: npm_config_fund
+        value: "false"
     autoDeploy: true

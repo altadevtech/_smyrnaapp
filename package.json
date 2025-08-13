@@ -14,8 +14,10 @@
     "postinstall": "npm rebuild sqlite3",
     "test-sqlite": "node scripts/test-sqlite.js",
     "rebuild-sqlite": "node scripts/rebuild-sqlite.js",
+    "fix-render-deps": "node scripts/fix-render-deps.js",
+    "clean-install": "rm -rf node_modules package-lock.json && npm install",
     "render-postbuild": "npm run rebuild-sqlite",
-    "render-build": "npm install && npm run rebuild-sqlite && npm run build"
+    "render-build": "node scripts/fix-render-deps.js && npm run rebuild-sqlite && npm run build"
   },
   "dependencies": {
     "@types/react-beautiful-dnd": "^13.1.8",
@@ -30,6 +32,7 @@
     "react-router-dom": "^6.22.0"
   },
   "devDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "^4.13.0",
     "@types/react": "^18.2.56",
     "@types/react-dom": "^18.2.19",
     "@vitejs/plugin-react": "^4.2.1",
@@ -42,7 +45,11 @@
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.2",
     "nodemon": "^3.0.3",
+    "rollup": "^4.13.0",
     "sqlite3": "^5.1.6",
     "vite": "^5.1.4"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "^4.13.0"
   }
 }

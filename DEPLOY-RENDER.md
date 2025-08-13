@@ -7,6 +7,13 @@
 2. **Port Configuration**: Porta alterada de 5000 para 10000 (padrão Render)
 3. **SQLite Rebuild**: Script otimizado para ambiente de produção
 4. **API URLs**: Configuração automática para produção
+5. **Rollup Linux Error**: Dependências nativas corrigidas para ambiente Linux ✅
+
+### Erro Rollup Corrigido:
+```
+Cannot find module @rollup/rollup-linux-x64-gnu
+```
+**✅ SOLUÇÃO:** Script automático de correção de dependências + configuração específica
 
 ## Pré-requisitos
 - Conta no [Render.com](https://render.com)
