@@ -9,7 +9,7 @@ router.get('/public', (req, res) => {
   const db = Database.getDb()
   
   db.all(
-    `SELECT p.id, p.title, p.content, p.created_at, p.updated_at, 
+    `SELECT p.id, p.title, p.slug, p.summary, p.content, p.featured_image, p.created_at, p.updated_at, 
             u.name as author_name, c.name as category_name, c.slug as category_slug, c.color as category_color 
      FROM posts p 
      JOIN users u ON p.author_id = u.id 
@@ -59,7 +59,7 @@ router.get('/recent', (req, res) => {
   const { limit = 10 } = req.query
   
   db.all(
-    `SELECT p.id, p.title, p.created_at, p.updated_at, 
+    `SELECT p.id, p.title, p.slug, p.summary, p.featured_image, p.created_at, p.updated_at, 
             u.name as author_name, c.name as category_name, c.slug as category_slug, c.color as category_color 
      FROM posts p 
      JOIN users u ON p.author_id = u.id 
@@ -132,7 +132,7 @@ router.post('/', (req, res) => {
   console.log('📝 Tentativa de criar post:', req.body)
   console.log('👤 Usuário autenticado:', req.user)
   
-  const { title, slug, summary, content, status = 'draft', category_id } = req.body
+  const { title, slug, summary, content, status = 'draft', category_id, featured_image } = req.body
 
   if (!title || !content) {
     console.log('❌ Erro: Título ou conteúdo faltando')
@@ -153,8 +153,8 @@ router.post('/', (req, res) => {
   
   console.log('💾 Executando inserção no banco...')
   db.run(
-    'INSERT INTO posts (title, slug, summary, content, status, author_id, category_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
-    [title, slug.trim(), summary || '', content, status, req.user.id, category_id || null],
+    'INSERT INTO posts (title, slug, summary, content, status, author_id, category_id, featured_image) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+    [title, slug.trim(), summary || '', content, status, req.user.id, category_id || null, featured_image || null],
     function(err) {
       if (err) {
         console.error('❌ Erro ao inserir post no banco:', err)
@@ -177,7 +177,7 @@ router.post('/', (req, res) => {
 // Atualizar post
 router.put('/:id', (req, res) => {
   const { id } = req.params
-  const { title, slug, summary, content, status, category_id } = req.body
+  const { title, slug, summary, content, status, category_id, featured_image } = req.body
 
   if (!title || !content) {
     return res.status(400).json({ message: 'Título e conteúdo são obrigatórios' })
@@ -209,8 +209,8 @@ router.put('/:id', (req, res) => {
     }
 
     db.run(
-      'UPDATE posts SET title = ?, slug = ?, summary = ?, content = ?, status = ?, category_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
-      [title, slug.trim(), summary || '', content, status, category_id || null, id],
+      'UPDATE posts SET title = ?, slug = ?, summary = ?, content = ?, status = ?, category_id = ?, featured_image = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+      [title, slug.trim(), summary || '', content, status, category_id || null, featured_image || null, id],
       function(err) {
         if (err) {
           // Verificar se é erro de slug duplicado

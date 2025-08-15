@@ -150,13 +150,13 @@ const Navbar = () => {
     gap: '0.5rem',
     padding: '0.75rem 1rem',
     textDecoration: 'none',
-    color: isActive ? '#667eea' : '#6b7280',
+    color: isActive ? 'white' : '#6b7280',
     fontWeight: isActive ? '600' : '500',
     fontSize: '0.9rem',
     borderRadius: '8px',
     transition: 'all 0.3s ease',
     position: 'relative',
-    background: isActive ? 'rgba(102, 126, 234, 0.1)' : 'transparent'
+    background: isActive ? 'linear-gradient(135deg, rgb(102, 234, 205), rgb(75, 129, 162))' : 'transparent'
   })
 
   const userMenuStyle = {
@@ -214,8 +214,8 @@ const Navbar = () => {
                         style={menuItemStyle(isActive)}
                         onMouseOver={(e) => {
                           if (!isActive) {
-                            e.target.style.color = '#667eea'
-                            e.target.style.background = 'rgba(102, 126, 234, 0.05)'
+                            e.target.style.color = 'rgb(102, 234, 205)'
+                            e.target.style.background = 'rgba(102, 234, 205, 0.05)'
                           }
                         }}
                         onMouseOut={(e) => {
@@ -243,8 +243,8 @@ const Navbar = () => {
                         style={menuItemStyle(isActive)}
                         onMouseOver={(e) => {
                           if (!isActive) {
-                            e.target.style.color = '#667eea'
-                            e.target.style.background = 'rgba(102, 126, 234, 0.05)'
+                            e.target.style.color = 'rgb(102, 234, 205)'
+                            e.target.style.background = 'rgba(102, 234, 205, 0.05)'
                           }
                         }}
                         onMouseOut={(e) => {
@@ -275,26 +275,26 @@ const Navbar = () => {
                     alignItems: 'center',
                     gap: '0.5rem',
                     padding: '0.5rem 1rem',
-                    background: 'rgba(102, 126, 234, 0.1)',
-                    border: '1px solid rgba(102, 126, 234, 0.2)',
+                    background: 'rgba(102, 234, 205, 0.1)',
+                    border: '1px solid rgba(102, 234, 205, 0.2)',
                     borderRadius: '8px',
-                    color: '#667eea',
+                    color: 'rgb(102, 234, 205)',
                     cursor: 'pointer',
                     fontSize: '0.9rem',
                     fontWeight: '500',
                     transition: 'all 0.3s ease'
                   }}
                   onMouseOver={(e) => {
-                    e.target.style.background = 'rgba(102, 126, 234, 0.15)'
+                    e.target.style.background = 'rgba(102, 234, 205, 0.15)'
                   }}
                   onMouseOut={(e) => {
-                    e.target.style.background = 'rgba(102, 126, 234, 0.1)'
+                    e.target.style.background = 'rgba(102, 234, 205, 0.1)'
                   }}
                 >
                   <div style={{
                     width: '24px',
                     height: '24px',
-                    background: 'linear-gradient(135deg, #667eea, #764ba2)',
+                    background: 'linear-gradient(135deg, rgb(102, 234, 205), rgb(75, 129, 162))',
                     borderRadius: '50%',
                     display: 'flex',
                     alignItems: 'center',
@@ -344,7 +344,7 @@ const Navbar = () => {
                         borderBottom: '1px solid rgba(0, 0, 0, 0.05)'
                       }}
                       onMouseOver={(e) => {
-                        e.target.style.background = 'rgba(102, 126, 234, 0.05)'
+                        e.target.style.background = 'rgba(102, 234, 205, 0.05)'
                       }}
                       onMouseOut={(e) => {
                         e.target.style.background = 'transparent'
@@ -389,22 +389,22 @@ const Navbar = () => {
                   alignItems: 'center',
                   gap: '0.5rem',
                   padding: '0.75rem 1.5rem',
-                  background: 'linear-gradient(135deg, #667eea, #764ba2)',
+                  background: 'linear-gradient(135deg, rgb(102, 234, 205), rgb(75, 129, 162))',
                   color: 'white',
                   textDecoration: 'none',
                   borderRadius: '8px',
                   fontSize: '0.9rem',
                   fontWeight: '500',
                   transition: 'all 0.3s ease',
-                  boxShadow: '0 2px 8px rgba(102, 126, 234, 0.3)'
+                  boxShadow: '0 2px 8px rgba(102, 234, 205, 0.3)'
                 }}
                 onMouseOver={(e) => {
                   e.target.style.transform = 'translateY(-1px)'
-                  e.target.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.4)'
+                  e.target.style.boxShadow = '0 4px 12px rgba(102, 234, 205, 0.4)'
                 }}
                 onMouseOut={(e) => {
                   e.target.style.transform = 'translateY(0)'
-                  e.target.style.boxShadow = '0 2px 8px rgba(102, 126, 234, 0.3)'
+                  e.target.style.boxShadow = '0 2px 8px rgba(102, 234, 205, 0.3)'
                 }}
               >
                 <User size={16} />
@@ -429,8 +429,8 @@ const Navbar = () => {
                 transition: 'all 0.3s ease'
               }}
               onMouseOver={(e) => {
-                e.target.style.background = 'rgba(102, 126, 234, 0.05)'
-                e.target.style.color = '#667eea'
+                e.target.style.background = 'rgba(102, 234, 205, 0.05)'
+                e.target.style.color = 'rgb(102, 234, 205)'
               }}
               onMouseOut={(e) => {
                 e.target.style.background = 'transparent'
@@ -490,8 +490,8 @@ const Navbar = () => {
                         gap: '0.75rem',
                         padding: '1rem',
                         textDecoration: 'none',
-                        color: isActive ? '#667eea' : '#374151',
-                        background: isActive ? 'rgba(102, 126, 234, 0.1)' : 'transparent',
+                        color: isActive ? 'white' : '#374151',
+                        background: isActive ? 'linear-gradient(135deg, rgb(102, 234, 205), rgb(75, 129, 162))' : 'transparent',
                         borderRadius: '8px',
                         marginBottom: '0.5rem',
                         fontSize: '1rem',
@@ -517,14 +517,14 @@ const Navbar = () => {
                     alignItems: 'center',
                     gap: '0.75rem',
                     padding: '1rem',
-                    background: 'rgba(102, 126, 234, 0.05)',
+                    background: 'rgba(102, 234, 205, 0.05)',
                     borderRadius: '8px',
                     marginBottom: '1rem'
                   }}>
                     <div style={{
                       width: '32px',
                       height: '32px',
-                      background: 'linear-gradient(135deg, #667eea, #764ba2)',
+                      background: 'linear-gradient(135deg, rgb(102, 234, 205), rgb(75, 129, 162))',
                       borderRadius: '50%',
                       display: 'flex',
                       alignItems: 'center',

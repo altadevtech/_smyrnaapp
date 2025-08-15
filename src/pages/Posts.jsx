@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import api from '../services/api'
 import toast from 'react-hot-toast'
-import { Plus, Edit, Trash2, Eye, EyeOff } from 'lucide-react'
+import { Plus, Edit, Trash2, Eye, EyeOff, FileText } from 'lucide-react'
 
 const Posts = () => {
   const [posts, setPosts] = useState([])
@@ -352,8 +352,13 @@ const Posts = () => {
           </div>
         </div>
       ) : (
-        <div className="card">
-          <p>Nenhum post encontrado. <Link to="/admin/posts/new">Criar primeiro post</Link></p>
+        <div className="card" style={{ textAlign: 'center', padding: '3rem' }}>
+          <FileText size={64} style={{ color: 'rgb(102, 234, 205)', marginBottom: '1rem' }} />
+          <h2>Nenhum post encontrado</h2>
+          <p>Ainda não há posts no blog.</p>
+          <Link to="/admin/posts/new" className="btn btn-primary">
+            <Plus size={18} style={{ verticalAlign: 'middle' }} /> Criar primeiro post
+          </Link>
         </div>
       )}
     </div>

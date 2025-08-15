@@ -117,7 +117,7 @@ const PageEditor = () => {
         <button onClick={() => navigate('/admin/pages')} className="btn">
           <ArrowLeft size={18} />
         </button>
-        <h1>{isEditing ? 'Editar Página' : 'Nova Página'}</h1>
+        <h1>{isEditing ? 'Editar Página Wiki' : 'Nova Página Wiki'}</h1>
       </div>
 
       <div className="card">
@@ -138,7 +138,7 @@ const PageEditor = () => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="summary">Resumo</label>
+            <label htmlFor="summary">Resumo da Página</label>
             <textarea
               id="summary"
               className="form-control"

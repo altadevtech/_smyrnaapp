@@ -315,12 +315,13 @@ const PublicBlog = () => {
                   style={{
                     background: '#f8fafc',
                     borderRadius: '12px',
-                    padding: '2rem',
+                    padding: '0',
                     border: '1px solid #e2e8f0',
                     boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
                     transition: 'all 0.3s ease',
                     cursor: 'pointer',
-                    lineHeight: '1.7'
+                    lineHeight: '1.7',
+                    overflow: 'hidden'
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.transform = 'translateY(-4px)'
@@ -331,7 +332,42 @@ const PublicBlog = () => {
                     e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.05)'
                   }}
                 >
-                  <div className="post-content">
+                  {/* Imagem destacada - Exibida apenas se existir */}
+                  {post.featured_image && (
+                    <div 
+                      className="post-featured-image"
+                      style={{
+                        width: '100%',
+                        height: '200px',
+                        overflow: 'hidden',
+                        borderRadius: '12px 12px 0 0',
+                        position: 'relative',
+                        marginBottom: '0'
+                      }}
+                    >
+                      <img 
+                        src={post.featured_image} 
+                        alt={post.title}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                          objectPosition: 'center',
+                          transition: 'transform 0.3s ease'
+                        }}
+                        onError={(e) => {
+                          e.target.style.display = 'none'
+                        }}
+                      />
+                    </div>
+                  )}
+                  
+                  <div 
+                    className="post-content"
+                    style={{
+                      padding: post.featured_image ? '2rem 2rem' : '2rem'
+                    }}
+                  >
                     {post.category_name && (
                       <div 
                         className="post-category" 

@@ -1,12 +1,15 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import api from '../services/api'
 import toast from 'react-hot-toast'
 import { 
-  Save, Eye, EyeOff, ArrowLeft, FileText, 
-  Layout, Tag, Settings, Palette 
+  Save, ArrowLeft, FileText, 
+  Layout, Tag, Settings 
 } from 'lucide-react'
+import RichTextEditor from '../components/RichTextEditor'
+import EditorLayout from '../components/EditorLayout'
+import { WikiEditorSidebar } from '../components/EditorSidebars'
 
 const DynamicPageEditor = () => {
   const { id } = useParams()
@@ -18,6 +21,7 @@ const DynamicPageEditor = () => {
   const [templates, setTemplates] = useState([])
   const [previewMode, setPreviewMode] = useState(false)
   const [currentUser, setCurrentUser] = useState(null)
+  const [content, setContent] = useState('')
   
   const { 
     register, 
@@ -28,6 +32,7 @@ const DynamicPageEditor = () => {
   } = useForm({
     defaultValues: {
       title: '',
+      summary: '',
       content: '',
       slug: '',
       status: 'draft',
@@ -37,78 +42,103 @@ const DynamicPageEditor = () => {
     }
   })
 
+  // Handler para mudanças no Rich Text Editor
+  const handleContentChange = useCallback((newContent) => {
+    setContent(newContent)
+    setValue('content', newContent, { shouldValidate: false })
+  }, [setValue])
+
   const watchedTitle = watch('title')
   const watchedContent = watch('content')
-  const watchedStatus = watch('status')
 
+  // Carregar dados iniciais
   useEffect(() => {
-    fetchInitialData()
-    if (isEditing) {
-      fetchPage()
+    const fetchData = async () => {
+      try {
+        const [categoriesRes, templatesRes] = await Promise.all([
+          api.get('/categories'),
+          api.get('/templates')
+        ])
+        
+        setCategories(categoriesRes.data || [])
+        setTemplates(templatesRes.data || [])
+      } catch (error) {
+        console.error('Erro ao carregar dados:', error)
+        toast.error('Erro ao carregar dados necessários')
+      }
     }
-  }, [id])
 
+    fetchData()
+  }, [])
+
+  // Buscar informações do usuário
   useEffect(() => {
-    // Auto-gerar slug baseado no título
-    if (watchedTitle && !isEditing) {
-      const slug = watchedTitle
-        .toLowerCase()
-        .replace(/[^\w\s-]/g, '')
-        .replace(/\s+/g, '-')
-        .replace(/-+/g, '-')
-        .trim()
-      setValue('slug', slug)
-    }
-  }, [watchedTitle, isEditing, setValue])
+    const fetchUserInfo = async () => {
+      try {
+        const token = localStorage.getItem('token')
+        if (!token) return
 
-  const fetchInitialData = async () => {
-    try {
-      const [categoriesRes, templatesRes] = await Promise.all([
-        api.get('/categories?type=wiki'),
-        api.get('/templates/public')
-      ])
-      
-      setCategories(categoriesRes.data)
-      setTemplates(templatesRes.data)
-      
-      // Obter usuário atual do token
-      const userRes = await api.get('/auth/me')
-      setCurrentUser(userRes.data)
-    } catch (error) {
-      console.error('Erro ao carregar dados iniciais:', error)
-      toast.error('Erro ao carregar dados iniciais')
+        const response = await api.get('/auth/me')
+        setCurrentUser(response.data)
+      } catch (error) {
+        console.error('Erro ao buscar informações do usuário:', error)
+      }
     }
-  }
 
-  const fetchPage = async () => {
-    setLoading(true)
-    try {
-      const response = await api.get(`/pages/${id}`)
-      const page = response.data
-      
-      // Preencher formulário com dados da página
-      Object.keys(page).forEach(key => {
-        if (key === 'widget_data') {
-          setValue(key, page[key] ? JSON.parse(page[key]) : {})
-        } else {
-          setValue(key, page[key])
-        }
-      })
-    } catch (error) {
-      console.error('Erro ao carregar página:', error)
-      toast.error('Erro ao carregar página')
-      navigate('/admin/pages')
+    fetchUserInfo()
+  }, [])
+
+  // Carregar página para edição
+  useEffect(() => {
+    if (!isEditing) return
+
+    const fetchPage = async () => {
+      try {
+        setLoading(true)
+        const response = await api.get(`/pages/${id}`)
+        const page = response.data
+        
+        // Preencher o formulário
+        setValue('title', page.title || '')
+        setValue('summary', page.summary || '')
+        setValue('slug', page.slug || '')
+        setValue('status', page.status || 'draft')
+        setValue('category_id', page.category_id || '')
+        setValue('template_id', page.template_id || 1)
+        setValue('widget_data', page.widget_data ? JSON.parse(page.widget_data) : {})
+        
+        // Definir conteúdo para o Rich Text Editor
+        const pageContent = page.content || ''
+        setContent(pageContent)
+        setValue('content', pageContent)
+        
+      } catch (error) {
+        console.error('Erro ao carregar página:', error)
+        toast.error('Erro ao carregar página')
+        navigate('/admin/pages')
+      } finally {
+        setLoading(false)
+      }
     }
-    setLoading(false)
-  }
+
+    fetchPage()
+  }, [id, isEditing, setValue, navigate])
 
   const onSubmit = async (data) => {
-    setLoading(true)
     try {
-      // Preparar dados para envio
+      setLoading(true)
+
+      // Validação do conteúdo
+      if (!content.trim()) {
+        toast.error('Conteúdo é obrigatório')
+        return
+      }
+
       const payload = {
         ...data,
-        widget_data: JSON.stringify(data.widget_data || {})
+        content: content, // Usar o conteúdo do Rich Text Editor
+        widget_data: JSON.stringify(data.widget_data || {}),
+        summary: data.summary || '' // Incluir o campo summary
       }
 
       if (isEditing) {
@@ -118,326 +148,165 @@ const DynamicPageEditor = () => {
         await api.post('/pages', payload)
         toast.success('Página criada com sucesso!')
       }
-      
+
       navigate('/admin/pages')
     } catch (error) {
       console.error('Erro ao salvar página:', error)
-      const errorMessage = error.response?.data?.message || 'Erro ao salvar página'
-      toast.error(errorMessage)
-    }
-    setLoading(false)
-  }
-
-  const handleQuickSave = async () => {
-    if (!isDirty) {
-      toast.success('Nenhuma alteração para salvar')
-      return
-    }
-
-    try {
-      const data = watch()
-      const payload = {
-        ...data,
-        widget_data: JSON.stringify(data.widget_data || {})
-      }
-
-      if (isEditing) {
-        await api.put(`/pages/${id}`, payload)
-        toast.success('Rascunho salvo!')
-      }
-    } catch (error) {
-      console.error('Erro ao salvar rascunho:', error)
-      toast.error('Erro ao salvar rascunho')
+      toast.error(error.response?.data?.message || 'Erro ao salvar página')
+    } finally {
+      setLoading(false)
     }
   }
-
-  const toggleStatus = () => {
-    const currentStatus = watch('status')
-    setValue('status', currentStatus === 'published' ? 'draft' : 'published', { shouldDirty: true })
-  }
-
-  const renderPreview = () => (
-    <div className="card" style={{ padding: '2rem', minHeight: '400px' }}>
-      <h1 style={{ marginBottom: '1rem' }}>{watchedTitle || 'Título da Página'}</h1>
-      <div 
-        style={{ 
-          lineHeight: '1.6',
-          fontSize: '1rem',
-          color: '#333'
-        }}
-        dangerouslySetInnerHTML={{ 
-          __html: watchedContent || '<p>Conteúdo da página aparecerá aqui...</p>' 
-        }}
-      />
-    </div>
-  )
 
   if (loading && isEditing) {
     return <div className="loading">Carregando página...</div>
   }
 
   return (
-    <div>
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <button 
-            type="button" 
+    <EditorLayout
+      title={isEditing ? 'Editar Página Wiki' : 'Nova Página Wiki'}
+      subtitle={isEditing ? 'Modifique o conteúdo da sua página' : 'Crie uma nova página para sua wiki'}
+      icon={FileText}
+      loading={loading}
+      sidebar={<WikiEditorSidebar currentUser={currentUser} isEditing={isEditing} />}
+    >
+      <form onSubmit={handleSubmit(onSubmit)}>
+        {/* Seção Principal */}
+        <div className="form-section">
+          <h3 className="form-section-title">
+            <FileText className="icon" />
+            Informações Básicas
+          </h3>
+          
+          <div className="form-group">
+            <label className="form-label required">Título</label>
+            <input
+              type="text"
+              className="form-input"
+              placeholder="Digite o título da página..."
+              {...register('title', { 
+                required: 'Título é obrigatório',
+                minLength: { value: 3, message: 'Título deve ter pelo menos 3 caracteres' }
+              })}
+            />
+            {errors.title && <div className="form-error">{errors.title.message}</div>}
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Resumo da Página</label>
+            <textarea
+              className="form-input form-textarea"
+              rows={3}
+              placeholder="Breve resumo da página (será exibido nas listagens)..."
+              {...register('summary')}
+            />
+            <div className="form-help">
+              Este resumo aparece nas listagens e ajuda na organização do conteúdo.
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Slug (URL)</label>
+            <input
+              type="text"
+              className="form-input"
+              placeholder="slug-da-pagina"
+              {...register('slug')}
+            />
+            <div className="form-help">
+              URL amigável para a página. Deixe vazio para gerar automaticamente.
+            </div>
+          </div>
+        </div>
+
+        {/* Conteúdo */}
+        <div className="form-section">
+          <h3 className="form-section-title">
+            <Layout className="icon" />
+            Conteúdo da Página
+          </h3>
+          
+          <div className="form-group">
+            <label className="form-label required">Conteúdo</label>
+            <RichTextEditor
+              value={content}
+              onChange={handleContentChange}
+              placeholder="Digite o conteúdo da página..."
+            />
+            {errors.content && <div className="form-error">{errors.content.message}</div>}
+          </div>
+        </div>
+
+        {/* Configurações */}
+        <div className="form-section">
+          <h3 className="form-section-title">
+            <Settings className="icon" />
+            Configurações
+          </h3>
+          
+          <div className="form-group">
+            <label className="form-label">Categoria</label>
+            <select
+              className="form-input form-select"
+              {...register('category_id')}
+            >
+              <option value="">Selecionar categoria</option>
+              {categories.map(category => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Template</label>
+            <select
+              className="form-input form-select"
+              {...register('template_id')}
+            >
+              {templates.map(template => (
+                <option key={template.id} value={template.id}>
+                  {template.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Status</label>
+            <select
+              className="form-input form-select"
+              {...register('status')}
+            >
+              <option value="draft">Rascunho</option>
+              <option value="published">Publicada</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Ações */}
+        <div className="editor-actions">
+          <button
+            type="submit"
+            className="btn-primary-editor"
+            disabled={loading}
+          >
+            <Save size={18} />
+            {loading ? 'Salvando...' : (isEditing ? 'Atualizar Página' : 'Criar Página')}
+          </button>
+          
+          <button
+            type="button"
             onClick={() => navigate('/admin/pages')}
-            className="btn"
-            style={{ padding: '0.5rem' }}
+            className="btn-secondary-editor"
           >
             <ArrowLeft size={18} />
+            Cancelar
           </button>
-          <h1>
-            <FileText size={24} style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} />
-            {isEditing ? 'Editar Página' : 'Nova Página Wiki'}
-          </h1>
-        </div>
-        
-        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-          {/* Preview Toggle */}
-          <button
-            type="button"
-            onClick={() => setPreviewMode(!previewMode)}
-            className={`btn ${previewMode ? 'btn-primary' : ''}`}
-            style={{ padding: '0.5rem 1rem' }}
-          >
-            <Eye size={16} style={{ marginRight: '0.5rem' }} />
-            {previewMode ? 'Editor' : 'Preview'}
-          </button>
-          
-          {/* Quick Save (apenas para edição) */}
-          {isEditing && (
-            <button
-              type="button"
-              onClick={handleQuickSave}
-              className="btn"
-              disabled={!isDirty || loading}
-              style={{ padding: '0.5rem 1rem' }}
-            >
-              <Save size={16} style={{ marginRight: '0.5rem' }} />
-              Salvar Rascunho
-            </button>
-          )}
-          
-          {/* Status Toggle */}
-          <button
-            type="button"
-            onClick={toggleStatus}
-            className={`btn ${watchedStatus === 'published' ? 'btn-success' : 'btn-warning'}`}
-            style={{ padding: '0.5rem 1rem' }}
-          >
-            {watchedStatus === 'published' ? <Eye size={16} /> : <EyeOff size={16} />}
-            <span style={{ marginLeft: '0.5rem' }}>
-              {watchedStatus === 'published' ? 'Publicada' : 'Rascunho'}
-            </span>
-          </button>
-        </div>
-      </div>
-
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <div style={{ display: 'grid', gridTemplateColumns: previewMode ? '1fr 1fr' : '2fr 1fr', gap: '2rem' }}>
-          
-          {/* Coluna Principal - Editor/Preview */}
-          <div>
-            {previewMode ? renderPreview() : (
-              <div className="card" style={{ padding: '1.5rem' }}>
-                {/* Título */}
-                <div style={{ marginBottom: '1.5rem' }}>
-                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-                    Título da Página *
-                  </label>
-                  <input
-                    type="text"
-                    {...register('title', { required: 'Título é obrigatório' })}
-                    placeholder="Digite o título da página..."
-                    style={{ 
-                      width: '100%', 
-                      padding: '0.75rem',
-                      fontSize: '1.1rem',
-                      border: errors.title ? '2px solid #ef4444' : '1px solid #ddd',
-                      borderRadius: '4px'
-                    }}
-                  />
-                  {errors.title && (
-                    <span style={{ color: '#ef4444', fontSize: '0.875rem' }}>
-                      {errors.title.message}
-                    </span>
-                  )}
-                </div>
-
-                {/* Slug */}
-                <div style={{ marginBottom: '1.5rem' }}>
-                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-                    URL (Slug) *
-                  </label>
-                  <input
-                    type="text"
-                    {...register('slug', { required: 'Slug é obrigatório' })}
-                    placeholder="url-da-pagina"
-                    style={{ 
-                      width: '100%', 
-                      padding: '0.75rem',
-                      border: errors.slug ? '2px solid #ef4444' : '1px solid #ddd',
-                      borderRadius: '4px',
-                      fontFamily: 'monospace'
-                    }}
-                  />
-                  {errors.slug && (
-                    <span style={{ color: '#ef4444', fontSize: '0.875rem' }}>
-                      {errors.slug.message}
-                    </span>
-                  )}
-                </div>
-
-                {/* Conteúdo */}
-                <div style={{ marginBottom: '1.5rem' }}>
-                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-                    Conteúdo *
-                  </label>
-                  <textarea
-                    {...register('content', { required: 'Conteúdo é obrigatório' })}
-                    rows={15}
-                    placeholder="Digite o conteúdo da página... (HTML é suportado)"
-                    style={{ 
-                      width: '100%', 
-                      padding: '0.75rem',
-                      border: errors.content ? '2px solid #ef4444' : '1px solid #ddd',
-                      borderRadius: '4px',
-                      fontFamily: 'monospace',
-                      fontSize: '0.9rem',
-                      lineHeight: '1.5',
-                      resize: 'vertical'
-                    }}
-                  />
-                  {errors.content && (
-                    <span style={{ color: '#ef4444', fontSize: '0.875rem' }}>
-                      {errors.content.message}
-                    </span>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Sidebar - Configurações */}
-          <div>
-            {/* Configurações da Página */}
-            <div className="card" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
-              <h3 style={{ margin: '0 0 1rem 0', display: 'flex', alignItems: 'center' }}>
-                <Settings size={18} style={{ marginRight: '0.5rem' }} />
-                Configurações
-              </h3>
-
-              {/* Categoria */}
-              <div style={{ marginBottom: '1rem' }}>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-                  <Tag size={14} style={{ marginRight: '0.25rem' }} />
-                  Categoria
-                </label>
-                <select
-                  {...register('category_id')}
-                  style={{ 
-                    width: '100%', 
-                    padding: '0.5rem',
-                    border: '1px solid #ddd',
-                    borderRadius: '4px'
-                  }}
-                >
-                  <option value="">Selecionar categoria</option>
-                  {categories.map(category => (
-                    <option key={category.id} value={category.id}>
-                      {category.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Template */}
-              <div style={{ marginBottom: '1rem' }}>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-                  <Layout size={14} style={{ marginRight: '0.25rem' }} />
-                  Template
-                </label>
-                <select
-                  {...register('template_id')}
-                  style={{ 
-                    width: '100%', 
-                    padding: '0.5rem',
-                    border: '1px solid #ddd',
-                    borderRadius: '4px'
-                  }}
-                >
-                  {templates.map(template => (
-                    <option key={template.id} value={template.id}>
-                      {template.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Status */}
-              <div style={{ marginBottom: '1rem' }}>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-                  Status
-                </label>
-                <select
-                  {...register('status')}
-                  style={{ 
-                    width: '100%', 
-                    padding: '0.5rem',
-                    border: '1px solid #ddd',
-                    borderRadius: '4px'
-                  }}
-                >
-                  <option value="draft">Rascunho</option>
-                  <option value="published">Publicada</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Informações */}
-            {isEditing && currentUser && (
-              <div className="card" style={{ padding: '1rem' }}>
-                <h4 style={{ margin: '0 0 0.5rem 0' }}>Informações</h4>
-                <div style={{ fontSize: '0.875rem', color: '#666' }}>
-                  <div>Autor: {currentUser.name}</div>
-                  <div>Última modificação: {new Date().toLocaleDateString()}</div>
-                </div>
-              </div>
-            )}
-
-            {/* Ações */}
-            <div style={{ marginTop: '1.5rem' }}>
-              <button
-                type="submit"
-                className="btn btn-primary"
-                disabled={loading}
-                style={{ 
-                  width: '100%', 
-                  padding: '0.75rem',
-                  fontSize: '1rem',
-                  marginBottom: '0.5rem'
-                }}
-              >
-                <Save size={18} style={{ marginRight: '0.5rem' }} />
-                {loading ? 'Salvando...' : (isEditing ? 'Atualizar Página' : 'Criar Página')}
-              </button>
-              
-              <button
-                type="button"
-                onClick={() => navigate('/admin/pages')}
-                className="btn"
-                style={{ width: '100%', padding: '0.75rem' }}
-              >
-                Cancelar
-              </button>
-            </div>
-          </div>
         </div>
       </form>
-    </div>
+    </EditorLayout>
   )
 }
 

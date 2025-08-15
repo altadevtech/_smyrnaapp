@@ -295,7 +295,7 @@ const Navbar = () => {
                   <div style={{
                     width: '24px',
                     height: '24px',
-                    background: 'linear-gradient(135deg, #667eea, #764ba2)',
+                    background: 'linear-gradient(135deg, rgb(102, 234, 205), rgb(75, 129, 162))',
                     borderRadius: '50%',
                     display: 'flex',
                     alignItems: 'center',
@@ -390,22 +390,22 @@ const Navbar = () => {
                   alignItems: 'center',
                   gap: '0.5rem',
                   padding: '0.75rem 1.5rem',
-                  background: 'linear-gradient(135deg, #667eea, #764ba2)',
+                  background: 'linear-gradient(135deg, rgb(102, 234, 205), rgb(75, 129, 162))',
                   color: 'white',
                   textDecoration: 'none',
                   borderRadius: '8px',
                   fontSize: '0.9rem',
                   fontWeight: '500',
                   transition: 'all 0.3s ease',
-                  boxShadow: '0 2px 8px rgba(102, 126, 234, 0.3)'
+                  boxShadow: '0 2px 8px rgba(102, 234, 205, 0.3)'
                 }}
                 onMouseOver={(e) => {
                   e.target.style.transform = 'translateY(-1px)'
-                  e.target.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.4)'
+                  e.target.style.boxShadow = '0 4px 12px rgba(102, 234, 205, 0.4)'
                 }}
                 onMouseOut={(e) => {
                   e.target.style.transform = 'translateY(0)'
-                  e.target.style.boxShadow = '0 2px 8px rgba(102, 126, 234, 0.3)'
+                  e.target.style.boxShadow = '0 2px 8px rgba(102, 234, 205, 0.3)'
                 }}
               >
                 <User size={16} />
@@ -525,7 +525,7 @@ const Navbar = () => {
                     <div style={{
                       width: '32px',
                       height: '32px',
-                      background: 'linear-gradient(135deg, #667eea, #764ba2)',
+                      background: 'linear-gradient(135deg, rgb(102, 234, 205), rgb(75, 129, 162))',
                       borderRadius: '50%',
                       display: 'flex',
                       alignItems: 'center',

@@ -326,6 +326,32 @@ const PublicPost = () => {
           </div>
         </header>
 
+        {/* Imagem destacada */}
+        {post.featured_image && (
+          <div 
+            style={{
+              width: '100%',
+              height: '400px',
+              overflow: 'hidden',
+              position: 'relative'
+            }}
+          >
+            <img 
+              src={post.featured_image} 
+              alt={post.title}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                objectPosition: 'center'
+              }}
+              onError={(e) => {
+                e.target.parentElement.style.display = 'none'
+              }}
+            />
+          </div>
+        )}
+
         {/* Conteúdo do artigo */}
         <div style={{
           padding: isMobile ? '2rem 1.5rem' : '3rem 2rem',

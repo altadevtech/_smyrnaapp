@@ -3,8 +3,10 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import api from '../services/api'
 import toast from 'react-hot-toast'
-import { Save, ArrowLeft } from 'lucide-react'
+import { Save, ArrowLeft, FileText, Tag, Settings } from 'lucide-react'
 import RichTextEditor from '../components/RichTextEditor'
+import EditorLayout from '../components/EditorLayout'
+import { PostEditorSidebar } from '../components/EditorSidebars'
 
 const PostEditor = () => {
   const navigate = useNavigate()
@@ -91,6 +93,7 @@ const PostEditor = () => {
       setValue('content', post.content)
       setValue('status', post.status)
       setValue('category_id', post.category_id || '')
+      setValue('featured_image', post.featured_image || '')
       setContent(post.content || '')
       setSlugManuallyEdited(true) // Marca que o slug não deve ser auto-gerado ao editar
     } catch (error) {
@@ -150,184 +153,154 @@ const PostEditor = () => {
   }
 
   return (
-    <div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
-        <button onClick={() => navigate('/admin/posts')} className="btn">
-          <ArrowLeft size={18} />
-        </button>
-        <h1>{isEditing ? 'Editar Post' : 'Novo Post'}</h1>
-      </div>
+    <EditorLayout
+      title={isEditing ? 'Editar Post' : 'Novo Post'}
+      subtitle={isEditing ? 'Modifique seu post do blog' : 'Crie um novo post para o blog'}
+      icon={FileText}
+      loading={loading}
+      sidebar={<PostEditorSidebar isEditing={isEditing} />}
+    >
+      <form onSubmit={handleSubmit(onSubmit)}>
+        {/* Seção Principal */}
+        <div className="form-section">
+          <h3 className="form-section-title">
+            <FileText className="icon" />
+            Informações Básicas
+          </h3>
+          
+          <div className="form-group">
+            <label className="form-label required">Título</label>
+            <input
+              type="text"
+              className="form-input"
+              placeholder="Digite o título do post..."
+              {...register('title', { required: 'Título é obrigatório' })}
+            />
+            {errors.title && <div className="form-error">{errors.title.message}</div>}
+          </div>
 
-      <div className="post-editor-grid">
-        {/* Formulário principal à esquerda */}
-        <div className="post-editor-main">
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <div className="form-group">
-              <label htmlFor="title">Título *</label>
-              <input
-                type="text"
-                id="title"
-                className="form-control"
-                {...register('title', { required: 'Título é obrigatório' })}
-              />
-              {errors.title && (
-                <div className="error" style={{ marginTop: '0.5rem' }}>
-                  {errors.title.message}
-                </div>
-              )}
+          <div className="form-group">
+            <label className="form-label required">URL/Slug</label>
+            <input
+              type="text"
+              className="form-input"
+              placeholder="url-amigavel-do-post"
+              {...register('slug', { required: 'Slug é obrigatório' })}
+              onChange={(e) => {
+                setSlugManuallyEdited(true)
+                register('slug').onChange(e)
+              }}
+            />
+            {errors.slug && <div className="form-error">{errors.slug.message}</div>}
+            <div className="form-help">
+              {!slugManuallyEdited && !isEditing ? 
+                "Gerado automaticamente baseado no título. Você pode editá-lo se necessário." :
+                "Usado para criar URLs amigáveis."
+              }
             </div>
+          </div>
 
-            <div className="form-group">
-              <label htmlFor="slug">URL/Slug *</label>
-              <input
-                type="text"
-                id="slug"
-                className="form-control"
-                {...register('slug', { required: 'Slug é obrigatório' })}
-                placeholder="url-amigavel-do-post"
-                onChange={(e) => {
-                  // Marcar que o slug foi editado manualmente
-                  setSlugManuallyEdited(true)
-                  // Aplicar a função register do react-hook-form
-                  register('slug').onChange(e)
-                }}
-              />
-              {errors.slug && (
-                <div className="error" style={{ marginTop: '0.5rem' }}>
-                  {errors.slug.message}
-                </div>
-              )}
-              <small className="form-text text-muted">
-                {!slugManuallyEdited && !isEditing ? 
-                  "Gerado automaticamente baseado no título. Você pode editá-lo se necessário." :
-                  "Usado para criar URLs amigáveis."
-                }
-              </small>
+          <div className="form-group">
+            <label className="form-label">Resumo</label>
+            <textarea
+              className="form-input form-textarea"
+              rows={3}
+              placeholder="Breve resumo do post (será exibido na lista de posts)..."
+              {...register('summary')}
+            />
+            <div className="form-help">
+              Este resumo aparecerá na grade de posts no blog. Recomendamos entre 100-200 caracteres.
             </div>
+          </div>
 
-            <div className="form-group">
-              <label htmlFor="summary">Resumo</label>
-              <textarea
-                id="summary"
-                className="form-control"
-                rows="3"
-                placeholder="Breve resumo do post (será exibido na lista de posts)..."
-                {...register('summary')}
-              />
-              <small className="form-text text-muted">
-                Este resumo aparecerá na grade de posts no blog. Recomendamos entre 100-200 caracteres.
-              </small>
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="category_id">Categoria</label>
-              <select
-                id="category_id"
-                className="form-control"
-                {...register('category_id')}
-              >
-                <option value="">Selecionar categoria</option>
-                {categories.map(category => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label>Conteúdo *</label>
-              <RichTextEditor
-                value={content}
-                onChange={handleContentChange}
-                placeholder="Digite o conteúdo do post..."
-              />
-              {errors.content && (
-                <div className="error" style={{ marginTop: '0.5rem' }}>
-                  {errors.content.message}
-                </div>
-              )}
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="status">Status</label>
-              <select
-                id="status"
-                className="form-control"
-                {...register('status')}
-              >
-                <option value="draft">Rascunho</option>
-                <option value="published">Publicado</option>
-              </select>
-            </div>
-
-            <div className="actions">
-              <button 
-                type="submit" 
-                className="btn btn-primary"
-                disabled={loading}
-              >
-                <Save size={18} style={{ verticalAlign: 'middle' }} />
-                {loading ? 'Salvando...' : 'Salvar Post'}
-              </button>
-              <button 
-                type="button" 
-                className="btn" 
-                onClick={() => navigate('/admin/posts')}
-              >
-                Cancelar
-              </button>
-            </div>
-          </form>
-        </div>
-
-        {/* Sidebar de ajuda à direita */}
-        <div className="post-editor-sidebar">
-          <div className="editor-help">
-            <h3 style={{ marginTop: 0, color: 'var(--text-color)', fontSize: '1.25rem' }}>📝 Editor de Posts</h3>
-            
-            <div className="help-sections">
-              <div className="help-section" style={{ marginBottom: '1.5rem' }}>
-                <h4 style={{ color: 'var(--primary-color)', fontSize: '16px', marginBottom: '0.5rem' }}>🎨 Recursos do Editor</h4>
-                <ul style={{ fontSize: '14px', color: 'var(--text-secondary)', marginLeft: '1rem' }}>
-                  <li><strong>Visual:</strong> Editor WYSIWYG com formatação</li>
-                  <li><strong>HTML:</strong> Edição direta do código</li>
-                  <li><strong>Preview:</strong> Visualização do resultado final</li>
-                </ul>
-              </div>
-
-              <div className="help-section" style={{ marginBottom: '1.5rem' }}>
-                <h4 style={{ color: 'var(--success-color)', fontSize: '16px', marginBottom: '0.5rem' }}>📊 Status de Publicação</h4>
-                <ul style={{ fontSize: '14px', color: 'var(--text-secondary)', marginLeft: '1rem' }}>
-                  <li><strong>Rascunho:</strong> Não aparece no site público</li>
-                  <li><strong>Publicado:</strong> Visível na página de blog</li>
-                </ul>
-              </div>
-
-              <div className="help-section" style={{ marginBottom: '1.5rem' }}>
-                <h4 style={{ color: 'var(--danger-color)', fontSize: '16px', marginBottom: '0.5rem' }}>💡 Dicas Importantes</h4>
-                <ul style={{ fontSize: '14px', color: 'var(--text-secondary)', marginLeft: '1rem' }}>
-                  <li>Use títulos chamativos e descritivos</li>
-                  <li>Posts são exibidos em ordem cronológica</li>
-                  <li>Você pode usar HTML e widgets no conteúdo</li>
-                  <li>Lembre-se de salvar suas alterações</li>
-                </ul>
-              </div>
-
-              <div className="help-section">
-                <h4 style={{ color: 'var(--primary-color)', fontSize: '16px', marginBottom: '0.5rem' }}>🔧 Funcionalidades</h4>
-                <ul style={{ fontSize: '14px', color: 'var(--text-secondary)', marginLeft: '1rem' }}>
-                  <li>Formatação rica de texto</li>
-                  <li>Inserção de links e imagens</li>
-                  <li>Listas numeradas e com marcadores</li>
-                  <li>Códigos e citações</li>
-                </ul>
-              </div>
+          <div className="form-group">
+            <label className="form-label">Imagem Destaque</label>
+            <input
+              type="url"
+              className="form-input"
+              placeholder="https://exemplo.com/imagem.jpg"
+              {...register('featured_image')}
+            />
+            <div className="form-help">
+              URL da imagem que será exibida no grid de posts e no cabeçalho do post individual. Use uma imagem com boa resolução (recomendado: 1200x630px).
             </div>
           </div>
         </div>
-      </div>
-    </div>
+
+        {/* Conteúdo */}
+        <div className="form-section">
+          <h3 className="form-section-title">
+            <FileText className="icon" />
+            Conteúdo do Post
+          </h3>
+          
+          <div className="form-group">
+            <label className="form-label required">Conteúdo</label>
+            <RichTextEditor
+              value={content}
+              onChange={handleContentChange}
+              placeholder="Digite o conteúdo do post..."
+            />
+            {errors.content && <div className="form-error">{errors.content.message}</div>}
+          </div>
+        </div>
+
+        {/* Configurações */}
+        <div className="form-section">
+          <h3 className="form-section-title">
+            <Settings className="icon" />
+            Configurações
+          </h3>
+          
+          <div className="form-group">
+            <label className="form-label">Categoria</label>
+            <select
+              className="form-input form-select"
+              {...register('category_id')}
+            >
+              <option value="">Selecionar categoria</option>
+              {categories.map(category => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Status</label>
+            <select
+              className="form-input form-select"
+              {...register('status')}
+            >
+              <option value="draft">Rascunho</option>
+              <option value="published">Publicado</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Ações */}
+        <div className="editor-actions">
+          <button
+            type="submit"
+            className="btn-primary-editor"
+            disabled={loading}
+          >
+            <Save size={18} />
+            {loading ? 'Salvando...' : 'Salvar Post'}
+          </button>
+          
+          <button
+            type="button"
+            onClick={() => navigate('/admin/posts')}
+            className="btn-secondary-editor"
+          >
+            <ArrowLeft size={18} />
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </EditorLayout>
   )
 }
 

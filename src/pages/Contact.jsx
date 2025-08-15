@@ -29,7 +29,7 @@ const Contact = () => {
   const pageStyle = {
     minHeight: '80vh',
     padding: '2rem 2rem',
-    background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
+    background: 'linear-gradient(135deg, rgb(102, 234, 205) 0%, rgb(75, 129, 162) 100%)',
     borderRadius: '15px'
   }
 
@@ -47,13 +47,13 @@ const Contact = () => {
   const titleStyle = {
     fontSize: '2.5rem',
     fontWeight: '700',
-    color: '#1f2937',
+    color: 'white',
     marginBottom: '1rem'
   }
 
   const subtitleStyle = {
     fontSize: '1.1rem',
-    color: '#6b7280',
+    color: 'white',
     maxWidth: '600px',
     margin: '0 auto'
   }
@@ -105,7 +105,7 @@ const Contact = () => {
     gap: '0.5rem',
     width: '100%',
     padding: '1rem',
-    background: 'linear-gradient(135deg, #667eea, #764ba2)',
+    background: 'linear-gradient(135deg, rgb(102, 234, 205), rgb(75, 129, 162))',
     color: 'white',
     border: 'none',
     borderRadius: '8px',
@@ -224,7 +224,7 @@ const Contact = () => {
                 <div style={{
                   width: '48px',
                   height: '48px',
-                  background: 'linear-gradient(135deg, #667eea, #764ba2)',
+                  background: 'linear-gradient(135deg, rgb(102, 234, 205), rgb(75, 129, 162))',
                   borderRadius: '50%',
                   display: 'flex',
                   alignItems: 'center',
@@ -237,7 +237,7 @@ const Contact = () => {
                   <h4 style={{ margin: 0, color: '#1f2937' }}>Email</h4>
                   <a 
                     href={`mailto:${settings.contactEmail}`}
-                    style={{ color: '#667eea', textDecoration: 'none' }}
+                    style={{ color: 'rgb(83, 161, 175)', textDecoration: 'none' }}
                   >
                     {settings.contactEmail}
                   </a>
@@ -250,7 +250,7 @@ const Contact = () => {
                 <div style={{
                   width: '48px',
                   height: '48px',
-                  background: 'linear-gradient(135deg, #667eea, #764ba2)',
+                  background: 'linear-gradient(135deg, rgb(102, 234, 205), rgb(75, 129, 162))',
                   borderRadius: '50%',
                   display: 'flex',
                   alignItems: 'center',
@@ -263,7 +263,7 @@ const Contact = () => {
                   <h4 style={{ margin: 0, color: '#1f2937' }}>Telefone</h4>
                   <a 
                     href={`tel:${settings.contactPhone}`}
-                    style={{ color: '#667eea', textDecoration: 'none' }}
+                    style={{ color: 'rgb(83, 161, 175)', textDecoration: 'none' }}
                   >
                     {settings.contactPhone}
                   </a>
@@ -276,7 +276,7 @@ const Contact = () => {
                 <div style={{
                   width: '48px',
                   height: '48px',
-                  background: 'linear-gradient(135deg, #667eea, #764ba2)',
+                  background: 'linear-gradient(135deg, rgb(102, 234, 205), rgb(75, 129, 162))',
                   borderRadius: '50%',
                   display: 'flex',
                   alignItems: 'center',
@@ -292,11 +292,32 @@ const Contact = () => {
               </div>
             )}
 
+            {settings.contactHours && (
+              <div style={contactItemStyle}>
+                <div style={{
+                  width: '48px',
+                  height: '48px',
+                  background: 'linear-gradient(135deg, rgb(102, 234, 205), rgb(75, 129, 162))',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white'
+                }}>
+                  <Clock size={20} />
+                </div>
+                <div>
+                  <h4 style={{ margin: 0, color: '#1f2937' }}>Horário de Funcionamento</h4>
+                  <p style={{ margin: 0, color: '#6b7280' }}>{settings.contactHours}</p>
+                </div>
+              </div>
+            )}
+
             <div style={contactItemStyle}>
               <div style={{
                 width: '48px',
                 height: '48px',
-                background: 'linear-gradient(135deg, #667eea, #764ba2)',
+                background: 'linear-gradient(135deg, rgb(102, 234, 205), rgb(75, 129, 162))',
                 borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
