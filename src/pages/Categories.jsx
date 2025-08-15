@@ -2,28 +2,39 @@ import React, { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import api from '../services/api'
 import toast from 'react-hot-toast'
-import { Plus, Edit, Trash2, Save, X, Tag } from 'lucide-react'
+import { Plus, Edit, Trash2, Save, X, Tag, ChevronRight } from 'lucide-react'
 
 const Categories = () => {
   const [categories, setCategories] = useState([])
+  const [parentCategories, setParentCategories] = useState([])
   const [loading, setLoading] = useState(true)
   const [isCreating, setIsCreating] = useState(false)
   const [editingCategory, setEditingCategory] = useState(null)
   const [activeTab, setActiveTab] = useState('wiki') // 'wiki' ou 'blog'
 
-  const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm({
+  const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm({
     defaultValues: {
       name: '',
       slug: '',
       description: '',
       color: '#6366f1',
-      type: 'wiki'
+      type: 'wiki',
+      parent_id: ''
     }
   })
 
+  const watchName = watch('name')
+
   useEffect(() => {
     fetchCategories()
+    fetchParentCategories()
   }, [activeTab])
+
+  useEffect(() => {
+    if (watchName && !editingCategory) {
+      setValue('slug', generateSlug(watchName))
+    }
+  }, [watchName, setValue, editingCategory])
 
   const fetchCategories = async () => {
     try {
@@ -34,6 +45,15 @@ const Categories = () => {
       console.error(error)
     }
     setLoading(false)
+  }
+
+  const fetchParentCategories = async () => {
+    try {
+      const response = await api.get(`/categories/main/${activeTab}`)
+      setParentCategories(response.data)
+    } catch (error) {
+      console.error('Erro ao carregar categorias principais:', error)
+    }
   }
 
   const generateSlug = (name) => {
@@ -74,6 +94,7 @@ const Categories = () => {
     setValue('slug', category.slug)
     setValue('description', category.description)
     setValue('color', category.color)
+    setValue('parent_id', category.parent_id || '')
     setIsCreating(true)
   }
 
@@ -85,7 +106,8 @@ const Categories = () => {
       slug: '',
       description: '',
       color: '#6366f1',
-      type: activeTab
+      type: activeTab,
+      parent_id: ''
     })
   }
 
@@ -108,6 +130,30 @@ const Categories = () => {
     if (!editingCategory) {
       setValue('slug', generateSlug(name))
     }
+  }
+
+  // Organizar categorias em estrutura hierárquica
+  const organizeCategories = () => {
+    const rootCategories = categories.filter(cat => !cat.parent_id)
+    const subcategories = categories.filter(cat => cat.parent_id)
+
+    return rootCategories.map(rootCat => ({
+      ...rootCat,
+      subcategories: subcategories.filter(subCat => subCat.parent_id === rootCat.id)
+    }))
+  }
+
+  const getCategoryDisplay = (category) => {
+    if (category.parent_name) {
+      return (
+        <div className="flex items-center gap-2">
+          <span className="text-gray-500">{category.parent_name}</span>
+          <ChevronRight size={16} className="text-gray-400" />
+          <span>{category.name}</span>
+        </div>
+      )
+    }
+    return category.name
   }
 
   if (loading) {
@@ -261,6 +307,24 @@ const Categories = () => {
                 />
               </div>
               <div className="form-group">
+                <label htmlFor="parent_id">Categoria Pai (opcional)</label>
+                <select
+                  id="parent_id"
+                  className="form-control"
+                  {...register('parent_id')}
+                >
+                  <option value="">Categoria Principal</option>
+                  {parentCategories.map(category => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+                <small style={{ color: '#64748b', fontSize: '0.875rem' }}>
+                  Deixe vazio para criar uma categoria principal ou selecione uma categoria pai para criar uma subcategoria
+                </small>
+              </div>
+              <div className="form-group">
                 <label htmlFor="type">Tipo *</label>
                 <select
                   id="type"
@@ -397,10 +461,13 @@ const Categories = () => {
                     verticalAlign: 'middle'
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      {category.parent_id && <span style={{ marginLeft: '1.5rem', color: '#9ca3af' }}>↳</span>}
                       <span style={{ fontSize: '1.2rem' }}>
                         {category.type === 'wiki' ? '📚' : '📝'}
                       </span>
-                      <strong>{category.name}</strong>
+                      <div>
+                        {getCategoryDisplay(category)}
+                      </div>
                     </div>
                   </td>
                   <td style={{

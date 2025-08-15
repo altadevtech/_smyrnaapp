@@ -25,7 +25,7 @@ const WikiSidebar = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await api.get('/categories')
+      const response = await api.get('/categories?type=wiki&hierarchical=true')
       setCategories(response.data)
     } catch (error) {
       console.error('Erro ao carregar categorias:', error)
@@ -161,7 +161,12 @@ const WikiSidebar = () => {
           const categoryPages = getPagesByCategory(category.id)
           const isExpanded = expandedCategories.has(category.id)
           
-          if (categoryPages.length === 0 && !searchTerm) return null
+          // Contar páginas incluindo subcategorias
+          const allPages = categoryPages.concat(
+            ...(category.subcategories || []).map(sub => getPagesByCategory(sub.id))
+          )
+          
+          if (allPages.length === 0 && !searchTerm && (!category.subcategories || category.subcategories.length === 0)) return null
 
           return (
             <div key={category.id} style={{ marginBottom: '0.5rem' }}>
@@ -190,12 +195,13 @@ const WikiSidebar = () => {
                   <FolderOpen size={16} style={{ marginRight: '0.5rem', color: category.color || '#6366f1' }} /> :
                   <Folder size={16} style={{ marginRight: '0.5rem', color: category.color || '#6366f1' }} />
                 }
-                {category.name} ({categoryPages.length})
+                {category.name} ({allPages.length})
               </button>
 
-              {/* Category Pages */}
+              {/* Category Content */}
               {isExpanded && (
                 <div style={{ marginLeft: '1.5rem', marginTop: '0.25rem' }}>
+                  {/* Category Pages */}
                   {categoryPages.map(page => (
                     <Link
                       key={page.id}
@@ -218,6 +224,71 @@ const WikiSidebar = () => {
                       {page.title}
                     </Link>
                   ))}
+                  
+                  {/* Subcategories */}
+                  {category.subcategories && category.subcategories.map(subcategory => {
+                    const subcategoryPages = getPagesByCategory(subcategory.id)
+                    const isSubExpanded = expandedCategories.has(subcategory.id)
+                    
+                    if (subcategoryPages.length === 0 && !searchTerm) return null
+                    
+                    return (
+                      <div key={subcategory.id} style={{ marginTop: '0.5rem' }}>
+                        {/* Subcategory Header */}
+                        <button
+                          onClick={() => toggleCategory(subcategory.id)}
+                          style={{
+                            width: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            padding: '0.375rem 0.5rem',
+                            border: 'none',
+                            background: 'transparent',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            fontSize: '0.8rem',
+                            fontWeight: '600',
+                            color: '#4b5563'
+                          }}
+                        >
+                          {isSubExpanded ? 
+                            <ChevronDown size={12} style={{ marginRight: '0.25rem' }} /> :
+                            <ChevronRight size={12} style={{ marginRight: '0.25rem' }} />
+                          }
+                          <Tag size={12} style={{ marginRight: '0.5rem', color: subcategory.color || '#8b5cf6' }} />
+                          {subcategory.name} ({subcategoryPages.length})
+                        </button>
+                        
+                        {/* Subcategory Pages */}
+                        {isSubExpanded && (
+                          <div style={{ marginLeft: '1rem', marginTop: '0.25rem' }}>
+                            {subcategoryPages.map(page => (
+                              <Link
+                                key={page.id}
+                                to={`/wiki/${page.slug}`}
+                                style={{
+                                  display: 'block',
+                                  padding: '0.25rem 0.5rem',
+                                  borderRadius: '4px',
+                                  textDecoration: 'none',
+                                  fontSize: '0.8rem',
+                                  color: isCurrentPage(page.slug) ? '#1f2937' : '#6b7280',
+                                  backgroundColor: isCurrentPage(page.slug) ? '#e5e7eb' : 'transparent',
+                                  marginBottom: '0.125rem'
+                                }}
+                              >
+                                <FileText size={12} style={{ 
+                                  marginRight: '0.5rem', 
+                                  verticalAlign: 'middle' 
+                                }} />
+                                {page.title}
+                              </Link>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
                 </div>
               )}
             </div>

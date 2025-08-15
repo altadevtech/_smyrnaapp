@@ -115,6 +115,7 @@ class Database {
         CREATE TABLE IF NOT EXISTS posts (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           title TEXT NOT NULL,
+          slug TEXT UNIQUE,
           content TEXT NOT NULL,
           status TEXT NOT NULL DEFAULT 'draft',
           author_id INTEGER NOT NULL,
@@ -135,10 +136,12 @@ class Database {
           description TEXT,
           type TEXT NOT NULL DEFAULT 'blog',
           color TEXT DEFAULT '#3b82f6',
+          parent_id INTEGER DEFAULT NULL,
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
           updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-          UNIQUE(name, type),
-          UNIQUE(slug, type)
+          UNIQUE(name, type, parent_id),
+          UNIQUE(slug, type, parent_id),
+          FOREIGN KEY (parent_id) REFERENCES categories (id) ON DELETE CASCADE
         )
       `
 
