@@ -52,7 +52,7 @@ const Login = () => {
       alignItems: 'center',
       justifyContent: 'center',
       padding: '2rem 1rem',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      fontFamily: 'Arial, Tahoma, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
       position: 'relative',
       overflow: 'hidden'
     }}>

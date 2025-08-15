@@ -32,7 +32,7 @@ const Footer = () => {
     marginTop: '2rem',
     position: 'relative',
     width: '100%',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    fontFamily: 'Arial, Tahoma, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
     lineHeight: 1.5
   }
 

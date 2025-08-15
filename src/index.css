@@ -1,5 +1,5 @@
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: Arial, Tahoma, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
@@ -14,11 +14,18 @@
   -webkit-text-size-adjust: 100%;
 }
 
-* {
+/* Força fonte sans-serif para todos os elementos */
+*, *::before, *::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
   text-align: left;
+  font-family: Arial, Tahoma, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+
+/* Override específico para elementos que podem ter fontes serifadas */
+h1, h2, h3, h4, h5, h6, p, div, span, a, li, ul, ol, button, input, textarea, select, label, td, th, tr, table {
+  font-family: Arial, Tahoma, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
 }
 
 body {
@@ -27,6 +34,7 @@ body {
   min-width: 320px;
   min-height: 100vh;
   text-align: left;
+  font-family: Arial, Tahoma, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
 }
 
 #root {

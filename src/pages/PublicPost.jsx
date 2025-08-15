@@ -148,7 +148,7 @@ const PublicPost = () => {
       maxWidth: '1200px',
       margin: '0 auto',
       padding: isMobile ? '1rem' : '2rem 1rem',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+      fontFamily: 'Arial, Tahoma, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
     }}>
       
       {/* Header com navegação */}
