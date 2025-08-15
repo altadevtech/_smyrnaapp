@@ -1,14 +1,15 @@
 import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import react from '@vitejs/plugin-react-swc'
 
-// https://vitejs.dev/config/
+// Configuração sem esbuild para evitar problemas no Render.com
 export default defineConfig({
   plugins: [react()],
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
     sourcemap: false,
-    minify: process.env.NODE_ENV === 'production' ? 'terser' : 'esbuild',
+    // Usar terser em vez de esbuild
+    minify: 'terser',
     target: 'es2015',
     rollupOptions: {
       output: {
@@ -25,9 +26,6 @@ export default defineConfig({
       }
     }
   },
-  esbuild: {
-    // Configuração específica para evitar problemas com esbuild
-    target: 'es2015',
-    platform: 'neutral'
-  }
+  // Completamente desabilitar esbuild
+  esbuild: false
 })
