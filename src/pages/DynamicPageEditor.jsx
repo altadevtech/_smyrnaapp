@@ -64,7 +64,7 @@ const DynamicPageEditor = () => {
   const fetchInitialData = async () => {
     try {
       const [categoriesRes, templatesRes] = await Promise.all([
-        api.get('/categories'),
+        api.get('/categories?type=wiki'),
         api.get('/templates/public')
       ])
       

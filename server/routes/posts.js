@@ -26,20 +26,12 @@ router.get('/public', (req, res) => {
   )
 })
 
-// Buscar post específico por slug (público)
-router.get('/public/:slug', (req, res) => {
-  const { slug } = req.params
-  
-  // Extrair ID do slug (formato: titulo-slug-ID)
-  const slugParts = slug.split('-')
-  const id = slugParts[slugParts.length - 1]
-  
-  if (!id || isNaN(id)) {
-    return res.status(400).json({ message: 'Slug inválido' })
-  }
-
+// Buscar post público por ID (temporário - sem funcionalidade de slug)
+router.get('/public/:id', (req, res) => {
+  const { id } = req.params
   const db = Database.getDb()
   
+  // Buscar apenas por ID (funcionalidade temporária sem slug)
   db.get(
     `SELECT p.*, u.name as author_name, c.name as category_name, c.slug as category_slug, c.color as category_color 
      FROM posts p 

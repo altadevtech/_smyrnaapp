@@ -134,6 +134,25 @@ const PostEditor = () => {
             </div>
 
             <div className="form-group">
+              <label htmlFor="slug">URL/Slug *</label>
+              <input
+                type="text"
+                id="slug"
+                className="form-control"
+                {...register('slug', { required: 'Slug é obrigatório' })}
+                placeholder="url-amigavel-do-post"
+              />
+              {errors.slug && (
+                <div className="error" style={{ marginTop: '0.5rem' }}>
+                  {errors.slug.message}
+                </div>
+              )}
+              <small className="form-text text-muted">
+                Gerado automaticamente baseado no título. Usado para criar URLs amigáveis.
+              </small>
+            </div>
+
+            <div className="form-group">
               <label htmlFor="category_id">Categoria</label>
               <select
                 id="category_id"

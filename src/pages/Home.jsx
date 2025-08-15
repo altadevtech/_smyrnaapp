@@ -89,7 +89,7 @@ const Home = () => {
               {posts.slice(0, 3).map(post => (
                 <div key={post.id} className="content-item">
                   <h3>
-                    <Link to={`/blog/${generateSlug(post.title, post.id)}`}>
+                    <Link to={`/blog/${post.slug || generateSlug(post.title, post.id)}`}>
                       {post.title}
                     </Link>
                   </h3>
