@@ -1,15 +1,14 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 
-// Configuração sem esbuild para evitar problemas no Render.com
+// Configuração SEM esbuild para Render.com
 export default defineConfig({
   plugins: [react()],
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
     sourcemap: false,
-    // Usar terser em vez de esbuild
-    minify: 'terser',
+    minify: 'terser', // Forçar terser
     target: 'es2015',
     rollupOptions: {
       output: {
@@ -26,6 +25,10 @@ export default defineConfig({
       }
     }
   },
-  // Completamente desabilitar esbuild
-  esbuild: false
+  // Remover completamente esbuild
+  esbuild: false,
+  define: {
+    // Garantir que não há referências ao esbuild
+    global: 'globalThis'
+  }
 })
