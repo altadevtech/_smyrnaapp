@@ -156,6 +156,7 @@ const PostEditor = () => {
       </div>
 
       <div className="post-editor-grid">
+        {/* Formulário principal à esquerda */}
         <div className="post-editor-main">
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="form-group">
@@ -263,6 +264,7 @@ const PostEditor = () => {
           </form>
         </div>
 
+        {/* Sidebar de ajuda à direita */}
         <div className="post-editor-sidebar">
           <div className="editor-help">
             <h3 style={{ marginTop: 0, color: 'var(--text-color)', fontSize: '1.25rem' }}>📝 Editor de Posts</h3>
