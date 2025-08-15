@@ -14,6 +14,7 @@ const PostEditor = () => {
   const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm({
     defaultValues: {
       title: '',
+      slug: '',
       content: '',
       status: 'draft',
       category_id: ''
@@ -24,6 +25,35 @@ const PostEditor = () => {
   const [initialLoading, setInitialLoading] = useState(isEditing)
   const [content, setContent] = useState('')
   const [categories, setCategories] = useState([])
+  const [slugManuallyEdited, setSlugManuallyEdited] = useState(false)
+
+  // Função para gerar slug automaticamente
+  const generateSlug = (title) => {
+    return title
+      .toLowerCase()
+      .trim()
+      .replace(/[áàâãäå]/g, 'a')
+      .replace(/[éèêë]/g, 'e')
+      .replace(/[íìîï]/g, 'i')
+      .replace(/[óòôõö]/g, 'o')
+      .replace(/[úùûü]/g, 'u')
+      .replace(/[ç]/g, 'c')
+      .replace(/[ñ]/g, 'n')
+      .replace(/[^a-z0-9\s-]/g, '') // Remove caracteres especiais
+      .replace(/\s+/g, '-') // Substitui espaços por hifens
+      .replace(/-+/g, '-') // Remove hifens consecutivos
+      .replace(/^-|-$/g, '') // Remove hifens do início e fim
+  }
+
+  // Observar mudanças no título para gerar slug automaticamente
+  const watchedTitle = watch('title')
+  
+  useEffect(() => {
+    if (watchedTitle && !isEditing && !slugManuallyEdited) {
+      const newSlug = generateSlug(watchedTitle)
+      setValue('slug', newSlug)
+    }
+  }, [watchedTitle, setValue, isEditing, slugManuallyEdited])
 
   useEffect(() => {
     fetchCategories()
@@ -55,10 +85,12 @@ const PostEditor = () => {
       const post = response.data
       
       setValue('title', post.title)
+      setValue('slug', post.slug || '')
       setValue('content', post.content)
       setValue('status', post.status)
       setValue('category_id', post.category_id || '')
       setContent(post.content || '')
+      setSlugManuallyEdited(true) // Marca que o slug não deve ser auto-gerado ao editar
     } catch (error) {
       toast.error('Erro ao carregar post')
       navigate('/admin/posts')
@@ -78,8 +110,16 @@ const PostEditor = () => {
         return
       }
 
+      // Validar slug
+      if (!data.slug || !data.slug.trim()) {
+        toast.error('Slug é obrigatório')
+        setLoading(false)
+        return
+      }
+
       const postData = {
         title: data.title,
+        slug: data.slug,
         content: content,
         status: data.status,
         category_id: data.category_id || null
@@ -141,6 +181,12 @@ const PostEditor = () => {
                 className="form-control"
                 {...register('slug', { required: 'Slug é obrigatório' })}
                 placeholder="url-amigavel-do-post"
+                onChange={(e) => {
+                  // Marcar que o slug foi editado manualmente
+                  setSlugManuallyEdited(true)
+                  // Aplicar a função register do react-hook-form
+                  register('slug').onChange(e)
+                }}
               />
               {errors.slug && (
                 <div className="error" style={{ marginTop: '0.5rem' }}>
@@ -148,7 +194,10 @@ const PostEditor = () => {
                 </div>
               )}
               <small className="form-text text-muted">
-                Gerado automaticamente baseado no título. Usado para criar URLs amigáveis.
+                {!slugManuallyEdited && !isEditing ? 
+                  "Gerado automaticamente baseado no título. Você pode editá-lo se necessário." :
+                  "Usado para criar URLs amigáveis."
+                }
               </small>
             </div>
 

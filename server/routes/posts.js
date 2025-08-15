@@ -132,11 +132,16 @@ router.post('/', (req, res) => {
   console.log('📝 Tentativa de criar post:', req.body)
   console.log('👤 Usuário autenticado:', req.user)
   
-  const { title, content, status = 'draft', category_id } = req.body
+  const { title, slug, content, status = 'draft', category_id } = req.body
 
   if (!title || !content) {
     console.log('❌ Erro: Título ou conteúdo faltando')
     return res.status(400).json({ message: 'Título e conteúdo são obrigatórios' })
+  }
+
+  if (!slug || !slug.trim()) {
+    console.log('❌ Erro: Slug é obrigatório')
+    return res.status(400).json({ message: 'Slug é obrigatório' })
   }
 
   if (!['draft', 'published'].includes(status)) {
@@ -148,11 +153,15 @@ router.post('/', (req, res) => {
   
   console.log('💾 Executando inserção no banco...')
   db.run(
-    'INSERT INTO posts (title, content, status, author_id, category_id) VALUES (?, ?, ?, ?, ?)',
-    [title, content, status, req.user.id, category_id || null],
+    'INSERT INTO posts (title, slug, content, status, author_id, category_id) VALUES (?, ?, ?, ?, ?, ?)',
+    [title, slug.trim(), content, status, req.user.id, category_id || null],
     function(err) {
       if (err) {
         console.error('❌ Erro ao inserir post no banco:', err)
+        // Verificar se é erro de slug duplicado
+        if (err.message.includes('UNIQUE constraint failed: posts.slug')) {
+          return res.status(400).json({ message: 'Este slug já está sendo usado. Por favor, escolha outro.' })
+        }
         return res.status(500).json({ message: 'Erro ao criar post' })
       }
 
@@ -168,10 +177,14 @@ router.post('/', (req, res) => {
 // Atualizar post
 router.put('/:id', (req, res) => {
   const { id } = req.params
-  const { title, content, status, category_id } = req.body
+  const { title, slug, content, status, category_id } = req.body
 
   if (!title || !content) {
     return res.status(400).json({ message: 'Título e conteúdo são obrigatórios' })
+  }
+
+  if (!slug || !slug.trim()) {
+    return res.status(400).json({ message: 'Slug é obrigatório' })
   }
 
   if (status && !['draft', 'published'].includes(status)) {
@@ -196,10 +209,14 @@ router.put('/:id', (req, res) => {
     }
 
     db.run(
-      'UPDATE posts SET title = ?, content = ?, status = ?, category_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
-      [title, content, status, category_id || null, id],
+      'UPDATE posts SET title = ?, slug = ?, content = ?, status = ?, category_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+      [title, slug.trim(), content, status, category_id || null, id],
       function(err) {
         if (err) {
+          // Verificar se é erro de slug duplicado
+          if (err.message.includes('UNIQUE constraint failed: posts.slug')) {
+            return res.status(400).json({ message: 'Este slug já está sendo usado. Por favor, escolha outro.' })
+          }
           return res.status(500).json({ message: 'Erro ao atualizar post' })
         }
 
