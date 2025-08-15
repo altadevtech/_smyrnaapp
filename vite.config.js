@@ -8,7 +8,7 @@ export default defineConfig({
     outDir: 'dist',
     assetsDir: 'assets',
     sourcemap: false,
-    minify: 'esbuild',
+    minify: process.env.NODE_ENV === 'production' ? 'terser' : 'esbuild',
     target: 'es2015',
     rollupOptions: {
       output: {
@@ -24,5 +24,10 @@ export default defineConfig({
         changeOrigin: true
       }
     }
+  },
+  esbuild: {
+    // Configuração específica para evitar problemas com esbuild
+    target: 'es2015',
+    platform: 'neutral'
   }
 })
