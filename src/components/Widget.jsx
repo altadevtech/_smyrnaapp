@@ -104,7 +104,7 @@ const Widget = ({ type, data, config = {} }) => {
                 {news.map(post => (
                   <article key={post.id} className="news-item">
                     <h4>
-                      <a href={`/blog/${generateSlug(post.title, post.id)}`}>
+                      <a href={`/blog/${post.slug || generateSlug(post.title, post.id)}`}>
                         {post.title}
                       </a>
                     </h4>

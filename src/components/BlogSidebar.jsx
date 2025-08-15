@@ -21,7 +21,7 @@ const BlogSidebar = ({ onCategorySelect, selectedCategorySlug }) => {
 
   const fetchCategoriesWithPosts = async () => {
     try {
-      const response = await api.get('/categories/stats/with-posts')
+      const response = await api.get('/categories/stats/with-posts?type=blog')
       setCategories(response.data)
     } catch (error) {
       console.error('Erro ao carregar categorias:', error)

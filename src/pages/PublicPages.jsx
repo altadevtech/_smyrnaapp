@@ -31,7 +31,7 @@ const PublicPages = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await api.get('/categories')
+      const response = await api.get('/categories?type=wiki')
       setCategories(response.data)
     } catch (error) {
       console.error('Erro ao carregar categorias:', error)

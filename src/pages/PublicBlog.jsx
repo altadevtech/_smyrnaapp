@@ -45,7 +45,7 @@ const PublicBlog = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await api.get('/categories/stats/with-posts')
+      const response = await api.get('/categories/stats/with-posts?type=blog')
       setCategories(response.data)
     } catch (error) {
       console.error('Erro ao carregar categorias:', error)
@@ -370,7 +370,7 @@ const PublicBlog = () => {
                       }}
                     >
                       <Link 
-                        to={`/blog/${generateSlug(post.title, post.id)}`}
+                        to={`/blog/${post.slug || generateSlug(post.title, post.id)}`}
                         style={{
                           textDecoration: 'none',
                           color: 'inherit',
@@ -420,7 +420,7 @@ const PublicBlog = () => {
                     
                     {/* Botão de ler mais */}
                     <Link 
-                      to={`/blog/${generateSlug(post.title, post.id)}`}
+                      to={`/blog/${post.slug || generateSlug(post.title, post.id)}`}
                       style={{
                         display: 'inline-flex',
                         alignItems: 'center',
