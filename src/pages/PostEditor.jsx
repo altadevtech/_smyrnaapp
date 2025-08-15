@@ -15,6 +15,7 @@ const PostEditor = () => {
     defaultValues: {
       title: '',
       slug: '',
+      summary: '',
       content: '',
       status: 'draft',
       category_id: ''
@@ -86,6 +87,7 @@ const PostEditor = () => {
       
       setValue('title', post.title)
       setValue('slug', post.slug || '')
+      setValue('summary', post.summary || '')
       setValue('content', post.content)
       setValue('status', post.status)
       setValue('category_id', post.category_id || '')
@@ -120,6 +122,7 @@ const PostEditor = () => {
       const postData = {
         title: data.title,
         slug: data.slug,
+        summary: data.summary || '',
         content: content,
         status: data.status,
         category_id: data.category_id || null
@@ -199,6 +202,20 @@ const PostEditor = () => {
                   "Gerado automaticamente baseado no título. Você pode editá-lo se necessário." :
                   "Usado para criar URLs amigáveis."
                 }
+              </small>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="summary">Resumo</label>
+              <textarea
+                id="summary"
+                className="form-control"
+                rows="3"
+                placeholder="Breve resumo do post (será exibido na lista de posts)..."
+                {...register('summary')}
+              />
+              <small className="form-text text-muted">
+                Este resumo aparecerá na grade de posts no blog. Recomendamos entre 100-200 caracteres.
               </small>
             </div>
 

@@ -232,7 +232,7 @@ router.get('/:id', (req, res) => {
 
 // Criar página
 router.post('/', (req, res) => {
-  const { title, content, status = 'draft', templateId = 1, slug, widgetData, category_id } = req.body
+  const { title, summary, content, status = 'draft', templateId = 1, slug, widgetData, category_id } = req.body
 
   if (!title || !content) {
     return res.status(400).json({ message: 'Título e conteúdo são obrigatórios' })
@@ -254,8 +254,8 @@ router.post('/', (req, res) => {
     .trim('-')
   
   db.run(
-    'INSERT INTO pages (title, content, status, author_id, template_id, slug, widget_data, category_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-    [title, content, status, req.user.id, templateId, finalSlug, widgetData ? JSON.stringify(widgetData) : null, category_id || null],
+    'INSERT INTO pages (title, summary, content, status, author_id, template_id, slug, widget_data, category_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    [title, summary || '', content, status, req.user.id, templateId, finalSlug, widgetData ? JSON.stringify(widgetData) : null, category_id || null],
     function(err) {
       if (err) {
         if (err.message.includes('UNIQUE constraint failed: pages.slug')) {
@@ -275,10 +275,10 @@ router.post('/', (req, res) => {
 // Atualizar página
 router.put('/:id', authenticateToken, (req, res) => {
   const { id } = req.params
-  const { title, content, status, templateId, slug, widgetData, category_id } = req.body
+  const { title, summary, content, status, templateId, slug, widgetData, category_id } = req.body
 
   console.log('📝 Atualizando página ID:', id)
-  console.log('📋 Dados recebidos:', { title, status, slug, category_id })
+  console.log('📋 Dados recebidos:', { title, summary, status, slug, category_id })
 
   if (!title || !content) {
     console.log('❌ Título ou conteúdo ausente')
@@ -319,9 +319,9 @@ router.put('/:id', authenticateToken, (req, res) => {
     createPageVersion(db, page, req.user.id, req.body.changeSummary || 'Edição da página', () => {
       console.log('🔄 Executando UPDATE da página...')
       db.run(
-        `UPDATE pages SET title = ?, content = ?, status = ?, template_id = ?, slug = ?, 
+        `UPDATE pages SET title = ?, summary = ?, content = ?, status = ?, template_id = ?, slug = ?, 
                           widget_data = ?, category_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
-        [title, content, status, templateId, slug, widgetData ? JSON.stringify(widgetData) : null, category_id || null, id],
+        [title, summary || '', content, status, templateId, slug, widgetData ? JSON.stringify(widgetData) : null, category_id || null, id],
         function(err) {
           if (err) {
             console.error('❌ Erro no UPDATE:', err)

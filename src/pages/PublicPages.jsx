@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import api from '../services/api'
 import { Calendar, User, FileText, ArrowRight, BookOpen, Search, Filter, Tag, X } from 'lucide-react'
+import { getDisplaySummary, formatDate, formatRelativeDate } from '../utils/textUtils'
 
 const PublicPages = () => {
   const [pages, setPages] = useState([])
@@ -547,20 +548,7 @@ const PublicPages = () => {
                     marginBottom: '1.5rem',
                     fontSize: '0.95rem'
                   }}>
-                    {page.content && page.content.length > 200 
-                      ? (
-                        <>
-                          {page.content.substring(0, 200)}...
-                          <span style={{
-                            color: 'rgb(75, 129, 162)',
-                            fontWeight: '500',
-                            marginLeft: '0.5rem'
-                          }}>
-                            Ler mais →
-                          </span>
-                        </>
-                      )
-                      : page.content || 'Conteúdo da página do wiki...'}
+                    {getDisplaySummary(page.summary, page.content, 250)}
                   </p>
                   
                   {/* Tags */}

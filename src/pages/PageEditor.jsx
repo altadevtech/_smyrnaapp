@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import api from '../services/api'
 import toast from 'react-hot-toast'
 import { Save, ArrowLeft } from 'lucide-react'
+import RichTextEditor from '../components/RichTextEditor'
 
 const PageEditor = () => {
   const navigate = useNavigate()
@@ -13,6 +14,7 @@ const PageEditor = () => {
   const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm({
     defaultValues: {
       title: '',
+      summary: '',
       content: '',
       status: 'draft',
       category_id: '',
@@ -23,7 +25,14 @@ const PageEditor = () => {
   
   const [loading, setLoading] = useState(false)
   const [initialLoading, setInitialLoading] = useState(isEditing)
+  const [content, setContent] = useState('')
   const [categories, setCategories] = useState([])
+
+  // Handler para mudanças no Rich Text Editor
+  const handleContentChange = useCallback((newContent) => {
+    setContent(newContent)
+    setValue('content', newContent, { shouldValidate: false })
+  }, [setValue])
 
   useEffect(() => {
     fetchCategories()
@@ -47,10 +56,12 @@ const PageEditor = () => {
       const page = response.data
       
       setValue('title', page.title)
+      setValue('summary', page.summary || '')
       setValue('content', page.content)
       setValue('status', page.status)
       setValue('category_id', page.category_id || '')
       setValue('tags', page.tags || '')
+      setContent(page.content || '')
     } catch (error) {
       toast.error('Erro ao carregar página')
       navigate('/admin/pages')
@@ -62,14 +73,32 @@ const PageEditor = () => {
     setLoading(true)
     
     try {
+      // Validar se há conteúdo
+      const textContent = content.replace(/<[^>]*>/g, '').trim()
+      if (!content || !textContent) {
+        toast.error('Conteúdo é obrigatório')
+        setLoading(false)
+        return
+      }
+
+      const pageData = {
+        title: data.title,
+        summary: data.summary || '',
+        content: content,
+        status: data.status,
+        category_id: data.category_id || null,
+        tags: data.tags || '',
+        changeSummary: data.changeSummary || ''
+      }
+
       if (isEditing) {
-        await api.put(`/pages/${id}`, data)
+        await api.put(`/pages/${id}`, pageData)
         toast.success('Página atualizada com sucesso!')
       } else {
-        await api.post('/pages', data)
+        await api.post('/pages', pageData)
         toast.success('Página criada com sucesso!')
+        navigate('/admin/pages')
       }
-      navigate('/admin/pages')
     } catch (error) {
       toast.error(error.response?.data?.message || 'Erro ao salvar página')
       console.error(error)
@@ -109,13 +138,25 @@ const PageEditor = () => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="content">Conteúdo *</label>
+            <label htmlFor="summary">Resumo</label>
             <textarea
-              id="content"
-              className="form-control editor"
-              rows="15"
+              id="summary"
+              className="form-control"
+              rows="3"
+              placeholder="Breve resumo da página (será exibido na lista de páginas)..."
+              {...register('summary')}
+            />
+            <small className="form-text text-muted">
+              Este resumo aparecerá na grade de páginas wiki. Recomendamos entre 100-200 caracteres.
+            </small>
+          </div>
+
+          <div className="form-group">
+            <label>Conteúdo *</label>
+            <RichTextEditor
+              value={content}
+              onChange={handleContentChange}
               placeholder="Digite o conteúdo da página..."
-              {...register('content', { required: 'Conteúdo é obrigatório' })}
             />
             {errors.content && (
               <div className="error" style={{ marginTop: '0.5rem' }}>

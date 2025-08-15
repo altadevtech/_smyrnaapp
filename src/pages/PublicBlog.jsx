@@ -3,6 +3,7 @@ import { Link, useParams, useNavigate } from 'react-router-dom'
 import api from '../services/api'
 import { Calendar, User, Tag, BookOpen, ArrowRight, FileText } from 'lucide-react'
 import BlogSidebar from '../components/BlogSidebar'
+import { getDisplaySummary, formatDate, formatRelativeDate } from '../utils/textUtils'
 
 const PublicBlog = () => {
   const [posts, setPosts] = useState([])
@@ -400,22 +401,7 @@ const PublicBlog = () => {
                         position: 'relative'
                       }}
                     >
-                      {post.content.length > 200 
-                        ? (
-                          <>
-                            {post.content.substring(0, 200)}...
-                            <span 
-                              style={{
-                                color: 'rgb(75, 129, 162)',
-                                fontWeight: '500',
-                                marginLeft: '0.5rem'
-                              }}
-                            >
-                              Ler mais →
-                            </span>
-                          </>
-                        )
-                        : post.content}
+                      {getDisplaySummary(post.summary, post.content, 250)}
                     </p>
                     
                     {/* Botão de ler mais */}
