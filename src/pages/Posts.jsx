@@ -203,7 +203,7 @@ const Posts = () => {
                         {post.category_name}
                       </span>
                     ) : (
-                      <span style={{ color: '#666', fontStyle: 'italic' }}>Sem categoria</span>
+                      <span style={{ color: 'var(--text-secondary)', fontStyle: 'italic' }}>Sem categoria</span>
                     )}
                   </td>
                   <td style={{
