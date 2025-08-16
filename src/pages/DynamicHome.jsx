@@ -14,6 +14,17 @@ function DynamicHome() {
 
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
 
+  // Função para gerar slug a partir do título e ID
+  const generateSlug = (title, id) => {
+    return title.toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9\s]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .trim('-') + '-' + id
+  }
+
   useEffect(() => {
     fetchHomepageContent()
     fetchRecentContent()
@@ -418,7 +429,7 @@ function DynamicHome() {
                         fontWeight: '600'
                       }}>
                         <a 
-                          href={`/post/${post.id}`}
+                          href={`/blog/${post.slug || generateSlug(post.title, post.id)}`}
                           style={{
                             color: '#374151',
                             textDecoration: 'none',

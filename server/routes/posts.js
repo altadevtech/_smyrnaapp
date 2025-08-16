@@ -26,29 +26,52 @@ router.get('/public', (req, res) => {
   )
 })
 
-// Buscar post público por ID (temporário - sem funcionalidade de slug)
-router.get('/public/:id', (req, res) => {
-  const { id } = req.params
+// Buscar post público por slug ou ID
+router.get('/public/:slugOrId', (req, res) => {
+  const { slugOrId } = req.params
   const db = Database.getDb()
   
-  // Buscar apenas por ID (funcionalidade temporária sem slug)
+  // Primeiro, tentar buscar por slug
   db.get(
     `SELECT p.*, u.name as author_name, c.name as category_name, c.slug as category_slug, c.color as category_color 
      FROM posts p 
      JOIN users u ON p.author_id = u.id 
      LEFT JOIN categories c ON p.category_id = c.id 
-     WHERE p.id = ? AND p.status = 'published'`,
-    [id],
+     WHERE p.slug = ? AND p.status = 'published'`,
+    [slugOrId],
     (err, post) => {
       if (err) {
         return res.status(500).json({ message: 'Erro ao buscar post' })
       }
       
-      if (!post) {
-        return res.status(404).json({ message: 'Post não encontrado' })
+      if (post) {
+        return res.json(post)
       }
       
-      res.json(post)
+      // Se não encontrou por slug, tentar por ID (para compatibilidade)
+      if (/^\d+$/.test(slugOrId)) {
+        db.get(
+          `SELECT p.*, u.name as author_name, c.name as category_name, c.slug as category_slug, c.color as category_color 
+           FROM posts p 
+           JOIN users u ON p.author_id = u.id 
+           LEFT JOIN categories c ON p.category_id = c.id 
+           WHERE p.id = ? AND p.status = 'published'`,
+          [parseInt(slugOrId)],
+          (err, post) => {
+            if (err) {
+              return res.status(500).json({ message: 'Erro ao buscar post' })
+            }
+            
+            if (!post) {
+              return res.status(404).json({ message: 'Post não encontrado' })
+            }
+            
+            res.json(post)
+          }
+        )
+      } else {
+        return res.status(404).json({ message: 'Post não encontrado' })
+      }
     }
   )
 })
