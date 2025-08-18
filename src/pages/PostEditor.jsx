@@ -6,6 +6,7 @@ import toast from 'react-hot-toast'
 import { Save, ArrowLeft, FileText, Tag, Settings } from 'lucide-react'
 import RichTextEditor from '../components/RichTextEditor'
 import EditorLayout from '../components/EditorLayout'
+import FeaturedImageUpload from '../components/FeaturedImageUpload'
 import { PostEditorSidebar } from '../components/EditorSidebars'
 
 const PostEditor = () => {
@@ -128,7 +129,8 @@ const PostEditor = () => {
         summary: data.summary || '',
         content: content,
         status: data.status,
-        category_id: data.category_id || null
+        category_id: data.category_id || null,
+        featured_image: data.featured_image || ''
       }
 
       console.log('Dados do post:', postData)
@@ -215,14 +217,13 @@ const PostEditor = () => {
 
           <div className="form-group">
             <label className="form-label">Imagem Destaque</label>
-            <input
-              type="url"
-              className="form-input"
-              placeholder="https://exemplo.com/imagem.jpg"
-              {...register('featured_image')}
+            <FeaturedImageUpload
+              value={watch('featured_image') || ''}
+              onChange={(imageUrl) => setValue('featured_image', imageUrl)}
+              onImageDelete={() => setValue('featured_image', '')}
             />
             <div className="form-help">
-              URL da imagem que será exibida no grid de posts e no cabeçalho do post individual. Use uma imagem com boa resolução (recomendado: 1200x630px).
+              Esta imagem será automaticamente otimizada e exibida no grid de posts e no cabeçalho do post individual.
             </div>
           </div>
         </div>

@@ -233,6 +233,19 @@ class Database {
             this.createDefaultTemplates()
             this.createDefaultUsers()
             this.createDefaultCategories()
+            
+            // Popular dados de exemplo se for ambiente de produção/render
+            if (process.env.NODE_ENV === 'production' || process.env.RENDER) {
+              setTimeout(async () => {
+                try {
+                  const { default: SampleDataSeeder } = await import('./utils/sampleDataSeeder.js')
+                  await SampleDataSeeder.seedSampleData()
+                } catch (error) {
+                  console.error('❌ Erro ao popular dados de exemplo:', error)
+                }
+              }, 1000)
+            }
+            
             resolve()
           }
         }
