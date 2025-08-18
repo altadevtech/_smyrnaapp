@@ -38,9 +38,37 @@ class SampleDataSeeder {
   static getPageCount() {
     return new Promise((resolve, reject) => {
       const db = Database.getDb()
-      db.get("SELECT COUNT(*) as count FROM pages WHERE type = 'wiki' AND status = 'published'", (err, result) => {
-        if (err) reject(err)
-        else resolve(result.count)
+      
+      // Primeiro verificar se a coluna 'type' existe
+      db.get("PRAGMA table_info(pages)", (err, tableInfo) => {
+        if (err) {
+          reject(err)
+          return
+        }
+        
+        // Verificar todas as colunas da tabela
+        db.all("PRAGMA table_info(pages)", (err, columns) => {
+          if (err) {
+            reject(err)
+            return
+          }
+          
+          const hasTypeColumn = columns.some(col => col.name === 'type')
+          
+          let query
+          if (hasTypeColumn) {
+            // Se tem coluna type, usar filtro completo
+            query = "SELECT COUNT(*) as count FROM pages WHERE type = 'wiki' AND status = 'published'"
+          } else {
+            // Se não tem coluna type, assumir que todas as pages são wiki
+            query = "SELECT COUNT(*) as count FROM pages WHERE status = 'published'"
+          }
+          
+          db.get(query, (err, result) => {
+            if (err) reject(err)
+            else resolve(result.count)
+          })
+        })
       })
     })
   }
@@ -48,9 +76,27 @@ class SampleDataSeeder {
   static getCategoryCount() {
     return new Promise((resolve, reject) => {
       const db = Database.getDb()
-      db.get("SELECT COUNT(*) as count FROM categories WHERE type = 'wiki'", (err, result) => {
-        if (err) reject(err)
-        else resolve(result.count)
+      
+      // Verificar se a coluna 'type' existe na tabela categories
+      db.all("PRAGMA table_info(categories)", (err, columns) => {
+        if (err) {
+          reject(err)
+          return
+        }
+        
+        const hasTypeColumn = columns.some(col => col.name === 'type')
+        
+        let query
+        if (hasTypeColumn) {
+          query = "SELECT COUNT(*) as count FROM categories WHERE type = 'wiki'"
+        } else {
+          query = "SELECT COUNT(*) as count FROM categories"
+        }
+        
+        db.get(query, (err, result) => {
+          if (err) reject(err)
+          else resolve(result.count)
+        })
       })
     })
   }
@@ -59,22 +105,47 @@ class SampleDataSeeder {
     return new Promise((resolve, reject) => {
       const db = Database.getDb()
       
-      const categories = [
-        { name: 'Processos Operacionais', slug: 'processos-operacionais', color: '#3B82F6' },
-        { name: 'Políticas Internas', slug: 'politicas-internas', color: '#EF4444' },
-        { name: 'Recursos Humanos', slug: 'recursos-humanos', color: '#10B981' },
-        { name: 'Tecnologia', slug: 'tecnologia', color: '#8B5CF6' },
-        { name: 'Financeiro', slug: 'financeiro', color: '#F59E0B' }
-      ]
-      
-      let completed = 0
-      
-      categories.forEach(category => {
-        db.run(
-          `INSERT OR IGNORE INTO categories (name, slug, type, color, created_at, updated_at) 
-           VALUES (?, ?, 'wiki', ?, datetime('now'), datetime('now'))`,
-          [category.name, category.slug, category.color],
-          function(err) {
+      // Verificar estrutura da tabela categories primeiro
+      db.all("PRAGMA table_info(categories)", (err, columns) => {
+        if (err) {
+          reject(err)
+          return
+        }
+        
+        const hasTypeColumn = columns.some(col => col.name === 'type')
+        const hasColorColumn = columns.some(col => col.name === 'color')
+        
+        const categories = [
+          { name: 'Processos Operacionais', slug: 'processos-operacionais', color: '#3B82F6' },
+          { name: 'Políticas Internas', slug: 'politicas-internas', color: '#EF4444' },
+          { name: 'Recursos Humanos', slug: 'recursos-humanos', color: '#10B981' },
+          { name: 'Tecnologia', slug: 'tecnologia', color: '#8B5CF6' },
+          { name: 'Financeiro', slug: 'financeiro', color: '#F59E0B' }
+        ]
+        
+        let completed = 0
+        
+        categories.forEach(category => {
+          // Construir query dinamicamente baseada nas colunas existentes
+          let insertQuery = "INSERT OR IGNORE INTO categories (name, slug"
+          let values = [category.name, category.slug]
+          let placeholders = "?, ?"
+          
+          if (hasTypeColumn) {
+            insertQuery += ", type"
+            values.push('wiki')
+            placeholders += ", ?"
+          }
+          
+          if (hasColorColumn) {
+            insertQuery += ", color"
+            values.push(category.color)
+            placeholders += ", ?"
+          }
+          
+          insertQuery += ", created_at, updated_at) VALUES (" + placeholders + ", datetime('now'), datetime('now'))"
+          
+          db.run(insertQuery, values, function(err) {
             if (err) {
               console.error(`Erro ao criar categoria ${category.name}:`, err)
             }
@@ -82,8 +153,8 @@ class SampleDataSeeder {
             if (completed === categories.length) {
               resolve()
             }
-          }
-        )
+          })
+        })
       })
     })
   }
@@ -93,11 +164,26 @@ class SampleDataSeeder {
       const db = Database.getDb()
       
       // Buscar IDs das categorias
-      db.all("SELECT id, slug FROM categories WHERE type = 'wiki'", (err, categories) => {
+      db.all("PRAGMA table_info(categories)", (err, columns) => {
         if (err) {
           reject(err)
           return
         }
+        
+        const hasTypeColumn = columns.some(col => col.name === 'type')
+        
+        let query
+        if (hasTypeColumn) {
+          query = "SELECT id, slug FROM categories WHERE type = 'wiki'"
+        } else {
+          query = "SELECT id, slug FROM categories"
+        }
+        
+        db.all(query, (err, categories) => {
+          if (err) {
+            reject(err)
+            return
+          }
         
         const catMap = {}
         categories.forEach(cat => {
