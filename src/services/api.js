@@ -14,7 +14,7 @@ const getBaseURL = () => {
   }
   
   // 3. Se estiver em desenvolvimento, usar localhost
-  return 'http://localhost:10000/api'
+  return 'http://localhost:9000/api'
 }
 
 // Configuração base do axios

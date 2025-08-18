@@ -192,4 +192,45 @@ router.post('/intercept-login', async (req, res) => {
   })
 })
 
+// Debug: Verificar páginas e categorias
+router.get('/pages-categories', (req, res) => {
+  const db = Database.getDb()
+  
+  // Buscar páginas com suas categorias
+  db.all(`
+    SELECT p.id, p.title, p.status, p.type, p.category_id,
+           c.id as cat_id, c.name as category_name, c.slug as category_slug
+    FROM pages p 
+    LEFT JOIN categories c ON p.category_id = c.id 
+    WHERE p.type = 'wiki'
+    ORDER BY c.name, p.title
+  `, (err, pages) => {
+    if (err) {
+      return res.status(500).json({ error: err.message })
+    }
+    
+    // Buscar todas as categorias
+    db.all(`
+      SELECT id, name, slug, parent_id
+      FROM categories 
+      WHERE type = 'wiki'
+      ORDER BY name
+    `, (err2, categories) => {
+      if (err2) {
+        return res.status(500).json({ error: err2.message })
+      }
+      
+      res.json({
+        pages: pages,
+        categories: categories,
+        stats: {
+          total_pages: pages.length,
+          published_pages: pages.filter(p => p.status === 'published').length,
+          total_categories: categories.length
+        }
+      })
+    })
+  })
+})
+
 export default router

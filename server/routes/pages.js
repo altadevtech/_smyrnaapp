@@ -7,7 +7,7 @@ const router = express.Router()
 // Listar artigos do wiki públicos (sem autenticação) com busca e filtros
 router.get('/public', (req, res) => {
   const db = Database.getDb()
-  const { search, tag, category } = req.query
+  const { search, tag, category, subCategory } = req.query
   
   let query = `
     SELECT p.id, p.title, p.content, p.slug, p.created_at, p.updated_at, 
@@ -26,10 +26,25 @@ router.get('/public', (req, res) => {
     params.push(`%${search}%`, `%${search}%`)
   }
   
-  // Filtro por categoria
-  if (category) {
-    query += ` AND p.category_id = ?`
-    params.push(category)
+  // Filtro por categoria ou subcategoria (prioriza subcategoria)
+  if (subCategory) {
+    // Se há subcategoria selecionada, filtra por ela
+    if (!isNaN(subCategory)) {
+      query += ` AND p.category_id = ?`
+      params.push(parseInt(subCategory))
+    } else {
+      query += ` AND c.slug = ?`
+      params.push(subCategory)
+    }
+  } else if (category) {
+    // Se não há subcategoria, mas há categoria principal
+    if (!isNaN(category)) {
+      query += ` AND p.category_id = ?`
+      params.push(parseInt(category))
+    } else {
+      query += ` AND c.slug = ?`
+      params.push(category)
+    }
   }
   
   // Filtro por tag (busca no conteúdo por tags)

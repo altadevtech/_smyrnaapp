@@ -477,4 +477,72 @@ router.get('/stats/with-posts', (req, res) => {
   })
 })
 
+// Buscar categorias com contagem de páginas (público) - para Wiki
+router.get('/stats/with-pages', (req, res) => {
+  const db = Database.getDb()
+  const { type } = req.query // 'wiki' ou 'blog'
+  
+  // Consulta mais robusta que busca categorias com páginas e suas categorias pais
+  let query = `
+    WITH categories_with_pages AS (
+      SELECT DISTINCT c.id, c.name, c.slug, c.color, c.type, c.parent_id,
+             COUNT(pg.id) as page_count
+      FROM categories c
+      INNER JOIN pages pg ON c.id = pg.category_id AND pg.status = 'published'
+  `
+  
+  let params = []
+  
+  if (type && ['wiki', 'blog'].includes(type)) {
+    query += ' WHERE c.type = ?'
+    params.push(type)
+  }
+  
+  query += `
+      GROUP BY c.id, c.name, c.slug, c.color, c.type, c.parent_id
+    ),
+    parent_categories AS (
+      SELECT DISTINCT parent.id, parent.name, parent.slug, parent.color, parent.type, parent.parent_id,
+             0 as page_count
+      FROM categories parent
+      INNER JOIN categories_with_pages cwp ON parent.id = cwp.parent_id
+      WHERE parent.id NOT IN (SELECT id FROM categories_with_pages)
+    )
+    SELECT * FROM categories_with_pages
+    UNION ALL
+    SELECT * FROM parent_categories
+    ORDER BY parent_id ASC, name ASC
+  `
+
+  db.all(query, params, (err, categories) => {
+    if (err) {
+      console.error('Erro ao buscar categorias com páginas:', err)
+      return res.status(500).json({ error: 'Erro interno do servidor' })
+    }
+    
+    // Organizar em estrutura hierárquica
+    const categoriesMap = {}
+    const rootCategories = []
+    
+    // Criar mapa de categorias
+    categories.forEach(cat => {
+      categoriesMap[cat.id] = {
+        ...cat,
+        subcategories: []
+      }
+    })
+    
+    // Organizar hierarquia
+    categories.forEach(cat => {
+      if (cat.parent_id && categoriesMap[cat.parent_id]) {
+        categoriesMap[cat.parent_id].subcategories.push(categoriesMap[cat.id])
+      } else if (!cat.parent_id) {
+        rootCategories.push(categoriesMap[cat.id])
+      }
+    })
+    
+    res.json(rootCategories)
+  })
+})
+
 export default router

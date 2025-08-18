@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import api from '../services/api'
 import { Calendar, User, FileText, ArrowRight, BookOpen, Search, Filter, Tag, X } from 'lucide-react'
 import { getDisplaySummary, formatDate, formatRelativeDate } from '../utils/textUtils'
+import WikiCategorySidebar from '../components/WikiCategorySidebar'
 
 const PublicPages = () => {
   const [pages, setPages] = useState([])
@@ -11,50 +12,13 @@ const PublicPages = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('')
+  const [selectedSubCategory, setSelectedSubCategory] = useState('')
+  const [selectedCategoryName, setSelectedCategoryName] = useState('')
+  const [selectedSubCategoryName, setSelectedSubCategoryName] = useState('')
   const [tagFilter, setTagFilter] = useState('')
+  const [statusFilter, setStatusFilter] = useState('')
+  const [sortBy, setSortBy] = useState('updated_at')
   const [showFilters, setShowFilters] = useState(false)
-
-  useEffect(() => {
-    fetchPages()
-    fetchCategories()
-    
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768)
-    }
-    
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
-
-  useEffect(() => {
-    fetchPages()
-  }, [searchTerm, selectedCategory, tagFilter])
-
-  const fetchCategories = async () => {
-    try {
-      const response = await api.get('/categories?type=wiki')
-      setCategories(response.data)
-    } catch (error) {
-      console.error('Erro ao carregar categorias:', error)
-    }
-  }
-
-  const fetchPages = async () => {
-    try {
-      const params = new URLSearchParams()
-      if (searchTerm) params.append('search', searchTerm)
-      if (selectedCategory) params.append('category', selectedCategory)
-      if (tagFilter) params.append('tag', tagFilter)
-      
-      const response = await api.get(`/pages/public?${params.toString()}`)
-      console.log('📄 Páginas recebidas da API:', response.data)
-      console.log('📊 Total de páginas:', response.data.length)
-      setPages(response.data)
-    } catch (error) {
-      console.error('Erro ao carregar páginas do wiki:', error)
-    }
-    setLoading(false)
-  }
 
   const generateSlug = (title, id) => {
     return title.toLowerCase()
@@ -66,13 +30,91 @@ const PublicPages = () => {
       .trim('-') + '-' + id
   }
 
+  useEffect(() => {
+    fetchData()
+    
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768)
+    }
+    
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  useEffect(() => {
+    fetchPages()
+  }, [searchTerm, selectedCategory, selectedSubCategory, tagFilter, statusFilter, sortBy])
+
+  const fetchData = async () => {
+    try {
+      const [pagesRes, categoriesRes] = await Promise.all([
+        api.get('/pages/public', { 
+          params: { 
+            search: searchTerm,
+            category: selectedCategory,
+            subCategory: selectedSubCategory,
+            tag: tagFilter,
+            status: statusFilter,
+            sort: sortBy
+          }
+        }),
+        api.get('/categories/stats/with-pages', { 
+          params: { 
+            type: 'wiki'
+          }
+        })
+      ])
+      setPages(pagesRes.data)
+      setCategories(categoriesRes.data)
+    } catch (error) {
+      console.error('Erro ao carregar dados:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const fetchPages = async () => {
+    try {
+      const response = await api.get('/pages/public', { 
+        params: { 
+          search: searchTerm,
+          category: selectedCategory,
+          subCategory: selectedSubCategory,
+          tag: tagFilter,
+          status: statusFilter,
+          sort: sortBy
+        }
+      })
+      setPages(response.data)
+    } catch (error) {
+      console.error('Erro ao carregar páginas:', error)
+    }
+  }
+
   const clearFilters = () => {
     setSearchTerm('')
     setSelectedCategory('')
+    setSelectedSubCategory('')
+    setSelectedCategoryName('')
+    setSelectedSubCategoryName('')
     setTagFilter('')
+    setStatusFilter('')
   }
 
-  const hasActiveFilters = searchTerm || selectedCategory || tagFilter
+  const handleCategorySelect = (categorySlug, categoryName) => {
+    setSelectedCategory(categorySlug)
+    setSelectedCategoryName(categoryName || '')
+    setSelectedSubCategory('')
+    setSelectedSubCategoryName('')
+  }
+
+  const handleSubCategorySelect = (subCategorySlug, subCategoryName, parentSlug) => {
+    setSelectedSubCategory(subCategorySlug)
+    setSelectedSubCategoryName(subCategoryName || '')
+    setSelectedCategory(parentSlug)
+  }
+
+  const hasActiveFilters = searchTerm || selectedCategory || selectedSubCategory || tagFilter
 
   if (loading) {
     return (
@@ -112,7 +154,7 @@ const PublicPages = () => {
 
   return (
     <div style={{
-      maxWidth: '1200px',
+      maxWidth: '1400px',
       margin: '0 auto',
       padding: isMobile ? '1rem' : '2rem 1rem',
       fontFamily: 'Arial, Tahoma, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
@@ -203,300 +245,331 @@ const PublicPages = () => {
         </Link>
       </div>
 
-      {/* Search and Filters */}
+      {/* Main Content with Sidebar */}
       <div style={{
-        background: '#f8fafc',
-        padding: '2rem',
-        borderRadius: '16px',
-        marginBottom: '2rem',
-        border: '1px solid #e2e8f0'
+        display: 'flex',
+        gap: '2rem',
+        flexDirection: isMobile ? 'column' : 'row',
+        alignItems: 'flex-start'
       }}>
-        {/* Search Bar */}
-        <div style={{
-          position: 'relative',
-          marginBottom: showFilters ? '1.5rem' : '1rem'
+        {/* Sidebar */}
+        {!isMobile && (
+          <div style={{ 
+            width: '300px', 
+            flexShrink: 0,
+            position: 'sticky',
+            top: '2rem'
+          }}>
+            <WikiCategorySidebar
+              onCategorySelect={handleCategorySelect}
+              selectedCategorySlug={selectedCategory}
+              onSubCategorySelect={handleSubCategorySelect}
+              selectedSubCategorySlug={selectedSubCategory}
+            />
+          </div>
+        )}
+
+        {/* Content Area */}
+        <div style={{ 
+          flex: 1,
+          minWidth: 0
         }}>
-          <Search 
-            size={20} 
-            style={{
-              position: 'absolute',
-              left: '1rem',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              color: '#64748b'
-            }}
-          />
-          <input
-            type="text"
-            placeholder="Buscar por título ou conteúdo..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '1rem 1rem 1rem 3rem',
-              border: '2px solid #e2e8f0',
-              borderRadius: '12px',
-              fontSize: '1rem',
-              background: 'white',
-              transition: 'all 0.3s ease',
-              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)'
-            }}
-            onFocus={(e) => {
-              e.target.style.borderColor = 'rgb(102, 234, 205)'
-              e.target.style.boxShadow = '0 0 0 3px rgba(102, 234, 205, 0.1)'
-            }}
-            onBlur={(e) => {
-              e.target.style.borderColor = '#e2e8f0'
-              e.target.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.05)'
-            }}
-          />
-        </div>
-
-        {/* Toggle Filters Button */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              padding: '0.75rem 1rem',
-              background: showFilters ? 'rgb(102, 234, 205)' : 'white',
-              color: showFilters ? 'white' : '#64748b',
-              border: '2px solid #e2e8f0',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontSize: '0.9rem',
-              fontWeight: '500',
-              transition: 'all 0.3s ease'
-            }}
-          >
-            <Filter size={16} />
-            {showFilters ? 'Ocultar Filtros' : 'Mostrar Filtros'}
-          </button>
-
-          {hasActiveFilters && (
-            <button
-              onClick={clearFilters}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                padding: '0.75rem 1rem',
-                background: '#ef4444',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                fontSize: '0.9rem',
-                fontWeight: '500',
-                transition: 'all 0.3s ease'
-              }}
-            >
-              <X size={16} />
-              Limpar Filtros
-            </button>
+          {/* Mobile Sidebar */}
+          {isMobile && (
+            <div style={{ marginBottom: '2rem' }}>
+              <WikiCategorySidebar
+                onCategorySelect={handleCategorySelect}
+                selectedCategorySlug={selectedCategory}
+                onSubCategorySelect={handleSubCategorySelect}
+                selectedSubCategorySlug={selectedSubCategory}
+              />
+            </div>
           )}
-        </div>
 
-        {/* Filters */}
-        {showFilters && (
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
-            gap: '1rem',
-            marginTop: '1.5rem',
-            paddingTop: '1.5rem',
-            borderTop: '1px solid #e2e8f0'
-          }}>
-            {/* Category Filter */}
-            <div>
-              <label style={{
-                display: 'block',
-                marginBottom: '0.5rem',
-                fontSize: '0.9rem',
-                fontWeight: '600',
-                color: '#374151'
-              }}>
-                Categoria
-              </label>
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  border: '2px solid #e2e8f0',
-                  borderRadius: '8px',
-                  fontSize: '0.9rem',
-                  background: 'white'
-                }}
-              >
-                <option value="">Todas as categorias</option>
-                {categories.map(category => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Tag Filter */}
-            <div>
-              <label style={{
-                display: 'block',
-                marginBottom: '0.5rem',
-                fontSize: '0.9rem',
-                fontWeight: '600',
-                color: '#374151'
-              }}>
-                Tag
-              </label>
-              <div style={{ position: 'relative' }}>
-                <Tag 
-                  size={16} 
-                  style={{
-                    position: 'absolute',
-                    left: '0.75rem',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    color: '#64748b'
-                  }}
-                />
-                <input
-                  type="text"
-                  placeholder="Digite uma tag..."
-                  value={tagFilter}
-                  onChange={(e) => setTagFilter(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem 0.75rem 0.75rem 2.5rem',
-                    border: '2px solid #e2e8f0',
-                    borderRadius: '8px',
-                    fontSize: '0.9rem',
-                    background: 'white'
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Active Filters Display */}
-        {hasActiveFilters && (
-          <div style={{
-            marginTop: '1rem',
-            padding: '1rem',
-            background: 'rgba(102, 234, 205, 0.1)',
-            borderRadius: '8px',
-            border: '1px solid rgba(102, 234, 205, 0.3)'
-          }}>
+          {/* Current Filter Display */}
+          {(selectedCategoryName || selectedSubCategoryName) && (
             <div style={{
-              fontSize: '0.85rem',
-              color: '#374151',
-              marginBottom: '0.5rem',
-              fontWeight: '600'
+              background: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              borderRadius: '12px',
+              padding: '1.5rem',
+              marginBottom: '2rem',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
             }}>
-              Filtros ativos:
-            </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-              {searchTerm && (
-                <span style={{
-                  background: 'rgba(102, 234, 205, 0.2)',
-                  padding: '0.25rem 0.5rem',
-                  borderRadius: '4px',
-                  fontSize: '0.8rem',
-                  color: '#374151'
+              <div>
+                <h2 style={{
+                  margin: '0 0 0.5rem 0',
+                  fontSize: '1.25rem',
+                  fontWeight: '600',
+                  color: '#1e293b'
                 }}>
-                  Busca: "{searchTerm}"
-                </span>
-              )}
-              {selectedCategory && (
-                <span style={{
-                  background: 'rgba(102, 234, 205, 0.2)',
-                  padding: '0.25rem 0.5rem',
-                  borderRadius: '4px',
-                  fontSize: '0.8rem',
-                  color: '#374151'
-                }}>
-                  Categoria: {categories.find(c => c.id == selectedCategory)?.name}
-                </span>
-              )}
-              {tagFilter && (
-                <span style={{
-                  background: 'rgba(102, 234, 205, 0.2)',
-                  padding: '0.25rem 0.5rem',
-                  borderRadius: '4px',
-                  fontSize: '0.8rem',
-                  color: '#374151'
-                }}>
-                  Tag: #{tagFilter}
-                </span>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Results Counter */}
-      {pages.length > 0 && (
-        <div style={{
-          marginBottom: '2rem',
-          padding: '1rem',
-          background: 'rgba(102, 234, 205, 0.05)',
-          borderRadius: '8px',
-          border: '1px solid rgba(102, 234, 205, 0.2)',
-          fontSize: '0.9rem',
-          color: '#374151'
-        }}>
-          <strong>{pages.length}</strong> {pages.length === 1 ? 'página encontrada' : 'páginas encontradas'}
-          {hasActiveFilters && ' com os filtros aplicados'}
-        </div>
-      )}
-
-      {/* Pages Grid */}
-      <main style={{
-        maxWidth: '1200px',
-        margin: '0 auto'
-      }}>
-        {pages.length > 0 ? (
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: isMobile 
-              ? '1fr' 
-              : window.innerWidth > 1400 
-                ? 'repeat(auto-fill, minmax(350px, 1fr))' 
-                : 'repeat(auto-fill, minmax(320px, 1fr))',
-            gap: isMobile ? '1.5rem' : '2rem',
-            marginBottom: '4rem'
-          }}>
-            {pages.map(page => (
-              <article 
-                key={page.id} 
+                  {selectedSubCategoryName || selectedCategoryName}
+                </h2>
+                {selectedSubCategoryName && selectedCategoryName && (
+                  <p style={{
+                    margin: '0',
+                    fontSize: '0.875rem',
+                    color: '#64748b'
+                  }}>
+                    em {selectedCategoryName}
+                  </p>
+                )}
+              </div>
+              <button
+                onClick={() => {
+                  setSelectedCategory('')
+                  setSelectedSubCategory('')
+                  setSelectedCategoryName('')
+                  setSelectedSubCategoryName('')
+                }}
                 style={{
-                  background: 'white',
-                  borderRadius: '16px',
-                  padding: '2rem',
-                  border: '1px solid #e2e8f0',
-                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)',
-                  transition: 'all 0.3s ease',
+                  background: 'none',
+                  border: 'none',
                   cursor: 'pointer',
-                  lineHeight: '1.7'
+                  padding: '0.5rem',
+                  borderRadius: '6px',
+                  color: '#64748b',
+                  transition: 'all 0.2s ease'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-4px)'
-                  e.currentTarget.style.boxShadow = '0 20px 25px rgba(0, 0, 0, 0.1)'
+                  e.target.style.background = '#e2e8f0'
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)'
-                  e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.05)'
+                  e.target.style.background = 'none'
                 }}
               >
+                <X size={20} />
+              </button>
+            </div>
+          )}
+
+          {/* Search and Filters */}
+          <div style={{
+            background: '#f8fafc',
+            padding: '2rem',
+            borderRadius: '16px',
+            marginBottom: '2rem',
+            border: '1px solid #e2e8f0'
+          }}>
+            {/* Search Bar */}
+            <div style={{
+              position: 'relative',
+              marginBottom: showFilters ? '1.5rem' : '1rem'
+            }}>
+              <Search 
+                size={20} 
+                style={{
+                  position: 'absolute',
+                  left: '1rem',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: '#64748b'
+                }}
+              />
+              <input
+                type="text"
+                placeholder="Buscar por título ou conteúdo..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '1rem 1rem 1rem 3rem',
+                  border: '2px solid #e2e8f0',
+                  borderRadius: '12px',
+                  fontSize: '1rem',
+                  background: 'white',
+                  transition: 'all 0.3s ease',
+                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)'
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = 'rgb(102, 234, 205)'
+                  e.target.style.boxShadow = '0 0 0 3px rgba(102, 234, 205, 0.1)'
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = '#e2e8f0'
+                  e.target.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.05)'
+                }}
+              />
+            </div>
+
+            {/* Toggle Filters Button */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  padding: '0.75rem 1rem',
+                  background: showFilters ? 'rgb(102, 234, 205)' : 'white',
+                  color: showFilters ? 'white' : '#64748b',
+                  border: '2px solid #e2e8f0',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontSize: '0.9rem',
+                  fontWeight: '500',
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                <Filter size={16} />
+                {showFilters ? 'Ocultar Filtros' : 'Mostrar Filtros'}
+              </button>
+
+              {hasActiveFilters && (
+                <button
+                  onClick={clearFilters}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    padding: '0.75rem 1rem',
+                    background: '#ef4444',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.background = '#dc2626'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.background = '#ef4444'
+                  }}
+                >
+                  <X size={16} />
+                  Limpar Filtros
+                </button>
+              )}
+            </div>
+
+            {/* Advanced Filters */}
+            {showFilters && (
+              <div style={{
+                paddingTop: '1.5rem',
+                borderTop: '1px solid #e2e8f0'
+              }}>
+                {/* Tag Filter */}
+                <div style={{ marginBottom: '1rem' }}>
+                  <label style={{
+                    display: 'block',
+                    marginBottom: '0.5rem',
+                    fontSize: '0.9rem',
+                    fontWeight: '600',
+                    color: '#374151'
+                  }}>
+                    <Tag size={16} style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} />
+                    Filtrar por tag
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Digite uma tag..."
+                    value={tagFilter}
+                    onChange={(e) => setTagFilter(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      border: '2px solid #e2e8f0',
+                      borderRadius: '8px',
+                      fontSize: '0.9rem',
+                      background: 'white'
+                    }}
+                  />
+                </div>
+
+                {/* Sort Options */}
                 <div>
+                  <label style={{
+                    display: 'block',
+                    marginBottom: '0.5rem',
+                    fontSize: '0.9rem',
+                    fontWeight: '600',
+                    color: '#374151'
+                  }}>
+                    Ordenar por
+                  </label>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      border: '2px solid #e2e8f0',
+                      borderRadius: '8px',
+                      fontSize: '0.9rem',
+                      background: 'white'
+                    }}
+                  >
+                    <option value="updated_at">Mais recentes</option>
+                    <option value="title">Ordem alfabética</option>
+                    <option value="created_at">Mais antigas</option>
+                  </select>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Results Counter */}
+          {pages.length > 0 && (
+            <div style={{
+              marginBottom: '2rem',
+              padding: '1rem',
+              background: 'rgba(102, 234, 205, 0.05)',
+              borderRadius: '8px',
+              border: '1px solid rgba(102, 234, 205, 0.2)',
+              fontSize: '0.9rem',
+              color: '#374151'
+            }}>
+              <strong>{pages.length}</strong> {pages.length === 1 ? 'página encontrada' : 'páginas encontradas'}
+              {hasActiveFilters && ' com os filtros aplicados'}
+            </div>
+          )}
+
+          {/* Pages Grid */}
+          {pages.length > 0 ? (
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: isMobile 
+                ? '1fr' 
+                : window.innerWidth > 1400 
+                  ? 'repeat(auto-fill, minmax(350px, 1fr))' 
+                  : 'repeat(auto-fill, minmax(320px, 1fr))',
+              gap: isMobile ? '1.5rem' : '2rem',
+              marginBottom: '4rem'
+            }}>
+              {pages.map(page => (
+                <article 
+                  key={page.id} 
+                  style={{
+                    background: 'white',
+                    borderRadius: '16px',
+                    padding: '2rem',
+                    border: '1px solid #e2e8f0',
+                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)',
+                    transition: 'all 0.3s ease',
+                    cursor: 'pointer',
+                    lineHeight: '1.7'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-4px)'
+                    e.currentTarget.style.boxShadow = '0 8px 20px rgba(0, 0, 0, 0.12)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)'
+                    e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.05)'
+                  }}
+                >
                   {/* Category Badge */}
                   {page.category_name && (
                     <div style={{
-                      marginBottom: '1rem'
+                      marginBottom: '1rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem'
                     }}>
                       <span style={{
                         background: 'linear-gradient(135deg, rgb(102, 234, 205) 0%, rgb(75, 129, 162) 100%)',
@@ -504,7 +577,7 @@ const PublicPages = () => {
                         padding: '0.25rem 0.75rem',
                         borderRadius: '20px',
                         fontSize: '0.75rem',
-                        fontWeight: '600',
+                        fontWeight: '500',
                         textTransform: 'uppercase',
                         letterSpacing: '0.5px'
                       }}>
@@ -604,107 +677,101 @@ const PublicPages = () => {
                       e.target.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)'
                     }}
                   >
-                    <BookOpen size={16} />
-                    Ler página completa
+                    <FileText size={16} />
+                    Ler artigo
                   </Link>
                   
-                  <div style={{
+                  {/* Meta Info */}
+                  <footer style={{
                     display: 'flex',
-                    gap: '1.5rem',
+                    justifyContent: 'space-between',
                     alignItems: 'center',
-                    fontSize: '0.875rem',
-                    color: '#64748b',
-                    paddingTop: '1.5rem',
-                    borderTop: '1px solid #e2e8f0'
+                    fontSize: '0.8rem',
+                    color: '#9ca3af',
+                    borderTop: '1px solid #f1f5f9',
+                    paddingTop: '1rem'
                   }}>
-                    <span style={{
+                    <div style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '0.375rem',
-                      fontWeight: '500'
+                      gap: '1rem'
                     }}>
-                      <User size={14} style={{ color: 'rgb(102, 234, 205)' }} /> 
-                      {page.author_name}
-                    </span>
-                    <span style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.375rem',
-                      fontWeight: '500'
-                    }}>
-                      <Calendar size={14} style={{ color: 'rgb(75, 129, 162)' }} /> 
-                      {new Date(page.updated_at).toLocaleDateString('pt-BR')}
-                    </span>
-                  </div>
-                </div>
-              </article>
-            ))}
-          </div>
-        ) : (
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '4rem 2rem',
-            background: '#f8fafc',
-            borderRadius: '16px',
-            border: '1px solid #e2e8f0',
-            textAlign: 'center'
-          }}>
-            <FileText 
-              size={64} 
-              style={{ 
-                color: 'rgb(102, 234, 205)',
-                marginBottom: '1rem'
-              }} 
-            />
-            <h2 style={{
-              color: '#1e293b',
-              marginBottom: '0.5rem',
-              fontSize: '1.5rem',
-              fontWeight: '600'
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                        <User size={14} />
+                        {page.author_name}
+                      </span>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                        <Calendar size={14} />
+                        {formatRelativeDate(page.updated_at)}
+                      </span>
+                    </div>
+                  </footer>
+                </article>
+              ))}
+            </div>
+          ) : (
+            /* No Results */
+            <div style={{
+              textAlign: 'center',
+              padding: '4rem 2rem',
+              background: '#f8fafc',
+              borderRadius: '16px',
+              border: '1px solid #e2e8f0'
             }}>
-              {hasActiveFilters ? 'Nenhuma página encontrada' : 'Nenhuma página disponível'}
-            </h2>
-            <p style={{
-              color: '#64748b',
-              fontSize: '1rem',
-              margin: '0'
-            }}>
-              {hasActiveFilters 
-                ? 'Tente ajustar os filtros de busca para encontrar mais resultados.'
-                : 'Ainda não há páginas publicadas no wiki.'
-              }
-            </p>
-            {hasActiveFilters && (
-              <button
-                onClick={clearFilters}
-                style={{
-                  marginTop: '1rem',
-                  padding: '0.75rem 1.5rem',
-                  background: 'rgb(102, 234, 205)',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  fontSize: '0.9rem',
-                  fontWeight: '500',
-                  transition: 'all 0.3s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.background = 'rgb(75, 129, 162)'
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.background = 'rgb(102, 234, 205)'
-                }}
-              >
-                Limpar todos os filtros
-              </button>
-            )}
-          </div>
-        )}
-      </main>
+              <BookOpen 
+                size={64} 
+                style={{ 
+                  color: '#cbd5e1', 
+                  marginBottom: '1.5rem' 
+                }} 
+              />
+              <h3 style={{
+                margin: '0 0 1rem 0',
+                fontSize: '1.25rem',
+                fontWeight: '600',
+                color: '#64748b'
+              }}>
+                {hasActiveFilters ? 'Nenhuma página encontrada' : 'Wiki ainda está vazio'}
+              </h3>
+              <p style={{
+                margin: '0 0 2rem 0',
+                color: '#64748b',
+                lineHeight: '1.6'
+              }}>
+                {hasActiveFilters 
+                  ? 'Tente ajustar os filtros de busca para encontrar mais resultados.'
+                  : 'Ainda não há páginas publicadas no wiki.'
+                }
+              </p>
+              {hasActiveFilters && (
+                <button
+                  onClick={clearFilters}
+                  style={{
+                    marginTop: '1rem',
+                    padding: '0.75rem 1.5rem',
+                    background: 'rgb(102, 234, 205)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontSize: '0.9rem',
+                    fontWeight: '500',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.background = 'rgb(75, 129, 162)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.background = 'rgb(102, 234, 205)'
+                  }}
+                >
+                  Limpar todos os filtros
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   )
 }

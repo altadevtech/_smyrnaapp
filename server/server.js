@@ -15,17 +15,20 @@ import categoriesRoutes from './routes/categories.js'
 import menuRoutes from './routes/menus.js'
 import debugRoutes from './routes/debug.js'
 import pageVersionsRoutes from './routes/page-versions.js'
+import featuredImagesRoutes from './routes/featured-images.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 const app = express()
-const PORT = process.env.PORT || 10000
+const PORT = process.env.PORT || 9000
 
 // Middlewares
 app.use(cors())
 app.use(express.json())
 app.use(express.static(path.join(__dirname, '../dist')))
+// Servir arquivos de upload estaticamente
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')))
 
 // Initialize database
 async function initializeServer() {
@@ -67,6 +70,7 @@ async function initializeServer() {
     app.use('/api/menus', menuRoutes)
     app.use('/api/debug', debugRoutes)
     app.use('/api/page-versions', pageVersionsRoutes)
+    app.use('/api/featured-images', featuredImagesRoutes)
 
     // Serve React app for all other routes
     app.get('*', (req, res) => {
