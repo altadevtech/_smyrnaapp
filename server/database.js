@@ -234,17 +234,16 @@ class Database {
             this.createDefaultUsers()
             this.createDefaultCategories()
             
-            // Popular dados de exemplo se for ambiente de produção/render
-            if (process.env.NODE_ENV === 'production' || process.env.RENDER) {
-              setTimeout(async () => {
-                try {
-                  const { default: SampleDataSeeder } = await import('./utils/sampleDataSeeder.js')
-                  await SampleDataSeeder.seedSampleData()
-                } catch (error) {
-                  console.error('❌ Erro ao popular dados de exemplo:', error)
-                }
-              }, 1000)
-            }
+            // Popular dados de exemplo sempre (o seeder verifica internamente se deve executar)
+            setTimeout(async () => {
+              try {
+                console.log('🌱 Iniciando verificação de dados de exemplo...')
+                const { default: SampleDataSeeder } = await import('./utils/sampleDataSeeder.js')
+                await SampleDataSeeder.seedSampleData()
+              } catch (error) {
+                console.error('❌ Erro ao popular dados de exemplo:', error)
+              }
+            }, 2000) // Aumentar timeout para dar mais tempo às tabelas serem criadas
             
             resolve()
           }
