@@ -4,6 +4,9 @@ Este projeto nasceu como um CMS simples e robusto, desenvolvido com React no fro
 
 Construído com tecnologias consolidadas e boas práticas de desenvolvimento, o sistema mantém seu compromisso com performance, leveza e segurança, enquanto incorpora recursos essenciais para uma WIKI funcional e escalável.
 
+### Apresentação do projeto:
+https://gamma.app/docs/Smyrna-Wiki-Construindo-uma-Plataforma-de-Conhecimento-Escalavel-3a3h0n6m148uczw
+
 ### Principais funcionalidades planejadas:
 ✅ Editor de conteúdo com suporte a Markdown e rich text  
 ✅ Sistema de versionamento de páginas  
@@ -441,12 +444,12 @@ Componente de navegação hierárquica moderno:
 - [x] **Sistema de Menu Hierárquico** ✅ (CONCLUÍDO - os menus agora são hierarquizados com dropdown moderno e responsivo)
 - [ ] Implantação de templates com estrutura de blocos (ideia inspirada no Elementor, para facilitar a edição do layout por parte dos usuários sem conhecimento de HTML. A proposta será o usuário poder estruturar um layout apenas arrastando componentes e interindo o conteúdo)
 - [ ] Aprimoramento do chaveanto dos temas BLACK e WHITE, abrangendo todos os elementos HTML
-- [ ] Ajuste responsivo das tabelas na área administrativa
-- [ ] Upload e gerenciamento de imagens
+- [x] Ajuste responsivo das tabelas na área administrativa
+- [x] Upload e gerenciamento de imagens
 - [ ] Galeria de Imagens
-- [ ] Sistema de tags e categorias
+- [x] Sistema de tags e categorias
 - [ ] SEO otimização
-- [ ] Cache e performance
+- [x] Cache e performance
 - [ ] Temas personalizáveis
 - [ ] Backup automatizado
 - [ ] Logs de auditoria
